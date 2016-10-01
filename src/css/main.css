@@ -5,74 +5,7 @@
     stroke: #c8c8c8;
 }
 
-.env-content {
-  font-size: 12px;
-  font-weight: bold;
-  text-align: center;
-  line-height: 100%;
-  vertical-align: top;
-}
-
-.env-params {
-	margin-top: 10px;
-}
-
-.env-param {
-	display: inline-block;
-	width: 110px;
-	margin: 6px;
-}
-
-.env-graph i {
-	font-size: 5em;
-}
-
-.palette .env-graph {
-	height: 25px;
-}
-
-.palette .env-graph i {
-	font-size: 2em;
-}
-
-.env-real {
-	border-top: 1px dashed #aaa;
-	border-bottom: 1px dashed #aaa;
-}
-
-ul.palette {
-	width: 915px;
-}
-
-ul.env li .env-content {
-	border: 1px solid #DDD;
-	background: #F2F2F2;
-	position: absolute;
-	width: 125px;
-	height: 155px;
-	margin: 5px;
-}
-
-ul.env {
-	position: relative;
-	top: 0px;
-	height: 165px;
-}
-
-ul.env li {
-	position: absolute;
-	top: 0px;
-	cursor: pointer;
-	display: list-item;
-	height: 200px;
-}
-
-ul.palette li {
-	border: 1px solid #DDD;
-	background: #F2F2F2;
-	cursor: pointer;
-	display: inline-block;
-	width: 125px;
-	margin-top: 5px;
-	margin-left: 5px;
+/* react-tooltip override */
+.tooltip {
+  font-size: 11px !important;
 }

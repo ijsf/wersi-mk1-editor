@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Grid, Row, Col } from 'react-bootstrap';
+import ReactTooltip from 'react-tooltip'
 
 import MidiConfig from 'components/MidiConfig';
 import InstrumentControl from 'components/InstrumentControl';
@@ -31,9 +32,13 @@ export default class WersiApp extends Component {
       token={"5UOfQAtnjnNIaZUWzpX2LLBkHNxrXALECEpj0ssklTM7ptYCuSOVQNn0qemO8Zat"}
     />);*/
     
+    // Tooltip support
+    let tooltip = (<ReactTooltip />);
+    
     return (
       <div>
         {midiConfig}
+        {tooltip}
         <Grid>
           <Row>
             <Col xsHidden={true} smHidden={true} mdHidden={true} lg={2}>

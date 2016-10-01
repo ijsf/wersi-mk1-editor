@@ -29,7 +29,7 @@ export default class Envelope extends Component {
     moduleSlots: 7,
     moduleMargin: 5,
     moduleWidth: 122,
-    moduleHeight: 155
+    moduleHeight: 160
   };
   
   constructor(props) {

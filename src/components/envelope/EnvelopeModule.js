@@ -5,12 +5,15 @@ import Rickshaw from 'rickshaw';
 
 const style = {
   display: 'inline-block',
-  cursor: 'move'
+  cursor: 'move',
+  fontSize: 12,
+  textAlign: 'center',
+  verticalAlign: 'top',
+  lineHeight: '100%'
 };
 
 const styleTitle = {
 	display: 'inline-block',
-	height: 14,
 	marginTop: 5,
 	marginBottom: 5,
 	verticalAlign: 'middle',
@@ -21,6 +24,11 @@ const styleTitle = {
 
 const styleGraph = {
 	display: 'inline-block'
+};
+
+const styleSlider = {
+  marginTop: 5,
+  marginBottom: 5
 };
 
 const styleSliderContainer = {
@@ -292,9 +300,12 @@ export default class EnvelopeModule extends Component {
     // Create HTML5 sliders
     const sliders = Array.from(['a', 'b', 'c']).map((key) => {
       const value = this.state[key];
+      const title = this.props[key + "Title"];
       if (value != null) {
         return (
           <input type="range"
+          style={{...styleSlider}}
+          data-tip={title} data-type="info" data-effect="solid" data-place="bottom" data-class="tooltip"
           defaultValue={value}
           min={0}
           max={4095}
@@ -315,7 +326,7 @@ export default class EnvelopeModule extends Component {
     // Create contents
     // We generally use bootstrap styles for colors to support flexible theming
     const contents = (
-      <div style={{ ...style, opacity, width, height, marginRight }} className="btn-default env-content">
+      <div style={{ ...style, opacity, width, height, marginRight }} className="btn-default">
         <div style={{ ...styleTitle }}>{this.props.title}</div>
         <div style={{ ...styleGraph }} ref={(c) => this._graph = c} />
         <div style={{ ...styleSliderContainer }}>

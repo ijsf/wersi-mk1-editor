@@ -78,6 +78,19 @@ class Wave extends Component {
     let lineChartOptions = {
       low: this.props.low,
       high: this.props.high,
+      chartPadding: 10,
+      fullWidth: true,
+      height: '100px',
+      axisX: {
+        showGrid: true,
+        showLabel: false,
+        offset: 0
+      },
+      axisY: {
+        showGrid: true,
+        showLabel: false,
+        offset: 0
+      },
       plugins: [
         (chart) => {
           let dragElement = null, dragStartX = null, dragStartY = null, dragY = null, dragMinY = Infinity, dragMaxY = -Infinity;

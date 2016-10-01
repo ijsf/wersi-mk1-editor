@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Panel, Button, Checkbox, Modal, Col, Form, FormGroup, InputGroup, FormControl, ControlLabel } from 'react-bootstrap';
-import FontAwesome from 'react-fontawesome';
 
 export default class InstrumentControl extends Component {
   constructor() {
@@ -10,17 +9,20 @@ export default class InstrumentControl extends Component {
   componentWillMount() {
   }
   
+  _handleSave() {
+  }
+  
   render() {
     let header = (
-      <h3><FontAwesome name='cog' fixedWidth />Instrument control</h3>
+      <h3>Instrument control</h3>
     );
     
     let form = (
       <Form horizontal>
         <FormGroup>
           <Col sm={2} componentClass={ControlLabel}>Name</Col>
-          <Col sm={10}>
-            <FormControl type="text" placeholder="Instrument name" />
+          <Col sm={3}>
+            <FormControl type="text" placeholder="Instrument name" maxLength={6} />
           </Col>
         </FormGroup>
         <FormGroup>
@@ -30,7 +32,7 @@ export default class InstrumentControl extends Component {
         </FormGroup>
         <FormGroup>
           <Col sm={2} componentClass={ControlLabel}>Tuning</Col>
-          <Col sm={5}>
+          <Col sm={3}>
             <InputGroup>
               <InputGroup.Addon>Transpose</InputGroup.Addon>
               <FormControl componentClass="select">
@@ -41,7 +43,7 @@ export default class InstrumentControl extends Component {
               </FormControl>
             </InputGroup>
           </Col>
-          <Col sm={5}>
+          <Col sm={3}>
             <InputGroup>
               <InputGroup.Addon>Detune</InputGroup.Addon>
               <FormControl componentClass="select">
@@ -68,7 +70,7 @@ export default class InstrumentControl extends Component {
             <Checkbox inline>WersiVoice</Checkbox>
           </Col>
           <Col sm={2}>
-            <Checkbox inline>VCF</Checkbox>
+            <Checkbox inline>Bright</Checkbox>
           </Col>
         </FormGroup>
         <FormGroup>
@@ -81,6 +83,11 @@ export default class InstrumentControl extends Component {
     
     return (
       <Panel header={header} collapsible defaultExpanded>
+        <div>
+          <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">
+            Save
+          </Button>
+        </div>
         {form}
       </Panel>
     );

@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Panel, Button, Checkbox, Modal, Col, Form, FormGroup, InputGroup, FormControl, ControlLabel } from 'react-bootstrap';
-import FontAwesome from 'react-fontawesome';
 
 import reactMixin from 'react-mixin';
 import reactor from 'modules/flux';
@@ -45,14 +44,16 @@ class WaveControl extends Component {
     const { instrumentId } = this.props;
     
     let header = (
-      <h3><FontAwesome name='sliders' fixedWidth />Wavetable</h3>
+      <h3>Wavetable control</h3>
     );
     
     return (
       <Panel header={header} collapsible defaultExpanded>
-        <Button onClick={this._handleSave.bind(this)} className="pull-right">
-          Save
-        </Button>
+        <div className="clearfix">
+          <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">
+            Save
+          </Button>
+        </div>
         <Wave client={this.props.client} waveSet='bassData' instrumentId={instrumentId} />
         <Wave client={this.props.client} waveSet='tenorData' instrumentId={instrumentId} />
         <Wave client={this.props.client} waveSet='altoData' instrumentId={instrumentId} />

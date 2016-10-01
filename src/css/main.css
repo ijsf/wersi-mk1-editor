@@ -1,26 +1,16 @@
-.env-container {
-  background-color: #FAFAFA;
+.ct-series-a .ct-bar, .ct-series-a .ct-line, .ct-series-a .ct-point, .ct-series-a .ct-slice-donut {
+    stroke: #c8c8c8;
+}
+.ct-series-b .ct-bar, .ct-series-b .ct-line, .ct-series-b .ct-point, .ct-series-b .ct-slice-donut {
+    stroke: #c8c8c8;
 }
 
 .env-content {
-	border: 1px solid #DDD;
-	background: #F2F2F2;
-	height: 155px;
-
   font-size: 12px;
   font-weight: bold;
   text-align: center;
   line-height: 100%;
   vertical-align: top;
-}
-
-.env-title {
-	display: inline-block;
-	height: 14px;
-	margin-top: 5px;
-	margin-bottom: 5px;
-	vertical-align: middle;
-	font-size: 12px;
 }
 
 .env-params {
@@ -31,12 +21,6 @@
 	display: inline-block;
 	width: 110px;
 	margin: 6px;
-}
-
-.env-graph {
-	display: inline-block;
-	width: 124px;
-	height: 70px;
 }
 
 .env-graph i {

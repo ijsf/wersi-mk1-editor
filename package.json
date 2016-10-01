@@ -47,6 +47,7 @@
   },
   "dependencies": {
     "bootstrap": "^3.3.7",
+    "bootswatch": "^3.3.7",
     "chartist": "^0.9.8",
     "font-awesome": "^4.6.3",
     "nuclear-js": "^1.4.0",
@@ -56,6 +57,7 @@
     "react-dnd": "^2.1.4",
     "react-dnd-html5-backend": "^2.1.2",
     "react-dom": "^0.14.6",
-    "react-fontawesome": "^1.2.0"
+    "react-fontawesome": "^1.2.0",
+    "rickshaw": "^1.6.0-rc.0"
   }
 }

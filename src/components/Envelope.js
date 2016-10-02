@@ -196,6 +196,11 @@ class Envelope extends Component {
     };
   }
   
+  _handleAddedModule() {
+    // Module has just been added, hide add dialog
+    this.setState({ showAdd: false });
+  }
+  
   _createModules(modules) {
     const { moduleWidth, moduleHeight, moduleMargin, moduleSlots, title } = this.props;
 
@@ -248,6 +253,8 @@ class Envelope extends Component {
           moduleHeight={moduleHeight}
           moduleMargin={moduleMargin}
           cancel={() => {this.setState({ showAdd: false })}}
+          addedModule={this._handleAddedModule.bind(this)}
+          save={this._handleSaveModule.bind(this, 6)}   // always add in the 6th slot
           />
           <div className="clearfix" style={{ paddingBottom: 10 }}>
             <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">

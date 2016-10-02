@@ -32,7 +32,12 @@ export default class EnvelopeDialog extends Component {
   componentWillMount() {
   }
   
-  _handleAdd() {
+  _handleAdd(data) {
+    // Call save
+    this.props.save(data);
+    
+    // Trigger addedModule callback
+    this.props.addedModule();
   }
   
   render() {
@@ -42,7 +47,8 @@ export default class EnvelopeDialog extends Component {
       width: moduleWidth,
       height: 75,
       graphHeight: 45,
-      margin: moduleMargin
+      margin: moduleMargin,
+      save: this._handleAdd.bind(this)
     };
     
     return (

@@ -438,7 +438,7 @@ export default class EnvelopeModule extends Component {
       target: () => findDOMNode(this.refs.target)
     };
     let tooltip = (<div/>);
-    if (!this._dragging) {
+    if (!this._dragging && !this.showCase) {
       if (graphData.error) {
         tooltip = (<Tooltip className="error" id={"EnvelopeModule" + this.props.id + "_tooltip"}>{graphData.error}</Tooltip>);
       } else if (graphData.warning) {
@@ -449,7 +449,7 @@ export default class EnvelopeModule extends Component {
     // Create contents
     // We generally use bootstrap styles for colors to support flexible theming
     const contents = (
-      <div style={{ display: 'inline-block', position: 'relative' }}>
+      <div style={{ display: 'inline-block', position: 'relative' }} onClick={() => { if(showCase){ this.saveModule(); } }}>
         <OverlayTrigger ref={(e) => { if(e) { e.show(); }} }
           placement="top" overlay={tooltip} key={"EnvelopeModule" + this.props.id + "_overlay"}>
           <div style={{ ...style, opacity, width, height, marginRight, marginBottom, cursor }}

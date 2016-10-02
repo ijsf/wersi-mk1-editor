@@ -123,6 +123,7 @@ class Envelope extends Component {
     const id2 = ((moduleData[2] & 0xFF) << 4) | (moduleData[3] & 0xF);
     if      (id1 === 0x3 && id2 === 0x68D)    { type = 'linup'; }
     else if (id1 === 0x3 && id2 === 0x889)    { type = 'lindown'; }
+    else if (id1 === 0x2 && id2 === 0xE0D)    { type = 'expup'; }
     else                                      { type = 'empty'; }
     
     return {
@@ -193,6 +194,7 @@ class Envelope extends Component {
       // Create element
       if (module.type === "linup")            { return (<EnvelopeModuleLinUp {...moduleProps} />); }
       else if (module.type === "lindown")     { return (<EnvelopeModuleLinDown {...moduleProps} />); }
+      else if (module.type === "expup")       { return (<EnvelopeModuleExpUp {...moduleProps} />); }
       else                                    { return (<EnvelopeModuleEmpty {...moduleProps} />); }
     });
   }
@@ -216,6 +218,7 @@ class Envelope extends Component {
           moduleWidth={moduleWidth}
           moduleHeight={moduleHeight}
           moduleMargin={moduleMargin}
+          cancel={() => {this.setState({ showAdd: false })}}
           />
           <div className="clearfix" style={{ paddingBottom: 10 }}>
             <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">

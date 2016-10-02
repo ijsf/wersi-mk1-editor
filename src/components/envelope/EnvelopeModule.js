@@ -147,6 +147,7 @@ export default class EnvelopeModule extends Component {
       c: props.c,
       amplBefore: props.amplBefore,
       timeBefore: props.timeBefore,
+      isFirst: true,
       
       // Drag copies of values
       _a: null,
@@ -253,7 +254,7 @@ export default class EnvelopeModule extends Component {
   }
   
   _getUpdatedData(props) {
-    let { id, data, a, b, c, amplBefore, timeBefore } = props;
+    let { id, data, a, b, c, amplBefore, timeBefore, isFirst } = props;
     
     // Check if we received data, in which case we will decode the data
     if (this._decode && data) {
@@ -274,6 +275,10 @@ export default class EnvelopeModule extends Component {
     if (id > 0) {
       timeBefore = window.envelopeModules[id - 1].a;
       amplBefore = window.envelopeModules[id - 1].b;
+      isFirst = false;
+    }
+    else {
+      isFirst = true;
     }
     
     return {
@@ -281,7 +286,8 @@ export default class EnvelopeModule extends Component {
       b: b,
       c: c,
       amplBefore: amplBefore,
-      timeBefore: timeBefore
+      timeBefore: timeBefore,
+      isFirst: isFirst
     };
   }
   

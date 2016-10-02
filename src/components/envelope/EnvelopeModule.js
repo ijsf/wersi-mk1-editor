@@ -272,8 +272,17 @@ export default class EnvelopeModule extends Component {
     //
     if (index > 0) {
       if (window.envelopeModules[index - 1]) {
-        timeBefore = window.envelopeModules[index - 1].a;
-        amplBefore = window.envelopeModules[index - 1].b;
+        const aBefore = window.envelopeModules[index - 1].a;
+        const bBefore = window.envelopeModules[index - 1].b;
+        
+        // Check if we are placed behind an empty element, which shouldn't be allowed
+        if (this._isNumeric(aBefore) && this._isNumeric(bBefore)) {
+          timeBefore = aBefore;
+          amplBefore = bBefore;
+        }
+        else {
+          // Not allowed
+        }
       }
       isFirst = false;
     }
@@ -301,11 +310,17 @@ export default class EnvelopeModule extends Component {
     Object.assign(nextState, this._getUpdatedData(nextProps));
   }
   
+  _isNumeric(x) {
+    return !isNaN(parseFloat(x)) && isFinite(x);
+  }
+  
   componentDidMount() {
+    const { a, b, c } = this.props;
+    
     // Render already occurred, this._graph must be valid, so construct the graph
     if (this._graph) {
       // Check for some props to see if we should create a graph at all
-      if (this.props.a || this.props.b || this.props.c) {
+      if (this._isNumeric(a) || this._isNumeric(b) || this._isNumeric(c)) {
         this._createGraph();
       }
     }

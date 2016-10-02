@@ -48,6 +48,14 @@ export default class EnvelopeDialog extends Component {
   }
   
   render() {
+    const { moduleWidth, moduleHeight, moduleMargin } = this.props;
+    
+    let moduleProps = {
+      width: moduleWidth,
+      height: moduleHeight * 0.7,
+      margin: moduleMargin
+    };
+    
     return (
       <Modal show={this.state.show}>
         <Modal.Header>
@@ -55,7 +63,11 @@ export default class EnvelopeDialog extends Component {
         </Modal.Header>
         <Modal.Body>
           <div>
-            <EnvelopeModuleVibrato2 />
+            <EnvelopeModuleLinUp {...moduleProps}/>
+            <EnvelopeModuleLinDown {...moduleProps}/>
+            <EnvelopeModuleStepRel {...moduleProps}/>
+            <EnvelopeModuleVibrato1 {...moduleProps}/>
+            <EnvelopeModuleVibrato2 {...moduleProps}/>
           </div>
         </Modal.Body>
         <Modal.Footer>

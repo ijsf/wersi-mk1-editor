@@ -5,11 +5,12 @@ import Rickshaw from 'rickshaw';
 
 const style = {
   display: 'inline-block',
-  cursor: 'move',
   fontSize: 12,
   textAlign: 'center',
   verticalAlign: 'top',
-  lineHeight: '100%'
+  lineHeight: '100%',
+  border: '1px solid black',
+  borderRadius: 4
 };
 
 const styleTitle = {
@@ -77,7 +78,8 @@ const RickshawCustomAxisRenderer = function(args) {
 		{
 			var value = this.graph.x.domain()[0];
 			var element = document.createElement('div');
-			element.style.left = '0px';
+			element.style.left = '5px';
+      element.style.cssFloat = 'left';
 			element.classList.add('x_tick_custom');
 			element.classList.add(self.ticksTreatment);
 
@@ -92,8 +94,8 @@ const RickshawCustomAxisRenderer = function(args) {
 		{
 			var value = this.graph.x.domain()[1];
 			var element = document.createElement('div');
-			element.style.right = '0px';
-			element.style.width = 'auto';
+			element.style.right = '5px';
+			element.style.cssFloat = 'right';
 			element.classList.add('x_tick_custom');
 			element.classList.add(self.ticksTreatment);
 
@@ -118,21 +120,9 @@ const RickshawCustomAxisRenderer = function(args) {
 //
 
 export default class EnvelopeModule extends Component {
-  static propTypes = {
-    connectDragSource: PropTypes.func.isRequired,
-    connectDropTarget: PropTypes.func.isRequired,
-    isDragging: PropTypes.bool.isRequired,
-    id: PropTypes.any.isRequired,
-    text: PropTypes.string.isRequired,
-    moveModule: PropTypes.func.isRequired,
-    findModule: PropTypes.func.isRequired,
-    width: PropTypes.number.isRequired,
-    margin: PropTypes.number.isRequired
-  };
-  
   static defaultProps = {
     ...Component.defaultProps,
-    showTimeAxis: false,
+    showTimeAxis: true,
     graphHeight: 70
   };
   
@@ -160,6 +150,11 @@ export default class EnvelopeModule extends Component {
   }
   
   static moduleSource = {
+    canDrag(props) {
+      // Only allow drag if the required properties are actually specified
+      return (props.findModule) ? true : false;
+    },
+    
     beginDrag(props) {
       return {
         id: props.id,
@@ -192,6 +187,9 @@ export default class EnvelopeModule extends Component {
   };
 
   _createGraph() {
+    // Find out whether we're actually being used for editing or not (dragging must be enabled)
+    const showCase = (this.props.findModule) ? false : true;
+
     // Create data series
     const graphData = this._graphFunction(this.state);
     const series = [{
@@ -213,7 +211,7 @@ export default class EnvelopeModule extends Component {
     graph.render();
   
 		// Create axis, if necessary
-		if (this.props.showTimeAxis)
+		if (this.props.showTimeAxis && !showCase)
 		{
 			new RickshawCustomAxisRenderer({
 				graph: graph
@@ -227,6 +225,10 @@ export default class EnvelopeModule extends Component {
     throw "No graph function implemented."
   }
   
+  _handleSave() {
+    throw "No _handleSave implemented."
+  }
+  
   componentWillUpdate(nextProps, nextState) {
     // Move values into state
     /*
@@ -238,22 +240,54 @@ export default class EnvelopeModule extends Component {
     */
   }
   
+  _getUpdatedData(props) {
+    let { id, data, a, b, c, amplBefore, timeBefore } = props;
+    
+    // Check if we received data, in which case we will decode the data
+    if (this._decode && data) {
+      let decoded = this._decode(data);
+      a = decoded.a;
+      b = decoded.b;
+      c = decoded.c;
+    }
+    
+    // Move values into hacky global (time is typically a and amplitude is typically b)
+    window.envelopeModules[id] = {
+      a: a,
+      b: b
+    };
+    
+    // Attempt to get timeBefore (a) and amplBefore (b) from hacky global
+    // (Here, we assume that the previous module has already executed this function!)
+    if (id > 0) {
+      timeBefore = window.envelopeModules[id - 1].a;
+      amplBefore = window.envelopeModules[id - 1].b;
+    }
+    
+    return {
+      a: a,
+      b: b,
+      c: c,
+      amplBefore: amplBefore,
+      timeBefore: timeBefore
+    };
+  }
+  
   componentWillMount() {
-    // Move values into state
-    this.setState({
-      a: this.props.a,
-      b: this.props.b,
-      c: this.props.c,
-      amplBefore: this.props.amplBefore,
-      timeBefore: this.props.timeBefore
-    });
+    // Immediately get most updated data and set initial state accordingly
+    this.setState(this._getUpdatedData(this.props));
+  }
+  
+  componentWillUpdate(nextProps, nextState) {
+    // Update state with most updated data
+    Object.assign(nextState, this._getUpdatedData(nextProps));
   }
   
   componentDidMount() {
     // Render already occurred, this._graph must be valid, so construct the graph
     if (this._graph) {
       // Check for some props to see if we should create a graph at all
-      if (this.props.a && this.props.b && this.props.c) {
+      if (this.props.a || this.props.b || this.props.c) {
         this._createGraph();
       }
     }
@@ -275,7 +309,6 @@ export default class EnvelopeModule extends Component {
       const graphData = this._graphFunction(nextState);
       graph.series[0].data = graphData.data;
       graph.update();
-      //graph.render();
       
       // Don't re-render
       return false;
@@ -284,10 +317,16 @@ export default class EnvelopeModule extends Component {
   }
   
   render() {
-    const { text, isDragging, connectDragSource, connectDropTarget, width, height, margin } = this.props;
+    const { isDragging, connectDragSource, connectDropTarget, width, height, margin } = this.props;
     const { graph } = this.state;
     const opacity = isDragging ? 0 : 1;
     const marginRight = margin;
+    
+    // Find out whether we're actually being used for editing or not (dragging must be enabled)
+    const showCase = (this.props.findModule) ? false : true;
+    
+    // Determine if we should show a move cursor for specific elements
+    const cursor = showCase ? 'default' : 'move';
 
     // Update and render graph
     if (graph) {
@@ -297,8 +336,8 @@ export default class EnvelopeModule extends Component {
       graph.render();
     }
     
-    // Create HTML5 sliders
-    const sliders = Array.from(['a', 'b', 'c']).map((key) => {
+    // Create HTML5 sliders (don't show if we're showcasing)
+    const sliders = showCase ? null : Array.from(['a', 'b', 'c']).map((key) => {
       const value = this.state[key];
       const title = this.props[key + "Title"];
       if (value != null) {
@@ -310,12 +349,25 @@ export default class EnvelopeModule extends Component {
           min={0}
           max={4095}
           key={key}
-          onMouseEnter={() => this.setState({ disableDrag: true }) }
-          onMouseLeave={() => this.setState({ disableDrag: false }) }
+          onMouseEnter={() => {
+            // Disable drag
+            this.setState({ disableDrag: true, changed: false });
+          }}
+          onMouseUp={() => {
+            // Update state, but only if changed
+            if (this.state.changed) {
+              this.props.save(this._handleSave());
+            }
+          }}
+          onMouseLeave={() => {
+            // Enable drag
+            this.setState({ disableDrag: false });
+          }}
           onChange={(event) => {
             // Move value into this.state._KEY
             let update = {};
-            update['_' + key] = event.target.value;
+            update['_' + key] = Number(event.target.value);
+            update.changed = true;
             this.setState(update);
           }}
           />
@@ -326,7 +378,7 @@ export default class EnvelopeModule extends Component {
     // Create contents
     // We generally use bootstrap styles for colors to support flexible theming
     const contents = (
-      <div style={{ ...style, opacity, width, height, marginRight }} className="btn-default">
+      <div style={{ ...style, opacity, width, height, marginRight, cursor }} className="btn-default">
         <div style={{ ...styleTitle }}>{this.props.title}</div>
         <div style={{ ...styleGraph }} ref={(c) => this._graph = c} />
         <div style={{ ...styleSliderContainer }}>
@@ -335,8 +387,8 @@ export default class EnvelopeModule extends Component {
       </div>
     );
     
-    // Only allow drag if not disabled
-    if (this.state.disableDrag) {
+    // Only allow drag if not disabled or not showcasing
+    if (this.state.disableDrag || showCase) {
       return contents;
     }
     else {

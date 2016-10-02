@@ -81,8 +81,14 @@ export default class MidiConfig extends Component {
     //
     
     // Request all 10 FIXWAVEs from RAM
+    /*
     this.props.client.getFixWave(65).then((wave) => {
       instrumentActions.update(65, 'wave', toImmutable(wave));
+    });
+    */
+    // Request all 10 AMPLs from RAM
+    this.props.client.getAmpl(65).then((data) => {
+      instrumentActions.update(65, 'ampl', toImmutable(data));
     });
   }
   

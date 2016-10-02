@@ -26,11 +26,11 @@ export default class WersiApp extends Component {
   render() {
     const { instrumentId } = this.state;
     
-    let midiConfig = null; /*(<MidiConfig
+    let midiConfig = (<MidiConfig
       client={this.client}
       url={"ws://localhost:9002"}
       token={"5UOfQAtnjnNIaZUWzpX2LLBkHNxrXALECEpj0ssklTM7ptYCuSOVQNn0qemO8Zat"}
-    />);*/
+    />);
     
     // Tooltip support
     let tooltip = (<ReactTooltip />);
@@ -68,8 +68,15 @@ export default class WersiApp extends Component {
           </Row>
           <Row>
             <Col xsHidden={true} smHidden={true} mdHidden={true} lg={2}>
+              <hr/>
               <p>
-                Description
+                Envelopes of a voice are configured by chaining one or more modules after one another.
+              </p>
+              <p>
+                The amplitude and frequency envelopes respectively modulate the amplitude and frequency or pitch over time.
+              </p>
+              <p>
+                You can drag any of the modules, or add any new modules by using the add button.
               </p>
             </Col>
             <Col lg={10}>

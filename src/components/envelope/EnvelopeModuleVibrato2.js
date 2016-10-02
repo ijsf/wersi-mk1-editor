@@ -19,7 +19,7 @@ const style = {
 export default class EnvelopeModuleVibrato2 extends EnvelopeModule {
   static defaultProps = {
     ...EnvelopeModule.defaultProps,
-    title: 'Vibrato II',
+    title: 'Vibrato B',
     description: 'Applies centered \'frequency\' vibrato to envelope',
     color: 'steelblue',
 		aTitle: 'Duration',

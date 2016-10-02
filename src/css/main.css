@@ -9,3 +9,10 @@
 .tooltip {
   font-size: 11px !important;
 }
+
+/* rickshaw */
+.x_tick_custom {
+	font-size: 10px;
+  font-weight: 300;
+  position: relative;
+}

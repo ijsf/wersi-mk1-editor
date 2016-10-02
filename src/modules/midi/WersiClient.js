@@ -112,10 +112,14 @@ export default class WersiClient extends Client {
     message.address = this._ntou(2, sysex[i++], sysex[i++]);
     message.length = this._ntou(1, sysex[i++], sysex[i++]);
     
+    // TODO: Ignore any transform buffer messages as these are spurious but unnecessary
+
     // Calculate expected (byte non-nibble) length
     const expectedLength = (sysex.length - i - 1) / 2;
     if (expectedLength != message.length) {
-      throw "Invalid SysEx length (got " + message.length + ", expected " + expectedLength + "): " + this._utohex(sysex);
+      throw "Invalid SysEx length (type " + String.fromCharCode(message.type) +
+      ", address " + message.address +
+      ", length got " + message.length +", expected " + expectedLength + "): " + this._utohex(sysex);
     }
     
     // Decode nibbles
@@ -143,7 +147,35 @@ export default class WersiClient extends Client {
         return this._fromSysEx(data);
       });
   }
+
+  getAmpl(address) {
+    return this._requestBlock(WersiClient.BLOCK_TYPE.AMPL, address)
+    .then((message) => {
+      // Verify AMPL length
+      const blockLength = this._getBlockLength(WersiClient.BLOCK_TYPE.AMPL);
+      if (message.length != blockLength) {
+        throw "Invalid message length for AMPL (got " + message.length + ", expected " + blockLength + ")";
+      }
+      
+      console.log("SysEx receive: " + this._utohex(message.data));
+      
+      return message.data;
+    });
+  }
   
+  setAmpl(address, data) {
+    return this.send(
+      this._toSysEx({
+        type: WersiClient.BLOCK_TYPE.AMPL.charCodeAt(0),
+        address: address,
+        length: data.length,
+        data: data
+      }), true)
+      .then((status) => {
+        return status;
+      });
+  }
+    
   getFixWave(address) {
     return this._requestBlock(WersiClient.BLOCK_TYPE.FIXWAVE, address)
     .then((message) => {

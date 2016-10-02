@@ -149,7 +149,6 @@ class Envelope extends Component {
   }
   
   _moveModule(id, atIndex) {
-    // TODO: update module.id!
     const { module, index } = this._findModule(id);
     this.setState(update(this.state, {
       modules: {
@@ -177,11 +176,12 @@ class Envelope extends Component {
     // Use global modules variable to allow simple communication between modules
     window.envelopeModules = [];
     
-    return modules.map(module => {
+    return modules.map((module, index) => {
       // Set up props
       let moduleProps = {
         key: module.id,
-        id: module.id,
+        id: module.id,  // unique identifier
+        index: index,   // linear index
         width: moduleWidth,
         height: moduleHeight,
         margin: moduleMargin,
@@ -192,10 +192,12 @@ class Envelope extends Component {
       };
   
       // Create element
-      if (module.type === "linup")            { return (<EnvelopeModuleLinUp {...moduleProps} />); }
-      else if (module.type === "lindown")     { return (<EnvelopeModuleLinDown {...moduleProps} />); }
-      else if (module.type === "expup")       { return (<EnvelopeModuleExpUp {...moduleProps} />); }
-      else                                    { return (<EnvelopeModuleEmpty {...moduleProps} />); }
+      let el;
+      if (module.type === "linup")            { el = (<EnvelopeModuleLinUp {...moduleProps} />); }
+      else if (module.type === "lindown")     { el = (<EnvelopeModuleLinDown {...moduleProps} />); }
+      else if (module.type === "expup")       { el = (<EnvelopeModuleExpUp {...moduleProps} />); }
+      else                                    { el = (<EnvelopeModuleEmpty {...moduleProps} />); }
+      return el;
     });
   }
   

@@ -5,10 +5,9 @@
     stroke: #c8c8c8;
 }
 
-/* react-tooltip override */
-.tooltip {
-  font-size: 11px !important;
-}
+/* react-bootstrap tooltip colors */
+.info .tooltip-arrow { border-bottom-color: #ccc !important; }
+.info .tooltip-inner { background-color: #ccc !important; color: #222; }
 
 /* rickshaw */
 .x_tick_custom {

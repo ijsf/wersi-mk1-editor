@@ -1,5 +1,8 @@
 import React, { Component, PropTypes } from 'react';
 import { DragSource, DropTarget } from 'react-dnd';
+import { Overlay, OverlayTrigger, Tooltip } from 'react-bootstrap';
+
+import { findDOMNode } from 'react-dom';
 
 import Rickshaw from 'rickshaw';
 
@@ -239,14 +242,6 @@ export default class EnvelopeModule extends Component {
   }
   
   componentWillUpdate(nextProps, nextState) {
-    // Move values into state
-    /*
-    nextState.a = nextProps.a;
-    nextState.b = nextProps.b;
-    nextState.c = nextProps.c;
-    nextState.amplBefore = nextProps.amplBefore;
-    nextState.timeBefore = nextProps.timeBefore;
-    */
   }
   
   _expScale(x, xMax, yMin, yMax) {
@@ -254,7 +249,7 @@ export default class EnvelopeModule extends Component {
   }
   
   _getUpdatedData(props) {
-    let { id, data, a, b, c, amplBefore, timeBefore, isFirst } = props;
+    let { id, index, data, a, b, c, amplBefore, timeBefore, isFirst } = props;
     
     // Check if we received data, in which case we will decode the data
     if (this._decode && data) {
@@ -265,16 +260,21 @@ export default class EnvelopeModule extends Component {
     }
     
     // Move values into hacky global (time is typically a and amplitude is typically b)
-    window.envelopeModules[id] = {
+    window.envelopeModules[index] = {
       a: a,
       b: b
     };
     
     // Attempt to get timeBefore (a) and amplBefore (b) from hacky global
-    // (Here, we assume that the previous module has already executed this function!)
-    if (id > 0) {
-      timeBefore = window.envelopeModules[id - 1].a;
-      amplBefore = window.envelopeModules[id - 1].b;
+    //
+    // Here, we assume that the previous module has already executed this function!)
+    // This does not hold in certain cases though, e.g. when we're dragging.
+    //
+    if (index > 0) {
+      if (window.envelopeModules[index - 1]) {
+        timeBefore = window.envelopeModules[index - 1].a;
+        amplBefore = window.envelopeModules[index - 1].b;
+      }
       isFirst = false;
     }
     else {
@@ -365,37 +365,42 @@ export default class EnvelopeModule extends Component {
       const valueMin = this.props[key + "Min"];
       const valueMax = this.props[key + "Max"];
       const title = this.props[key + "Title"];
+      const keyName = "EnvelopeModule" + this.props.id + "_" + key;
+
+      let tooltip = (<Tooltip className="info" id={keyName + "_tooltip"} key={keyName + "_tooltip"}>{title}</Tooltip>);
+
       if (value != null) {
         return (
-          <input type="range"
-          style={{...styleSlider}}
-          data-tip={title} data-type="info" data-effect="solid" data-place="bottom" data-class="tooltip"
-          defaultValue={value}
-          min={valueMin}
-          max={valueMax}
-          key={key}
-          onMouseEnter={() => {
-            // Disable drag
-            this.setState({ disableDrag: true, changed: false });
-          }}
-          onMouseUp={() => {
-            // Update state, but only if changed
-            if (this.state.changed) {
-              this.props.save(this._handleSave());
-            }
-          }}
-          onMouseLeave={() => {
-            // Enable drag
-            this.setState({ disableDrag: false });
-          }}
-          onChange={(event) => {
-            // Move value into this.state._KEY
-            let update = {};
-            update['_' + key] = Number(event.target.value);
-            update.changed = true;
-            this.setState(update);
-          }}
-          />
+          <OverlayTrigger placement="bottom" overlay={tooltip} key={keyName + "_overlay"}>
+            <input type="range"
+            style={{...styleSlider}}
+            defaultValue={value}
+            min={valueMin}
+            max={valueMax}
+            key={keyName + "_slider"}
+            onMouseEnter={() => {
+              // Disable drag
+              this.setState({ disableDrag: true, changed: false });
+            }}
+            onMouseUp={() => {
+              // Update state, but only if changed
+              if (this.state.changed) {
+                this.props.save(this._handleSave());
+              }
+            }}
+            onMouseLeave={() => {
+              // Enable drag
+              this.setState({ disableDrag: false });
+            }}
+            onChange={(event) => {
+              // Move value into this.state._KEY
+              let update = {};
+              update['_' + key] = Number(event.target.value);
+              update.changed = true;
+              this.setState(update);
+            }}
+            />
+          </OverlayTrigger>
         );
       }
     });
@@ -403,7 +408,10 @@ export default class EnvelopeModule extends Component {
     // Create contents
     // We generally use bootstrap styles for colors to support flexible theming
     const contents = (
-      <div style={{ ...style, opacity, width, height, marginRight, marginBottom, cursor }} className="btn-default">
+      <div
+      style={{ ...style, opacity, width, height, marginRight, marginBottom, cursor }}
+      className="btn-default"
+      >
         <div style={{ ...styleTitle }}>{this.props.title}</div>
         <div style={{ ...styleGraph }} ref={(c) => this._graph = c} />
         <div style={{ ...styleSliderContainer }}>

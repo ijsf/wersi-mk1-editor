@@ -159,6 +159,7 @@ export default class EnvelopeModule extends Component {
     };
     
     this._graph = null;
+    this._dragging = false;
   }
   
   static moduleSource = {
@@ -167,7 +168,10 @@ export default class EnvelopeModule extends Component {
       return (props.findModule) ? true : false;
     },
     
-    beginDrag(props) {
+    beginDrag(props, monitor, component) {
+      if (component) {
+        component._dragging = true;
+      }
       return {
         id: props.id,
         originalIndex: props.findModule(props.id).index
@@ -179,6 +183,9 @@ export default class EnvelopeModule extends Component {
 
       if (!didDrop) {
         props.moveModule(droppedId, originalIndex);
+      }
+      if (component) {
+        component._dragging = false;
       }
     }
   };
@@ -350,16 +357,6 @@ export default class EnvelopeModule extends Component {
       // Don't re-render
       return false;
     }
-
-    // Order of this module changed, so save
-    /*
-    if (this.props.index !== nextProps.index) {
-      console.log("type " + this.constructor.name + " moved from " + this.props.index + " to " + nextProps.index);
-      this.saveModule(nextProps, nextState);
-      return false;
-    }
-    */
-
     return true;
   }
   
@@ -381,8 +378,8 @@ export default class EnvelopeModule extends Component {
     const cursor = showCase ? 'default' : 'move';
 
     // Update and render graph
+    const graphData = this._graphFunction(this.state);
     if (graph) {
-      const graphData = this._graphFunction(this.state);
       graph.series[0].data = graphData.data;
       graph.update();
       graph.render();
@@ -434,18 +431,37 @@ export default class EnvelopeModule extends Component {
       }
     });
     
+    // Tooltip
+    const overlayProps = {
+      show: true,
+      container: this,
+      target: () => findDOMNode(this.refs.target)
+    };
+    let tooltip = (<div/>);
+    if (!this._dragging) {
+      if (graphData.error) {
+        tooltip = (<Tooltip className="error" id={"EnvelopeModule" + this.props.id + "_tooltip"}>{graphData.error}</Tooltip>);
+      } else if (graphData.warning) {
+        tooltip = (<Tooltip className="warning" id={"EnvelopeModule" + this.props.id + "_tooltip"}>{graphData.warning}</Tooltip>);
+      }
+    }
+    
     // Create contents
     // We generally use bootstrap styles for colors to support flexible theming
     const contents = (
-      <div
-      style={{ ...style, opacity, width, height, marginRight, marginBottom, cursor }}
-      className="btn-default"
-      >
-        <div style={{ ...styleTitle }}>{this.props.title}</div>
-        <div style={{ ...styleGraph }} ref={(c) => this._graph = c} />
-        <div style={{ ...styleSliderContainer }}>
-          {sliders}
-        </div>
+      <div style={{ display: 'inline-block', position: 'relative' }}>
+        <OverlayTrigger ref={(e) => { if(e) { e.show(); }} }
+          placement="top" overlay={tooltip} key={"EnvelopeModule" + this.props.id + "_overlay"}>
+          <div style={{ ...style, opacity, width, height, marginRight, marginBottom, cursor }}
+          className="module"
+          >
+            <div style={{ ...styleTitle }}>{this.props.title}</div>
+            <div style={{ ...styleGraph }} ref={(c) => this._graph = c} />
+            <div style={{ ...styleSliderContainer }}>
+              {sliders}
+            </div>
+          </div>
+        </OverlayTrigger>
       </div>
     );
     

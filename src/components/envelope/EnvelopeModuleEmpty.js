@@ -16,6 +16,10 @@ export default class EnvelopeModuleEmpty extends EnvelopeModule {
     title: 'Empty'
   };
   
+  _graphFunction() {
+    return {};
+  }
+
   _handleSave(state) {
     return new Uint8Array([
       0,

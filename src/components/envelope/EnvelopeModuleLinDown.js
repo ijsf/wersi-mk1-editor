@@ -79,7 +79,7 @@ export default class EnvelopeModuleLinDown extends EnvelopeModule {
 			warning: (amplBefore < b) ? 'Start amplitude is smaller than end amplitude. Use linear-up instead' : null,
 			data: [
 				{ x: timeBefore, y: amplBefore },
-				{ x: timeBefore+((5 + (aLog / 4094) * (20500 - 5)))/1000, y: (amplBefore < b) ? amplBefore : b }
+				{ x: timeBefore+this._expScale(a, 4080 + 1, 5, 3000)/1000, y: (amplBefore < b) ? amplBefore : b }
 			]
 		};
   }

@@ -63,7 +63,7 @@ export default class EnvelopeModuleLinUp extends EnvelopeModule {
 		/*
 		* A (time duration)
 		* 0: 5ms
-		* 4094: 20500ms -- doesn't make sense at all since 4080 is max.. adjusted to 3s according to empirical evidence
+		* 4094: 20500ms -- doesn't make sense at all since 4080 is max.. adjusted to 3000ms according to empirical evidence
 		* 4095: infinite (how is this even possible with 0:255 (8-bit) rescaled to 0:4080 (12-bit))
 		*
 		* B (end amplitude)
@@ -71,15 +71,11 @@ export default class EnvelopeModuleLinUp extends EnvelopeModule {
 		*
 		* If start amplitude is bigger than end amplitude, end amplitude equals start amplitude
 		*/
-    const yMin = 5;
-    const yMax = 3000;
-    const aMax = 4080 + 1;
-    const aLog = yMax-((yMax-yMin)*Math.log10(aMax-a))/Math.log10(aMax);
 		return {
 			warning: (amplBefore > b) ? 'Start amplitude is bigger than end amplitude. Use linear-down instead' : null,
 			data: [
 				{ x: timeBefore, y: amplBefore },
-				{ x: timeBefore+aLog/1000, y: (amplBefore > b) ? amplBefore : b }
+				{ x: timeBefore+this._expScale(a, 4080 + 1, 5, 3000)/1000, y: (amplBefore > b) ? amplBefore : b }
 			]
 		};
   }

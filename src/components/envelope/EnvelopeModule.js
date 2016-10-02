@@ -244,6 +244,10 @@ export default class EnvelopeModule extends Component {
     */
   }
   
+  _expScale(x, xMax, yMin, yMax) {
+    return yMax-((yMax-yMin)*Math.log10(xMax-x))/Math.log10(xMax);
+  }
+  
   _getUpdatedData(props) {
     let { id, data, a, b, c, amplBefore, timeBefore } = props;
     

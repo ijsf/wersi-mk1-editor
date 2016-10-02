@@ -127,7 +127,11 @@ export default class EnvelopeModule extends Component {
     
     // Default min and max for 12-bit values
     aMin: 0,
-    aMax: 4095
+    aMax: 4095,
+    bMin: 0,
+    bMax: 4095,
+    cMin: 0,
+    cMax: 4095
   };
   
   constructor(props) {

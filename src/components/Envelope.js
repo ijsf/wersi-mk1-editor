@@ -34,7 +34,13 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import { actions as instrumentActions, getters as instrumentGetters } from 'modules/instrument';
 
 const moduleTarget = {
-  drop() {
+  drop(props, monitor, component) {
+    // Indicate that we just dropped
+    component.setState((state) => {
+      return {
+        dropCount: state.dropCount + 1
+      };
+    });
   }
 };
 
@@ -61,10 +67,30 @@ class Envelope extends Component {
     
     this.state = {
       showAdd: false,
-      modules: null
+      modules: null,
+      dropCount: 0
     };
     
     this._unwatch = null;
+    
+    // References to all EnvelopeModule components
+    this._moduleEls = [];
+  }
+  
+  componentDidUpdate() {
+  }
+  
+  shouldComponentUpdate(nextProps, nextState) {
+    // Check if we just dropped a module
+    if (this.state.dropCount !== nextState.dropCount) {
+      // NOTE: this is a hacky anti-pattern!
+      this._moduleEls.forEach((dnd) => {
+        const module = dnd.getDecoratedComponentInstance().getDecoratedComponentInstance();
+        module.saveModule();
+      });
+      return false;
+    }
+    return true;
   }
   
   componentWillMount() {
@@ -133,16 +159,16 @@ class Envelope extends Component {
     };
   }
   
-  _handleSaveModule(id, moduleData) {
+  _handleSaveModule(index, moduleData) {
     // Construct buffer with epilogue
-    let dataId = 0xC4 + id * 6;
+    let dataId = 0xC4 + index * 6;
     let buffer = new Uint8Array(moduleData.length + 1);
     buffer.set(moduleData, 0);
     buffer[moduleData.length] = dataId;
     
     // Splice into existing data
     let data = this.state.data;
-    data.set(buffer, 2 + id * 6);
+    data.set(buffer, 2 + index * 6);
     
     // Update store (store as normal array)
     instrumentActions.update(this.props.instrumentId, this.props.type, Array.prototype.slice.call(data));
@@ -175,6 +201,7 @@ class Envelope extends Component {
 
     // Use global modules variable to allow simple communication between modules
     window.envelopeModules = [];
+    this._moduleEls = [];
     
     return modules.map((module, index) => {
       // Set up props
@@ -187,16 +214,16 @@ class Envelope extends Component {
         margin: moduleMargin,
         moveModule: this._moveModule.bind(this),
         findModule: this._findModule.bind(this),
-        save: this._handleSaveModule.bind(this, module.id),
+        save: this._handleSaveModule.bind(this, index),   // use linear index here
         data: module.data
       };
   
       // Create element
       let el;
-      if (module.type === "linup")            { el = (<EnvelopeModuleLinUp {...moduleProps} />); }
-      else if (module.type === "lindown")     { el = (<EnvelopeModuleLinDown {...moduleProps} />); }
-      else if (module.type === "expup")       { el = (<EnvelopeModuleExpUp {...moduleProps} />); }
-      else                                    { el = (<EnvelopeModuleEmpty {...moduleProps} />); }
+      if (module.type === "linup")          { el = (<EnvelopeModuleLinUp {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === "lindown")   { el = (<EnvelopeModuleLinDown {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === "expup")     { el = (<EnvelopeModuleExpUp {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else                                  { el = (<EnvelopeModuleEmpty {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
       return el;
     });
   }

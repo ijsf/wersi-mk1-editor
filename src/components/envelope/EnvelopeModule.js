@@ -173,7 +173,7 @@ export default class EnvelopeModule extends Component {
         originalIndex: props.findModule(props.id).index
       };
     },
-    endDrag(props, monitor) {
+    endDrag(props, monitor, component) {
       const { id: droppedId, originalIndex } = monitor.getItem();
       const didDrop = monitor.didDrop();
 
@@ -237,7 +237,7 @@ export default class EnvelopeModule extends Component {
     throw "No graph function implemented."
   }
   
-  _handleSave() {
+  _handleSave(state) {
     throw "No _handleSave implemented."
   }
   
@@ -310,6 +310,10 @@ export default class EnvelopeModule extends Component {
     Object.assign(nextState, this._getUpdatedData(nextProps));
   }
   
+  saveModule() {
+    this.props.save(this._handleSave(this.state));
+  }
+  
   _isNumeric(x) {
     return !isNaN(parseFloat(x)) && isFinite(x);
   }
@@ -346,6 +350,16 @@ export default class EnvelopeModule extends Component {
       // Don't re-render
       return false;
     }
+
+    // Order of this module changed, so save
+    /*
+    if (this.props.index !== nextProps.index) {
+      console.log("type " + this.constructor.name + " moved from " + this.props.index + " to " + nextProps.index);
+      this.saveModule(nextProps, nextState);
+      return false;
+    }
+    */
+
     return true;
   }
   
@@ -398,9 +412,9 @@ export default class EnvelopeModule extends Component {
               this.setState({ disableDrag: true, changed: false });
             }}
             onMouseUp={() => {
-              // Update state, but only if changed
+              // Save changes, but only if changed
               if (this.state.changed) {
-                this.props.save(this._handleSave());
+                this.saveModule();
               }
             }}
             onMouseLeave={() => {

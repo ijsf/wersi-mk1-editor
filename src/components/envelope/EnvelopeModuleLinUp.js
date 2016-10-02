@@ -46,9 +46,9 @@ export default class EnvelopeModuleLinUp extends EnvelopeModule {
     };
   }
   
-  _handleSave() {
-    const A = (~(this.state.a >> 4)) & 0xFF;
-    const B = (this.state.b >> 4) & 0xFF;
+  _handleSave(state) {
+    const A = (~(state.a >> 4)) & 0xFF;
+    const B = (state.b >> 4) & 0xFF;
     return new Uint8Array([
       0xF3,
       A,

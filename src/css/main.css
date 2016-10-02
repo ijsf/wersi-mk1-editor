@@ -8,6 +8,8 @@
 /* react-bootstrap tooltip colors */
 .info .tooltip-arrow { border-bottom-color: #ccc !important; }
 .info .tooltip-inner { background-color: #ccc !important; color: #222; }
+.error .tooltip-arrow { border-bottom-color: #ee5f5b !important; }
+.error .tooltip-inner { background-color: #ee5f5b !important; }
 
 /* rickshaw */
 .x_tick_custom {

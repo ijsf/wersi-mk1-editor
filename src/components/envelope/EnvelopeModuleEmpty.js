@@ -15,4 +15,14 @@ export default class EnvelopeModuleEmpty extends EnvelopeModule {
     ...EnvelopeModule.defaultProps,
     title: 'Empty'
   };
+  
+  _handleSave(state) {
+    return new Uint8Array([
+      0,
+      0,
+      0,
+      0,
+      0
+    ]);
+  }
 }

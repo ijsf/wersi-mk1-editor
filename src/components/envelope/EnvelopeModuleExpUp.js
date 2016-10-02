@@ -45,9 +45,9 @@ export default class EnvelopeModuleExpUp extends EnvelopeModule {
     };
   }
   
-  _handleSave() {
-    const A = ~this.state.a & 0xFFF;
-    const B = this.state.b & 0xFFF;
+  _handleSave(state) {
+    const A = ~state.a & 0xFFF;
+    const B = state.b & 0xFFF;
     return new Uint8Array([
       ((A & 0xF) << 4) | 0x2,
       (A >> 4) & 0xFF,

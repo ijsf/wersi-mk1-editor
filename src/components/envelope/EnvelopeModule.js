@@ -450,7 +450,7 @@ export default class EnvelopeModule extends Component {
     // We generally use bootstrap styles for colors to support flexible theming
     const contents = (
       <div style={{ display: 'inline-block', position: 'relative' }} onClick={() => { if(showCase){ this.saveModule(); } }}>
-        <OverlayTrigger ref={(e) => { if(e) { e.show(); }} }
+        <OverlayTrigger
           placement="top" overlay={tooltip} key={"EnvelopeModule" + this.props.id + "_overlay"}>
           <div style={{ ...style, opacity, width, height, marginRight, marginBottom, cursor }}
           className="module"

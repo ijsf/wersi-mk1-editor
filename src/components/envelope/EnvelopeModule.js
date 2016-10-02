@@ -123,7 +123,11 @@ export default class EnvelopeModule extends Component {
   static defaultProps = {
     ...Component.defaultProps,
     showTimeAxis: true,
-    graphHeight: 70
+    graphHeight: 70,
+    
+    // Default min and max for 12-bit values
+    aMin: 0,
+    aMax: 4095
   };
   
   constructor(props) {
@@ -339,6 +343,8 @@ export default class EnvelopeModule extends Component {
     // Create HTML5 sliders (don't show if we're showcasing)
     const sliders = showCase ? null : Array.from(['a', 'b', 'c']).map((key) => {
       const value = this.state[key];
+      const valueMin = this.props[key + "Min"];
+      const valueMax = this.props[key + "Max"];
       const title = this.props[key + "Title"];
       if (value != null) {
         return (
@@ -346,8 +352,8 @@ export default class EnvelopeModule extends Component {
           style={{...styleSlider}}
           data-tip={title} data-type="info" data-effect="solid" data-place="bottom" data-class="tooltip"
           defaultValue={value}
-          min={0}
-          max={4095}
+          min={valueMin}
+          max={valueMax}
           key={key}
           onMouseEnter={() => {
             // Disable drag

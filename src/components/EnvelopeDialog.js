@@ -26,25 +26,13 @@ export default class EnvelopeDialog extends Component {
     super(props);
     
     this.state = {
-      show: false
     };
   }
   
   componentWillMount() {
   }
   
-  shouldComponentUpdate(nextProps, nextState) {
-    if (this.state.show !== nextProps.show) {
-      nextState.show = nextProps.show;
-    }
-    return true;
-  }
-  
   _handleAdd() {
-  }
-  
-  _handleCancel() {
-    this.setState({ show: false });
   }
   
   render() {
@@ -52,18 +40,20 @@ export default class EnvelopeDialog extends Component {
     
     let moduleProps = {
       width: moduleWidth,
-      height: moduleHeight * 0.7,
+      height: 75,
+      graphHeight: 45,
       margin: moduleMargin
     };
     
     return (
-      <Modal show={this.state.show}>
+      <Modal show={this.props.show}>
         <Modal.Header>
           <Modal.Title>Click a module to add to your envelope</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div>
             <EnvelopeModuleLinUp {...moduleProps}/>
+            <EnvelopeModuleExpUp {...moduleProps}/>
             <EnvelopeModuleLinDown {...moduleProps}/>
             <EnvelopeModuleStepRel {...moduleProps}/>
             <EnvelopeModuleVibrato1 {...moduleProps}/>
@@ -71,7 +61,7 @@ export default class EnvelopeDialog extends Component {
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button bsStyle="default" onClick={this._handleCancel.bind(this)}>Cancel</Button>
+          <Button bsStyle="default" onClick={this.props.cancel}>Cancel</Button>
         </Modal.Footer>
       </Modal>
     );

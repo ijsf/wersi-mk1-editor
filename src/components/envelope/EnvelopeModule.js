@@ -331,11 +331,16 @@ export default class EnvelopeModule extends Component {
   render() {
     const { isDragging, connectDragSource, connectDropTarget, width, height, margin } = this.props;
     const { graph } = this.state;
-    const opacity = isDragging ? 0 : 1;
     const marginRight = margin;
     
+    // Change opacity when dragging
+    const opacity = isDragging ? 0 : 1;
+
     // Find out whether we're actually being used for editing or not (dragging must be enabled)
     const showCase = (this.props.findModule) ? false : true;
+
+    // Add bottom margin when showcasing (cause modules may be placed below)
+    const marginBottom = showCase ? margin : null;
     
     // Determine if we should show a move cursor for specific elements
     const cursor = showCase ? 'default' : 'move';
@@ -392,7 +397,7 @@ export default class EnvelopeModule extends Component {
     // Create contents
     // We generally use bootstrap styles for colors to support flexible theming
     const contents = (
-      <div style={{ ...style, opacity, width, height, marginRight, cursor }} className="btn-default">
+      <div style={{ ...style, opacity, width, height, marginRight, marginBottom, cursor }} className="btn-default">
         <div style={{ ...styleTitle }}>{this.props.title}</div>
         <div style={{ ...styleGraph }} ref={(c) => this._graph = c} />
         <div style={{ ...styleSliderContainer }}>

@@ -28,10 +28,15 @@ export default class EnvelopeModuleLinDown extends EnvelopeModule {
 		b: 0,
     amplBefore: 2048,
     timeBefore: 0,
-    interpolate: true
+    interpolate: true,
+
+    // Don't allow infinity, scale up to 4080 max
+    aMin: 0,
+    aMax: 4080
   };
   
   _decode(data) {
+    // upper 4 bits ignored, always 0xF?
     const A = ((~data[1]) & 0xFF) << 4;
     const B = (data[4] & 0xFF) << 4;
     return {
@@ -58,20 +63,23 @@ export default class EnvelopeModuleLinDown extends EnvelopeModule {
 		/*
 		* A (time duration)
 		* 0: 5ms
-		* 4094: 20500ms
-		* 4095: infinite
+		* 4094: 20500ms -- doesn't make sense at all since 4080 is max.. adjusted to 3s according to empirical evidence
+		* 4095: infinite (how is this even possible with 0:255 (8-bit) rescaled to 0:4080 (12-bit))
 		*
 		* B (end amplitude)
 		* 0 to 4095
 		*
 		* If start amplitude is smaller than end amplitude, end amplitude equals start amplitude
 		*/
-    // TODO: exponential time?
+    const yMin = 5;
+    const yMax = 3000;
+    const aMax = 4080 + 1;
+    const aLog = yMax-((yMax-yMin)*Math.log10(aMax-a))/Math.log10(aMax);
 		return {
 			warning: (amplBefore < b) ? 'Start amplitude is smaller than end amplitude. Use linear-up instead' : null,
 			data: [
 				{ x: timeBefore, y: amplBefore },
-				{ x: timeBefore+((5 + (a / 4094) * (20500 - 5)))/1000, y: (amplBefore < b) ? amplBefore : b }
+				{ x: timeBefore+((5 + (aLog / 4094) * (20500 - 5)))/1000, y: (amplBefore < b) ? amplBefore : b }
 			]
 		};
   }

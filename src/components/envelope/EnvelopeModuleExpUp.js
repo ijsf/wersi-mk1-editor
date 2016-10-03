@@ -21,7 +21,6 @@ export default class EnvelopeModuleExpUp extends EnvelopeModule {
     ...EnvelopeModule.defaultProps,
     title: 'Exp. up',
     description: 'Exponentially increases the envelope. Starts off on the amplitude of the previous module, and thus cannot be the first module.',
-    color: 'lightslategrey',
 		aTitle: 'Duration',
 		bTitle: 'Final amplitude',
 		a: 2048,

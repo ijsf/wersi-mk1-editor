@@ -127,6 +127,7 @@ export default class EnvelopeModule extends Component {
     ...Component.defaultProps,
     showTimeAxis: true,
     graphHeight: 70,
+    color: 'silver',
     
     // Default min and max for 12-bit values
     aMin: 0,
@@ -361,7 +362,7 @@ export default class EnvelopeModule extends Component {
   }
   
   render() {
-    const { isDragging, connectDragSource, connectDropTarget, width, height, margin } = this.props;
+    const { isDragging, connectDragSource, connectDropTarget, width, height, margin, color } = this.props;
     const { graph } = this.state;
     const marginRight = margin;
     
@@ -380,6 +381,7 @@ export default class EnvelopeModule extends Component {
     // Update and render graph
     const graphData = this._graphFunction(this.state);
     if (graph) {
+      graph.series[0].color = color;
       graph.series[0].data = graphData.data;
       graph.update();
       graph.render();

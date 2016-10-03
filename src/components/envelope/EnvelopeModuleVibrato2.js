@@ -21,7 +21,6 @@ export default class EnvelopeModuleVibrato2 extends EnvelopeModule {
     ...EnvelopeModule.defaultProps,
     title: 'Vibrato B',
     description: 'Applies centered \'frequency\' vibrato to envelope',
-    color: 'steelblue',
 		aTitle: 'Duration',
 		bTitle: 'Vibrato amplitude',
 		cTitle: 'Vibrato frequency',

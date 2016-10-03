@@ -21,7 +21,6 @@ export default class EnvelopeModuleLinDown extends EnvelopeModule {
     ...EnvelopeModule.defaultProps,
     title: 'Linear down',
     description: 'Linearly decreases the envelope',
-    color: 'lightslategrey',
 		aTitle: 'Duration',
 		bTitle: 'Final amplitude',
 		a: 2048,

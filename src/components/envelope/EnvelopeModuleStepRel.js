@@ -21,7 +21,6 @@ export default class EnvelopeModuleStepRel extends EnvelopeModule {
     ...EnvelopeModule.defaultProps,
     title: 'Step relative',
     description: 'Steps the envelope between two values added to the last envelope (wraps around at maximum)',
-    color: 'teal',
 		aTitle: 'First amplitude',
 		bTitle: 'Second amplitude',
 		a: 512,

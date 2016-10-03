@@ -21,7 +21,6 @@ export default class EnvelopeModuleExpDown extends EnvelopeModule {
     ...EnvelopeModule.defaultProps,
     title: 'Exp. down',
     description: 'Exponentially decreases the envelope. Starts off on the amplitude of the previous module, and thus cannot be the first module.',
-    color: 'lightslategrey',
 		aTitle: 'Duration',
 		bTitle: 'Final amplitude',
 		a: 2048,

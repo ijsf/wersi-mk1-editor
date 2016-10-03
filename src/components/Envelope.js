@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import update from 'react/lib/update';
-import { Well, Panel, Button, Checkbox, Modal, Col, Form, FormGroup, InputGroup, FormControl, ControlLabel } from 'react-bootstrap';
+import { Overlay, OverlayTrigger, Tooltip, Well, Panel, Button, Checkbox, Modal, Col, Form, FormGroup, InputGroup, FormControl, ControlLabel } from 'react-bootstrap';
 
 import reactMixin from 'react-mixin';
 import reactor from 'modules/flux';
@@ -68,7 +68,8 @@ class Envelope extends Component {
     this.state = {
       showAdd: false,
       modules: null,
-      dropCount: 0
+      dropCount: 0,
+      releasePhaseStart: 3
     };
     
     this._unwatch = null;
@@ -210,6 +211,9 @@ class Envelope extends Component {
     this._moduleEls = [];
     
     return modules.map((module, index) => {
+      // Determine if this is a release module
+      const release = (index >= this.state.releasePhaseStart);
+      
       // Set up props
       let moduleProps = {
         key: module.id,
@@ -221,7 +225,9 @@ class Envelope extends Component {
         moveModule: this._moveModule.bind(this),
         findModule: this._findModule.bind(this),
         save: this._handleSaveModule.bind(this, index),   // use linear index here
-        data: module.data
+        data: module.data,
+        color: release ? 'thistle' : 'lightsteelblue',
+        relaease: release
       };
   
       // Create element
@@ -236,8 +242,8 @@ class Envelope extends Component {
   }
   
   render() {
-    const { connectDropTarget, moduleWidth, moduleHeight, moduleMargin, moduleSlots, title } = this.props;
-    const { modules } = this.state;
+    const { connectDropTarget, moduleWidth, moduleHeight, moduleMargin, moduleSlots, title, type } = this.props;
+    const { modules, releasePhaseStart } = this.state;
     
     const width = moduleMargin + moduleSlots * (moduleMargin + moduleWidth);
     const padding = moduleMargin;
@@ -245,6 +251,29 @@ class Envelope extends Component {
     let header = (
       <h3>{title}</h3>
     );
+    
+    // Release slider, if type is ampl
+    let releaseSlider;
+    if (type === "ampl" ) {
+      releaseSlider = (
+        <div style={{ width: width, position: 'relative', left: moduleWidth * 0.5, marginTop: 10 }}>
+          <OverlayTrigger
+          placement="bottom"
+          overlay={<Tooltip className="info">Start of release phase</Tooltip>}
+          >
+            <input type="range"
+            style={{ width: width - moduleWidth }}
+            defaultValue={ releasePhaseStart }
+            min={0}
+            max={6}
+            onChange={(event) => {
+              this.setState({ releasePhaseStart: Number(event.target.value) });
+            }}
+            />
+          </OverlayTrigger>
+        </div>
+        );
+    }
     
     return connectDropTarget(
       <div>
@@ -274,6 +303,7 @@ class Envelope extends Component {
             paddingBottom: moduleMargin
           }}>
             {modules ? this._createModules(modules) : "No modules available."}
+            {releaseSlider}
           </div>
           </Well>
         </Panel>

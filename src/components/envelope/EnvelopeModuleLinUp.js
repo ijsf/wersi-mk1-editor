@@ -21,7 +21,6 @@ export default class EnvelopeModuleLinUp extends EnvelopeModule {
     ...EnvelopeModule.defaultProps,
     title: 'Linear up',
     description: 'Linearly increases the envelope',
-    color: 'lightslategrey',
 		aTitle: 'Duration',
 		bTitle: 'Final amplitude',
 		a: 2048,

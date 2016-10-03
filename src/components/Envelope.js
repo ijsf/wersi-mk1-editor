@@ -150,6 +150,7 @@ class Envelope extends Component {
     if      (id1 === 0x3 && id2 === 0x68D)    { type = 'linup'; }
     else if (id1 === 0x3 && id2 === 0x889)    { type = 'lindown'; }
     else if (id1 === 0x2 && id2 === 0xE0D)    { type = 'expup'; }
+    else if (id1 === 0x2 && id2 === 0xF09)    { type = 'expdown'; }
     else                                      { type = 'empty'; }
     
     return {
@@ -228,6 +229,7 @@ class Envelope extends Component {
       if (module.type === "linup")          { el = (<EnvelopeModuleLinUp {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
       else if (module.type === "lindown")   { el = (<EnvelopeModuleLinDown {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
       else if (module.type === "expup")     { el = (<EnvelopeModuleExpUp {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === "expdown")   { el = (<EnvelopeModuleExpDown {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
       else                                  { el = (<EnvelopeModuleEmpty {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
       return el;
     });

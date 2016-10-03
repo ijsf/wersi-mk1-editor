@@ -32,7 +32,7 @@ export default class EnvelopeModuleExpUp extends EnvelopeModule {
     
     // Minimum must be 16
     aMin: 16,
-    aMax: 4095
+    aMax: 4079
   };
   
   _decode(data) {
@@ -79,11 +79,8 @@ export default class EnvelopeModuleExpUp extends EnvelopeModule {
 				}
 			);
 		};
-    if (isFirst) {
-      error = "This module cannot be the first module"
-    }
-    else if (amplBefore < 16) {
-      error = "Start amplitude must be higher than 16"
+    if (amplBefore < 16) {
+      error = "Start amplitude must be higher than 16";
     }
 		return {
 			warning: (amplBefore > b) ? 'Start amplitude is bigger than end amplitude. Use exponential-down instead' : null,

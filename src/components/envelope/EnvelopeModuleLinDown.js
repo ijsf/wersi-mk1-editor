@@ -28,32 +28,33 @@ export default class EnvelopeModuleLinDown extends EnvelopeModule {
     amplBefore: 2048,
     timeBefore: 0,
     interpolate: true,
+    sustainEnable: true,
 
-    // Don't allow infinity, scale up to 4080 max
     aMin: 0,
-    aMax: 4080
+    aMax: 4094
   };
   
   _decode(data) {
-    // upper 4 bits ignored, always 0xF?
-    const A = ((~data[1]) & 0xFF) << 4;
-    const B = (data[4] & 0xFF) << 4;
+    const A = ((~data[1]) & 0xFF) << 4 | ((~data[0] >> 4) & 0xF);
+    const B = (data[4] & 0xFF) << 4 | ((data[3] >> 4) & 0xF);
     return {
       a: A,
       b: B,
-      c: null
+      c: null,
+      sustain: A === 4095
     };
   }
   
   _handleSave(state) {
-    const A = (~(state.a >> 4)) & 0xFF;
-    const B = (state.b >> 4) & 0xFF;
+    const a = state.sustain ? 4095 : state.a;
+    const A = ~a & 0xFFF;
+    const B = state.b & 0xFFF;
     return new Uint8Array([
-      0xF3,
-      A,
+      ((A & 0xF) << 4) | 0x3,
+      (A >> 4) & 0xFF,
       0x88,
-      0x09,
-      B
+      ((B & 0xF) << 4) | 0x9,
+      (B >> 4) & 0xFF
     ]);
   }
   
@@ -62,23 +63,19 @@ export default class EnvelopeModuleLinDown extends EnvelopeModule {
 		/*
 		* A (time duration)
 		* 0: 5ms
-		* 4094: 20500ms -- doesn't make sense at all since 4080 is max.. adjusted to 3s according to empirical evidence
-		* 4095: infinite (how is this even possible with 0:255 (8-bit) rescaled to 0:4080 (12-bit))
+		* 4094: 20500ms
+		* 4095: infinite
 		*
 		* B (end amplitude)
 		* 0 to 4095
 		*
 		* If start amplitude is smaller than end amplitude, end amplitude equals start amplitude
 		*/
-    const yMin = 5;
-    const yMax = 3000;
-    const aMax = 4080 + 1;
-    const aLog = yMax-((yMax-yMin)*Math.log10(aMax-a))/Math.log10(aMax);
 		return {
 			warning: (amplBefore < b) ? 'Start amplitude is smaller than end amplitude. Use linear-up instead' : null,
 			data: [
 				{ x: timeBefore, y: amplBefore },
-				{ x: timeBefore+this._expScale(a, 4080 + 1, 5, 3000)/1000, y: (amplBefore < b) ? amplBefore : b }
+				{ x: timeBefore+this._expScale(a, 4095, 5, 20500)/1000, y: (amplBefore < b) ? amplBefore : b }
 			]
 		};
   }

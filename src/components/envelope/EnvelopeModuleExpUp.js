@@ -28,24 +28,32 @@ export default class EnvelopeModuleExpUp extends EnvelopeModule {
     amplBefore: 0,
     timeBefore: 0,
     interpolate: true,
+    sustainEnable: true,
     
-    // Minimum must be 16
-    aMin: 16,
+    aMin: 0,
     aMax: 4079
   };
   
   _decode(data) {
-    const A = (((~data[1]) & 0xFF) << 4) | ((~data[0] >> 4) & 0xF);
-    const B = (((data[4]) & 0xFF) << 4) | ((data[3] >> 4) & 0xF);
+    let A = (((~data[1]) & 0xFF) << 4) | ((~data[0] >> 4) & 0xF);
+    let B = (((data[4]) & 0xFF) << 4) | ((data[3] >> 4) & 0xF);
+    let sustain = A >= 4080;
+    if (!sustain) {
+      A = Math.min(4080 - 1, A);
+    }
     return {
       a: A,
       b: B,
-      c: null
+      c: null,
+      sustain: sustain
     };
   }
   
   _handleSave(state) {
-    const A = ~state.a & 0xFFF;
+    const a = state.sustain ? 4080 : Math.min(4080 - 1, state.a);
+    console.log(state.sustain);
+    console.log(a);
+    const A = ~a & 0xFFF;
     const B = state.b & 0xFFF;
     return new Uint8Array([
       ((A & 0xF) << 4) | 0x2,
@@ -62,7 +70,7 @@ export default class EnvelopeModuleExpUp extends EnvelopeModule {
 		* A (time duration)
 		* 0: 60ms
 		* 4079: 7500ms
-		* 4080: infinite
+		* >=4080: infinite
 		*
 		* B (end amplitude)
 		* 0 to 4095
@@ -73,13 +81,13 @@ export default class EnvelopeModuleExpUp extends EnvelopeModule {
 		for(i = 0; i < n; i++) {
 			data.push(
 				{
-					x: timeBefore+((this._expScale(a, 4080 + 1, 60, 7500) / n) * i)/1000,
+					x: timeBefore+((this._expScale(a, 4080, 60, 7500) / n) * i)/1000,
 					y: amplBefore + (Math.exp(1 - (1 / Math.pow(i / n, 2))) * Math.max(0, b - amplBefore))
 				}
 			);
 		};
     if (amplBefore < 16) {
-      error = "Start amplitude must be higher than 16";
+      error = "Previous amplitude must be higher than 16";
     }
 		return {
 			warning: (amplBefore > b) ? 'Start amplitude is bigger than end amplitude. Use exponential-down instead' : null,

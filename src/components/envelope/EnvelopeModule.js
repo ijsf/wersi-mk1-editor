@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { DragSource, DropTarget } from 'react-dnd';
-import { Overlay, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Button, Overlay, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import ToggleButton from 'react-toggle-button';
 
 import { findDOMNode } from 'react-dom';
 
@@ -31,8 +32,22 @@ const styleGraph = {
 };
 
 const styleSlider = {
+	display: 'inline-block',
   marginTop: 5,
-  marginBottom: 5
+  marginBottom: 5,
+  marginLeft: 5,
+  marginRight: 5,
+  verticalAlign: 'middle'
+};
+
+const styleSliderButton = {
+	display: 'inline-block',
+  paddingLeft: 4,
+  paddingRight: 4,
+  paddingTop: 0,
+  paddingBottom: 0,
+  marginTop: 0,
+  marginBottom: 0
 };
 
 const styleSliderContainer = {
@@ -104,7 +119,8 @@ const RickshawCustomAxisRenderer = function(args) {
 
 			var title = document.createElement('div');
 			title.classList.add('title');
-			title.innerHTML = unit.formatter(new Date(value * 1000));
+      // _sustain is quite the hack
+			title.innerHTML = self.graph._sustain ? "∞" : unit.formatter(new Date(value * 1000));
 			element.appendChild(title);
 
 			self.graph.element.appendChild(element);
@@ -128,14 +144,18 @@ export default class EnvelopeModule extends Component {
     showTimeAxis: true,
     graphHeight: 70,
     color: 'silver',
+    sustainEnable: false,
     
-    // Default min and max for 12-bit values
+    // Default min and max and step increments for 12-bit values
     aMin: 0,
     aMax: 4095,
+    aStep: 1,
     bMin: 0,
     bMax: 4095,
+    bStep: 1,
     cMin: 0,
-    cMax: 4095
+    cMax: 4095,
+    cStep: 1
   };
   
   constructor(props) {
@@ -150,13 +170,15 @@ export default class EnvelopeModule extends Component {
       b: props.b,
       c: props.c,
       amplBefore: props.amplBefore,
-      timeBefore: props.timeBefore,
+      timeBefore: 0, // props.timeBefore, -- ignore
       isFirst: true,
+      sustain: false,
       
       // Drag copies of values
       _a: null,
       _b: null,
-      _c: null
+      _c: null,
+      _sustain: null
     };
     
     this._graph = null;
@@ -253,11 +275,12 @@ export default class EnvelopeModule extends Component {
   }
   
   _expScale(x, xMax, yMin, yMax) {
+    x = Math.min(x, xMax - 1);
     return yMax-((yMax-yMin)*Math.log10(xMax-x))/Math.log10(xMax);
   }
   
   _getUpdatedData(props) {
-    let { id, index, data, a, b, c, amplBefore, timeBefore, isFirst } = props;
+    let { id, index, data, a, b, c, sustain, amplBefore, timeBefore, isFirst } = props;
     
     // Check if we received data, in which case we will decode the data
     if (this._decode && data) {
@@ -265,6 +288,7 @@ export default class EnvelopeModule extends Component {
       a = decoded.a;
       b = decoded.b;
       c = decoded.c;
+      sustain = decoded.sustain;
     }
     
     // Move values into hacky global (time is typically a and amplitude is typically b)
@@ -285,7 +309,7 @@ export default class EnvelopeModule extends Component {
         
         // Check if we are placed behind an empty element, which shouldn't be allowed
         if (this._isNumeric(aBefore) && this._isNumeric(bBefore)) {
-          timeBefore = aBefore;
+          //timeBefore = aBefore; -- ignore
           amplBefore = bBefore;
         }
         else {
@@ -304,7 +328,8 @@ export default class EnvelopeModule extends Component {
       c: c,
       amplBefore: amplBefore,
       timeBefore: timeBefore,
-      isFirst: isFirst
+      isFirst: isFirst,
+      sustain: sustain
     };
   }
   
@@ -344,15 +369,19 @@ export default class EnvelopeModule extends Component {
     // If we are dragging, don't re-render
     if (this.state._a !== nextState._a
     || this.state._b !== nextState._b
-    || this.state._c !== nextState._c) {
+    || this.state._c !== nextState._c
+    || this.state._sustain !== nextState._sustain) {
       // Copy drag values into real values
       nextState.a = nextState._a ? nextState._a : this.state.a;
       nextState.b = nextState._b ? nextState._b : this.state.b;
       nextState.c = nextState._c ? nextState._c : this.state.c;
+      nextState.sustain = (nextState._sustain !== null) ? nextState._sustain : this.state.sustain;
+      console.log("sustain: " + nextState.sustain + " // " + nextState._sustain);
     
       // Just update the graph
       const graphData = this._graphFunction(nextState);
       graph.series[0].data = graphData.data;
+      graph._sustain = nextState.sustain;  // _sustain is quite the hack
       graph.update();
       
       // Don't re-render
@@ -362,8 +391,8 @@ export default class EnvelopeModule extends Component {
   }
   
   render() {
-    const { isDragging, connectDragSource, connectDropTarget, width, height, margin, color } = this.props;
-    const { graph } = this.state;
+    const { isDragging, connectDragSource, connectDropTarget, width, height, margin, color, sustainEnable } = this.props;
+    const { graph, sustain } = this.state;
     const marginRight = margin;
     
     // Change opacity when dragging
@@ -383,51 +412,95 @@ export default class EnvelopeModule extends Component {
     if (graph) {
       graph.series[0].color = color;
       graph.series[0].data = graphData.data;
+      graph._sustain = this.state.sustain;  // _sustain is quite the hack
       graph.update();
       graph.render();
     }
+    
+    // Create sustain toggle (don't show if we're showcasing or if not enabled)
+    const sustainToggle = (showCase || !sustainEnable) ? null : (
+      <div>
+        <ToggleButton
+        value={sustain}
+        thumbStyle={{ borderRadius: 2 }}
+        trackStyle={{ borderRadius: 2 }}
+        onToggle={(value) => {
+          console.log("toggle: " + value);
+          this.setState((state) => {
+            return { '_sustain': !value };
+          }, () => {
+            console.log(this.state._sustain);
+            console.log(this.state.sustain);
+            this.saveModule();
+          });
+        }}
+        />
+      </div>
+    );
     
     // Create HTML5 sliders (don't show if we're showcasing)
     const sliders = showCase ? null : Array.from(['a', 'b', 'c']).map((key) => {
       const value = this.state[key];
       const valueMin = this.props[key + "Min"];
       const valueMax = this.props[key + "Max"];
+      const valueStep = this.props[key + "Step"];
       const title = this.props[key + "Title"];
       const keyName = "EnvelopeModule" + this.props.id + "_" + key;
 
       let tooltip = (<Tooltip className="info" id={keyName + "_tooltip"} key={keyName + "_tooltip"}>{title}</Tooltip>);
+      
+      // Button handlers
+      let handleButtonDecrease = () => {
+        this.setState((state) => {
+          if (value > valueMin) {
+            state['_' + key] = value - valueStep;
+          }
+          return state;
+        }, () => { this.saveModule() });
+      };
+      let handleButtonIncrease = () => {
+        this.setState((state) => {
+          if (value < valueMax) {
+            state['_' + key] = value + valueStep;
+          }
+          return state;
+        }, () => { this.saveModule() });
+      };
 
       if (value != null) {
         return (
           <OverlayTrigger placement="bottom" overlay={tooltip} key={keyName + "_overlay"}>
-            <input type="range"
-            style={{...styleSlider}}
-            defaultValue={value}
-            min={valueMin}
-            max={valueMax}
-            key={keyName + "_slider"}
-            onMouseEnter={() => {
-              // Disable drag
-              this.setState({ disableDrag: true, changed: false });
-            }}
-            onMouseUp={() => {
-              // Save changes, but only if changed
-              if (this.state.changed) {
-                this.saveModule();
-              }
-            }}
-            onMouseLeave={() => {
-              // Enable drag
-              this.setState({ disableDrag: false });
-            }}
-            onChange={(event) => {
-              // Move value into this.state._KEY
-              let update = {};
-              update['_' + key] = Number(event.target.value);
-              update.changed = true;
-              this.setState(update);
-            }}
-            />
+            <div style={{ display: 'block' }}>
+              <Button onClick={ handleButtonDecrease } style={{...styleSliderButton, width: 17}}>-</Button>
+              <input type="range" style={{...styleSlider, width: width * 0.5 + 5 }}
+              defaultValue={value}
+              min={valueMin}
+              max={valueMax}
+              key={keyName + "_slider"}
+              onMouseEnter={() => {
+                // Disable drag
+                this.setState({ disableDrag: true, changed: false });
+              }}
+              onMouseUp={() => {
+                // Save changes, but only if changed
+                if (this.state.changed) {
+                  this.saveModule();
+                }
+              }}
+              onMouseLeave={() => {
+                // Enable drag
+                this.setState({ disableDrag: false });
+              }}
+              onChange={(event) => {
+                // Move value into this.state._KEY
+                let update = {};
+                update['_' + key] = Number(event.target.value);
+                update.changed = true;
+                this.setState(update);
+              }}
+              />
+              <Button onClick={ handleButtonIncrease } style={{...styleSliderButton, width: 17}}>+</Button>
+            </div>
           </OverlayTrigger>
         );
       }
@@ -460,6 +533,7 @@ export default class EnvelopeModule extends Component {
             <div style={{ ...styleTitle }}>{this.props.title}</div>
             <div style={{ ...styleGraph }} ref={(c) => this._graph = c} />
             <div style={{ ...styleSliderContainer }}>
+              {sustainToggle}
               {sliders}
             </div>
           </div>

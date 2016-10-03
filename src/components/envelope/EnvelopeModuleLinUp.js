@@ -28,32 +28,33 @@ export default class EnvelopeModuleLinUp extends EnvelopeModule {
     amplBefore: 0,
     timeBefore: 0,
     interpolate: true,
+    sustainEnable: true,
     
-    // Don't allow infinity, scale up to 4080 max
     aMin: 0,
-    aMax: 4080
+    aMax: 4094
   };
   
   _decode(data) {
-    // upper 4 bits ignored, always 0xF?
-    const A = ((~data[1]) & 0xFF) << 4;
-    const B = (data[4] & 0xFF) << 4;
+    const A = ((~data[1]) & 0xFF) << 4 | ((~data[0] >> 4) & 0xF);
+    const B = (data[4] & 0xFF) << 4 | ((data[3] >> 4) & 0xF);
     return {
       a: A,
       b: B,
-      c: null
+      c: null,
+      sustain: A === 4095
     };
   }
   
   _handleSave(state) {
-    const A = (~(state.a >> 4)) & 0xFF;
-    const B = (state.b >> 4) & 0xFF;
+    const a = state.sustain ? 4095 : state.a;
+    const A = ~a & 0xFFF;
+    const B = state.b & 0xFFF;
     return new Uint8Array([
-      0xF3,
-      A,
+      ((A & 0xF) << 4) | 0x3,
+      (A >> 4) & 0xFF,
       0x68,
-      0x0D,
-      B
+      ((B & 0xF) << 4) | 0xD,
+      (B >> 4) & 0xFF
     ]);
   }
   
@@ -62,8 +63,8 @@ export default class EnvelopeModuleLinUp extends EnvelopeModule {
 		/*
 		* A (time duration)
 		* 0: 5ms
-		* 4094: 20500ms -- doesn't make sense at all since 4080 is max.. adjusted to 3000ms according to empirical evidence
-		* 4095: infinite (how is this even possible with 0:255 (8-bit) rescaled to 0:4080 (12-bit))
+		* 4094: 20500ms
+		* 4095: infinite
 		*
 		* B (end amplitude)
 		* 0 to 4095
@@ -74,7 +75,7 @@ export default class EnvelopeModuleLinUp extends EnvelopeModule {
 			warning: (amplBefore > b) ? 'Start amplitude is bigger than end amplitude. Use linear-down instead' : null,
 			data: [
 				{ x: timeBefore, y: amplBefore },
-				{ x: timeBefore+this._expScale(a, 4080 + 1, 5, 3000)/1000, y: (amplBefore > b) ? amplBefore : b }
+				{ x: timeBefore+this._expScale(a, 4095, 5, 20500)/1000, y: (amplBefore > b) ? amplBefore : b }
 			]
 		};
   }

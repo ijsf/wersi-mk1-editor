@@ -59,7 +59,7 @@ class Envelope extends Component {
     moduleSlots: 7,
     moduleMargin: 5,
     moduleWidth: 122,
-    moduleHeight: 160
+    moduleHeight: 190
   };
   
   constructor(props) {
@@ -259,7 +259,7 @@ class Envelope extends Component {
         <div style={{ width: width, position: 'relative', left: moduleWidth * 0.5, marginTop: 10 }}>
           <OverlayTrigger
           placement="bottom"
-          overlay={<Tooltip className="info">Start of release phase</Tooltip>}
+          overlay={<Tooltip className="info" id="tooltipRelease">Start of release phase</Tooltip>}
           >
             <input type="range"
             style={{ width: width - moduleWidth }}

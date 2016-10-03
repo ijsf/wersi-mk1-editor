@@ -28,9 +28,9 @@ export default class EnvelopeModuleExpDown extends EnvelopeModule {
     amplBefore: 4079,
     timeBefore: 0,
     interpolate: true,
+    sustainEnable: true,
     
-    // Minimum must be 16
-    aMin: 16,
+    aMin: 0,
     aMax: 4079
   };
   
@@ -40,12 +40,14 @@ export default class EnvelopeModuleExpDown extends EnvelopeModule {
     return {
       a: A,
       b: B,
-      c: null
+      c: null,
+      sustain: A >= 4080
     };
   }
   
   _handleSave(state) {
-    const A = ~state.a & 0xFFF;
+    const a = state.sustain ? 4095 : state.a;
+    const A = ~a & 0xFFF;
     const B = state.b & 0xFFF;
     return new Uint8Array([
       ((A & 0xF) << 4) | 0x2,
@@ -62,7 +64,7 @@ export default class EnvelopeModuleExpDown extends EnvelopeModule {
 		* A (time duration)
 		* 0: 60ms
 		* 4079: 7500ms
-		* 4080: infinite
+		* >=4080: infinite
 		*
 		* B (end amplitude)
 		* 0 to 4095
@@ -72,7 +74,7 @@ export default class EnvelopeModuleExpDown extends EnvelopeModule {
 		for(i = 0; i < n; i++) {
 			data.push(
 				{
-					x: timeBefore+(((60 + (a / 4079) * (7500 - 60)) / n) * i)/1000,
+					x: timeBefore+((this._expScale(a, 4080, 60, 7500) / n) * i)/1000,
 					y: amplBefore - (Math.exp(1 - (1 / Math.pow(i / n, 2))) * Math.max(0, amplBefore - b))
 				}
 			);

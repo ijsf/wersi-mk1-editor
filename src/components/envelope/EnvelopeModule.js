@@ -155,7 +155,10 @@ export default class EnvelopeModule extends Component {
     bStep: 1,
     cMin: 0,
     cMax: 4095,
-    cStep: 1
+    cStep: 1,
+    
+    // Epilogue enabled?
+    epilogue: true
   };
   
   constructor(props) {
@@ -344,7 +347,7 @@ export default class EnvelopeModule extends Component {
   }
   
   saveModule() {
-    this.props.save(this._handleSave(this.state));
+    this.props.save(this._handleSave(this.state), this.props);
   }
   
   _isNumeric(x) {
@@ -376,7 +379,6 @@ export default class EnvelopeModule extends Component {
       nextState.b = nextState._b ? nextState._b : this.state.b;
       nextState.c = nextState._c ? nextState._c : this.state.c;
       nextState.sustain = (nextState._sustain !== null) ? nextState._sustain : this.state.sustain;
-      console.log("sustain: " + nextState.sustain + " // " + nextState._sustain);
     
       // Just update the graph
       const graphData = this._graphFunction(nextState);
@@ -425,12 +427,9 @@ export default class EnvelopeModule extends Component {
         thumbStyle={{ borderRadius: 2 }}
         trackStyle={{ borderRadius: 2 }}
         onToggle={(value) => {
-          console.log("toggle: " + value);
           this.setState((state) => {
             return { '_sustain': !value };
           }, () => {
-            console.log(this.state._sustain);
-            console.log(this.state.sustain);
             this.saveModule();
           });
         }}
@@ -476,6 +475,7 @@ export default class EnvelopeModule extends Component {
               defaultValue={value}
               min={valueMin}
               max={valueMax}
+              step={valueStep}
               key={keyName + "_slider"}
               onMouseEnter={() => {
                 // Disable drag
@@ -491,7 +491,7 @@ export default class EnvelopeModule extends Component {
                 // Enable drag
                 this.setState({ disableDrag: false });
               }}
-              onChange={(event) => {
+              onInput={(event) => {
                 // Move value into this.state._KEY
                 let update = {};
                 update['_' + key] = Number(event.target.value);
@@ -513,11 +513,13 @@ export default class EnvelopeModule extends Component {
       target: () => findDOMNode(this.refs.target)
     };
     let tooltip = (<div/>);
-    if (!this._dragging && !this.showCase) {
+    if (!this._dragging && !showCase) {
       if (graphData.error) {
         tooltip = (<Tooltip className="error" id={"EnvelopeModule" + this.props.id + "_tooltip"}>{graphData.error}</Tooltip>);
       } else if (graphData.warning) {
         tooltip = (<Tooltip className="warning" id={"EnvelopeModule" + this.props.id + "_tooltip"}>{graphData.warning}</Tooltip>);
+      } else if (graphData.info) {
+        tooltip = (<Tooltip className="info" id={"EnvelopeModule" + this.props.id + "_tooltip"}>{graphData.info}</Tooltip>);
       }
     }
     
@@ -528,7 +530,7 @@ export default class EnvelopeModule extends Component {
         <OverlayTrigger
           placement="top" overlay={tooltip} key={"EnvelopeModule" + this.props.id + "_overlay"}>
           <div style={{ ...style, opacity, width, height, marginRight, marginBottom, cursor }}
-          className="module"
+          className={showCase ? "btn-default" : "module"}
           >
             <div style={{ ...styleTitle }}>{this.props.title}</div>
             <div style={{ ...styleGraph }} ref={(c) => this._graph = c} />

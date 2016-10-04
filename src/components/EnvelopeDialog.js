@@ -32,9 +32,9 @@ export default class EnvelopeDialog extends Component {
   componentWillMount() {
   }
   
-  _handleAdd(data) {
+  _handleAdd(data, props) {
     // Call save
-    this.props.save(data);
+    this.props.save(data, props);
     
     // Trigger addedModule callback
     this.props.addedModule();
@@ -62,6 +62,8 @@ export default class EnvelopeDialog extends Component {
             <EnvelopeModuleExpUp {...moduleProps}/>
             <EnvelopeModuleLinDown {...moduleProps}/>
             <EnvelopeModuleStepRel {...moduleProps}/>
+            <EnvelopeModuleConstAbs {...moduleProps}/>
+            <EnvelopeModuleConstRel {...moduleProps}/>
             <EnvelopeModuleVibrato1 {...moduleProps}/>
             <EnvelopeModuleVibrato2 {...moduleProps}/>
           </div>

@@ -76,6 +76,9 @@ class Envelope extends Component {
     
     // References to all EnvelopeModule components
     this._moduleEls = [];
+    
+    // Use global modules variable to allow simple communication between modules
+    window.envelopeModules = [];
   }
   
   componentDidUpdate() {
@@ -147,12 +150,17 @@ class Envelope extends Component {
     
     // Detect type
     const id1 = moduleData[0] & 0xF;
-    const id2 = ((moduleData[2] & 0xFF) << 4) | (moduleData[3] & 0xF);
-    if      (id1 === 0x3 && id2 === 0x68D)    { type = 'linup'; }
-    else if (id1 === 0x3 && id2 === 0x889)    { type = 'lindown'; }
-    else if (id1 === 0x2 && id2 === 0xE0D)    { type = 'expup'; }
-    else if (id1 === 0x2 && id2 === 0xF09)    { type = 'expdown'; }
-    else                                      { type = 'empty'; }
+    const id2 = moduleData[2] & 0xFF;
+    const id23 = ((moduleData[2] & 0xFF) << 4) | (moduleData[3] & 0xF);
+    if      (id1 === 0x3 && id23 === 0x68D)    { type = 'linup'; }
+    else if (id1 === 0x3 && id23 === 0x889)    { type = 'lindown'; }
+    else if (id1 === 0x2 && id23 === 0xE0D)    { type = 'expup'; }
+    else if (id1 === 0x2 && id23 === 0xF09)    { type = 'expdown'; }
+    else if (id1 === 0x1 && id2 === 0x000)     { type = 'constabs'; }
+    else if (id1 === 0x5 && id2 === 0x000)     { type = 'constrel'; }
+    else                                       { type = 'empty'; }
+
+    console.log(type + ': ' + (Array.from(moduleData).map(function (x) {return x.toString(16);})).join(";"));
     
     return {
       id: id,
@@ -161,12 +169,16 @@ class Envelope extends Component {
     };
   }
   
-  _handleSaveModule(index, moduleData) {
-    // Construct buffer with epilogue
-    let dataId = 0xC4 + index * 6;
+  _handleSaveModule(index, moduleData, props) {
+    // Construct buffer
     let buffer = new Uint8Array(moduleData.length + 1);
     buffer.set(moduleData, 0);
-    buffer[moduleData.length] = dataId;
+    
+    // Add epilogue if necessary
+    if (props.epilogue) {
+      let dataId = 0xC4 + index * 6;
+      buffer[moduleData.length] = dataId;
+    }
     
     // Splice into existing data
     let data = this.state.data;
@@ -206,8 +218,6 @@ class Envelope extends Component {
   _createModules(modules) {
     const { moduleWidth, moduleHeight, moduleMargin, moduleSlots, title } = this.props;
 
-    // Use global modules variable to allow simple communication between modules
-    window.envelopeModules = [];
     this._moduleEls = [];
     
     return modules.map((module, index) => {
@@ -236,6 +246,8 @@ class Envelope extends Component {
       else if (module.type === "lindown")   { el = (<EnvelopeModuleLinDown {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
       else if (module.type === "expup")     { el = (<EnvelopeModuleExpUp {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
       else if (module.type === "expdown")   { el = (<EnvelopeModuleExpDown {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === "constabs")  { el = (<EnvelopeModuleConstAbs {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === "constrel")  { el = (<EnvelopeModuleConstRel {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
       else                                  { el = (<EnvelopeModuleEmpty {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
       return el;
     });

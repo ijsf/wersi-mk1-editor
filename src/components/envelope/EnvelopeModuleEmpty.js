@@ -13,7 +13,8 @@ import EnvelopeModule from 'components/envelope/EnvelopeModule';
 export default class EnvelopeModuleEmpty extends EnvelopeModule {
   static defaultProps = {
     ...EnvelopeModule.defaultProps,
-    title: 'Empty'
+    title: 'Empty',
+    epilogue: false
   };
   
   _graphFunction() {

@@ -458,8 +458,9 @@ export default class EnvelopeModule extends Component {
     }
     
     // Create sustain toggle (don't show if we're showcasing or if not enabled)
-    const sustainToggle = (showCase || !sustainEnable) ? null : (
-      <div>
+    let sustainToggle = (showCase || !sustainEnable)
+    ? (<div style={{ height: 20 }} />)
+    : (<div style={{ height: 20 }}>
         <div style={{ display: 'inline-block', marginRight: 6 }}>
           <ToggleButton
           value={sustain}

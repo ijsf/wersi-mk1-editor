@@ -331,8 +331,8 @@ class Envelope extends Component {
             <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">
               Save
             </Button>
-            <Button onClick={this._handleToggleValues.bind(this)} className="pull-right" bsStyle="primary">
-              Values
+            <Button onClick={this._handleToggleValues.bind(this)} className="pull-right">
+              Show {this.state.showValues ? "sliders" : "values"}
             </Button>
             <Button onClick={this._handleAdd.bind(this)} className="pull-right">
               Add

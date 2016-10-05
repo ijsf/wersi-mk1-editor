@@ -460,18 +460,23 @@ export default class EnvelopeModule extends Component {
     // Create sustain toggle (don't show if we're showcasing or if not enabled)
     const sustainToggle = (showCase || !sustainEnable) ? null : (
       <div>
-        <ToggleButton
-        value={sustain}
-        thumbStyle={{ borderRadius: 2 }}
-        trackStyle={{ borderRadius: 2 }}
-        onToggle={(value) => {
-          this.setState((state) => {
-            return { '_sustain': !value };
-          }, () => {
-            this.saveModule();
-          });
-        }}
-        />
+        <div style={{ display: 'inline-block', marginRight: 6 }}>
+          <ToggleButton
+          value={sustain}
+          thumbStyle={{ borderRadius: 2 }}
+          trackStyle={{ borderRadius: 2 }}
+          onToggle={(value) => {
+            this.setState((state) => {
+              return { '_sustain': !value };
+            }, () => {
+              this.saveModule();
+            });
+          }}
+          />
+        </div>
+        <span style={{ fontSize: 10, opacity: 0.7 }}>
+          SUSTAIN
+        </span>
       </div>
     );
     
@@ -599,6 +604,9 @@ export default class EnvelopeModule extends Component {
       }
     }
     
+    // Determine Wersi style "phase index" (1, 3, 5, 7, 9, 11, 13)
+    const wersiPhase = this.props.index ? 1 + this.props.index * 2 : null;
+    
     // Create contents
     // We generally use bootstrap styles for colors to support flexible theming
     const contents = (
@@ -608,7 +616,10 @@ export default class EnvelopeModule extends Component {
           <div style={{ ...style, opacity, width, height, marginRight, marginBottom, cursor }}
           className={showCase ? "btn-default" : "module"}
           >
-            <div style={{ ...styleTitle }}>{this.props.title}</div>
+            <div style={{ ...styleTitle }}>
+              <span style={{ opacity: styleTitle.opacity * 0.6}}>{wersiPhase ? wersiPhase + '.' : null} </span>
+              {this.props.title}
+            </div>
             <div style={{ ...styleGraph }} ref={(c) => this._graph = c} />
             {iconContent}
             <div style={{ ...styleSliderContainer }}>

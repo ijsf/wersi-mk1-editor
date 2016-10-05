@@ -20,6 +20,7 @@
 }
 
 /* react-bootstrap tooltip colors */
+.tooltip { pointer-events: none; }
 .info.top .tooltip-arrow { border-top-color: #ccc !important; }
 .info.bottom .tooltip-arrow { border-bottom-color: #ccc !important; }
 .info .tooltip-inner { background-color: #ccc !important; color: #222; }

@@ -172,16 +172,24 @@ class Envelope extends Component {
     let type;
     
     // Detect type
-    const id1 = moduleData[0] & 0xF;
+    //
+    // After spending some time reverse engineering these,
+    // probably should've rather done this decoding using the Wersi instructions themselves,
+    // but alas, this code was written pretty early on, and it works.
+    //
+    const id1n = moduleData[0] & 0xF;
+    const id2n = moduleData[2] & 0xF;
     const id2 = moduleData[2] & 0xFF;
     const id23 = ((moduleData[2] & 0xFF) << 4) | (moduleData[3] & 0xF);
-    if      (id1 === 0x3 && id23 === 0x68D)    { type = 'linup'; }
-    else if (id1 === 0x3 && id23 === 0x889)    { type = 'lindown'; }
-    else if (id1 === 0x2 && id23 === 0xE0D)    { type = 'expup'; }
-    else if (id1 === 0x2 && id23 === 0xF09)    { type = 'expdown'; }
-    else if (id1 === 0x1 && id2 === 0x00)     { type = 'constabs'; }
-    else if (id1 === 0x5 && id2 === 0x00)     { type = 'constrel'; }
-    else if (id1 === 0x2 && id2 === 0x00)     { type = 'repeat'; }
+    if      (id1n === 0x3 && id23 === 0x68D)    { type = 'linup'; }
+    else if (id1n === 0x3 && id23 === 0x889)    { type = 'lindown'; }
+    else if (id1n === 0x2 && id23 === 0xE0D)    { type = 'expup'; }
+    else if (id1n === 0x2 && id23 === 0xF09)    { type = 'expdown'; }
+    else if (id1n === 0x1 && id2 === 0x00)      { type = 'constabs'; }
+    else if (id1n === 0x5 && id2 === 0x00)      { type = 'constrel'; }
+    else if (id1n === 0x2 && id2 === 0x00)      { type = 'repeat'; }
+    else if (id1n === 0x1 && id2n === 0x1)      { type = 'stepabs'; }
+    else if (id1n === 0x5 && id2n === 0x5)      { type = 'steprel'; }
     else                                       { type = 'empty'; }
 
     console.log(type + ': ' + (Array.from(moduleData).map(function (x) {return x.toString(16);})).join(";"));
@@ -278,6 +286,8 @@ class Envelope extends Component {
       else if (module.type === "expdown")   { el = (<EnvelopeModuleExpDown {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
       else if (module.type === "constabs")  { el = (<EnvelopeModuleConstAbs {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
       else if (module.type === "constrel")  { el = (<EnvelopeModuleConstRel {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === "stepabs")   { el = (<EnvelopeModuleStepAbs {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === "steprel")   { el = (<EnvelopeModuleStepRel {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
       else if (module.type === "repeat")    { el = (<EnvelopeModuleRepeat {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
       else                                  { el = (<EnvelopeModuleEmpty {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
       return el;

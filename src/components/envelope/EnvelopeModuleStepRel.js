@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { DragSource, DropTarget } from 'react-dnd';
+import WersiClient from 'modules/midi/WersiClient';
 
 import EnvelopeModule from 'components/envelope/EnvelopeModule';
 import Rickshaw from 'rickshaw';
@@ -8,6 +9,19 @@ const style = {
   cursor: 'move',
   display: 'inline-block'
 };
+
+/*
+ * StepAbs
+ *
+ * A (first amplitude)
+ * 0 to 4095
+ *
+ * B (second amplitude)
+ * 0 to 4095
+ *
+ * Steps from amplitude A to B in 10ms, each step lasting 5ms.
+ * Start amplitude is added to amplitudes A and B, module 4096, similar to constant-relative.
+ */
 
 @DropTarget("envelope", EnvelopeModule.moduleTarget, connect => ({
   connectDropTarget: connect.dropTarget()
@@ -27,21 +41,33 @@ export default class EnvelopeModuleStepRel extends EnvelopeModule {
 		b: 1024,
     amplBefore: 4000,
     timeBefore: 0,
-    interpolate: false
+    interpolate: false,
+    sustainEnabled: false,
+    epilogue: false
   };
+  
+  _decode(data) {
+    const A = ((data[1]) & 0xFF) << 4 | ((data[0] >> 4) & 0xF);
+    const B = (data[3] & 0xFF) << 4 | ((data[2] >> 4) & 0xF);
+    return {
+      a: A,
+      b: B,
+      c: null
+    };
+  }
+  
+  _handleSave(state) {
+    const A = state.a & 0xFFF;
+    const B = state.b & 0xFFF;
+    return new Uint8Array([].concat(
+      WersiClient.ENVELOPE.add(A),
+      WersiClient.ENVELOPE.add(B),
+      0x00
+    ));
+  }
   
   _graphFunction(state) {
     const { a, b, c, amplBefore, timeBefore } = state;
-		/*
-		* A (first amplitude)
-		* 0 to 4095
-		*
-		* B (second amplitude)
-		* 0 to 4095
-		*
-		* Steps from amplitude A to B in 10ms, each step lasting 5ms.
-		* Start amplitude is added to amplitudes A and B, module 4096, similar to constant-relative.
-		*/
 		return {
 			info: (((amplBefore + a) > 4095) || (amplBefore + b) > 4095) ? 'Value wrapped around at 4096' : null,
 			data: [

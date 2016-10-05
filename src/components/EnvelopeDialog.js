@@ -63,6 +63,7 @@ export default class EnvelopeDialog extends Component {
             <EnvelopeModuleLinUp {...moduleProps}/>
             <EnvelopeModuleExpUp {...moduleProps}/>
             <EnvelopeModuleLinDown {...moduleProps}/>
+            <EnvelopeModuleStepAbs {...moduleProps}/>
             <EnvelopeModuleStepRel {...moduleProps}/>
             <EnvelopeModuleConstAbs {...moduleProps}/>
             <EnvelopeModuleConstRel {...moduleProps}/>

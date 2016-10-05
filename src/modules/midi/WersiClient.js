@@ -21,6 +21,36 @@ export default class WersiClient extends Client {
     RELWAVE: 'w'      // RELWAVE wavetable block
   };
   
+  /**
+   * Wersi instruction explanation for envelopes
+   *
+   * Instructions (reverse engineered so far):
+   *
+   *     FVVVVVVV | 0x0: delay V or infinite if F (0 to 5*127 = 635ms)
+   * VVVVVVVVVVVV | 0x1: set V (5ms)
+   * VVVVVVVVVVVV | 0x5: add V (5ms)
+   */
+  static ENVELOPE = {
+    delay: function(v, f) {
+      return [
+        0x00,
+        v
+      ];
+    },
+    set: function(v) {
+      return [
+        ((v & 0xF) << 4) | 0x1,
+        (v >> 4) & 0xFF
+      ];
+    },
+    add: function(v) {
+      return [
+        ((v & 0xF) << 4) | 0x5,
+        (v >> 4) & 0xFF
+      ];
+    }
+  };
+  
   constructor() {
     super();
     

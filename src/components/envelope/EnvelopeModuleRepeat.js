@@ -9,6 +9,10 @@ const style = {
 };
 
 /*
+ * Repeat
+ *
+ * Repeats X last modules.
+ *
  * Does not appear to work correctly with all modules (e.g. linear up/down).
  */
 

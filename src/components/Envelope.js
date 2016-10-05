@@ -67,6 +67,7 @@ class Envelope extends Component {
     
     this.state = {
       showAdd: false,
+      showValues: false,
       modules: null,
       dropCount: 0,
       releasePhaseStart: 3
@@ -133,6 +134,14 @@ class Envelope extends Component {
   
   _handleAdd() {
     this.setState({ showAdd: true });
+  }
+
+  _handleToggleValues() {
+    this.setState((state) => {
+      return {
+        showValues: !state.showValues
+      };
+    }, () => { console.log(this.state.showValues); });
   }
   
   _handleSave() {
@@ -257,7 +266,8 @@ class Envelope extends Component {
         save: this._handleSaveModule.bind(this, index),   // use linear index here
         data: module.data,
         color: release ? 'thistle' : 'lightsteelblue',
-        relaease: release
+        release: release,
+        showValues: this.state.showValues
       };
   
       // Create element
@@ -320,6 +330,9 @@ class Envelope extends Component {
           <div className="clearfix" style={{ paddingBottom: 10 }}>
             <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">
               Save
+            </Button>
+            <Button onClick={this._handleToggleValues.bind(this)} className="pull-right" bsStyle="primary">
+              Values
             </Button>
             <Button onClick={this._handleAdd.bind(this)} className="pull-right">
               Add

@@ -37,7 +37,19 @@ const styleSlider = {
   marginBottom: 5,
   marginLeft: 5,
   marginRight: 5,
-  verticalAlign: 'middle'
+  verticalAlign: 'middle',
+  height: 15
+};
+
+const styleText = {
+	display: 'inline-block',
+  marginTop: 5,
+  marginBottom: 5,
+  marginLeft: 5,
+  marginRight: 5,
+  verticalAlign: 'middle',
+  fontSize: 11,
+  height: 15
 };
 
 const styleSliderButton = {
@@ -438,8 +450,8 @@ export default class EnvelopeModule extends Component {
           padding: 4,
           color: 'silver',
           display: 'block',
-          height: graphHeight,
-          marginTop: graphHeight * 0.25
+          height: graphHeight + 14,
+          paddingTop: graphHeight * 0.25
         }}
         />
       );
@@ -475,6 +487,24 @@ export default class EnvelopeModule extends Component {
 
       let tooltip = (<Tooltip className="info" id={keyName + "_tooltip"} key={keyName + "_tooltip"}>{title}</Tooltip>);
       
+      // Use temporary state values to allow for input text field changes
+      const textInputValue = this.state["_text_" + key];
+      let handleTextInputChange = (event) => {
+        const value = event.target.value;
+        this.setState((state) => {
+          state['_text_' + key] = value;
+          return state;
+        });
+      };
+      let handleTextInputDone = (event) => {
+        const value = event.target.value;
+        this.setState((state) => {
+          state['_' + key] = value;
+          state['_text_' + key] = undefined;
+          return state;
+        }, () => { this.saveModule() });
+      };
+      
       // Button handlers
       let handleButtonDecrease = () => {
         this.setState((state) => {
@@ -503,7 +533,17 @@ export default class EnvelopeModule extends Component {
       };
 
       let sliderContent = null;
-      if (valueType === "range") {
+      if (valueType === 'text' || this.props.showValues) {
+        sliderContent = (
+          <input type="text" style={{...styleText, width: width * 0.5 + 5 }}
+          onChange={handleTextInputChange}
+          onBlur={handleTextInputDone}
+          value={this.state['_text_' + key] || value}
+          key={keyName + "_text"}
+          />
+        );
+      }
+      else if (valueType === "range") {
         sliderContent = (
           <input type="range" style={{...styleSlider, width: width * 0.5 + 5 }}
           defaultValue={value}
@@ -526,13 +566,6 @@ export default class EnvelopeModule extends Component {
             this.setState({ disableDrag: false });
           }}
           onInput={handleInput}
-          />
-        );
-      } else if (valueType === 'text') {
-        sliderContent = (
-          <input type="text" style={{...styleSlider, width: width * 0.5 + 5 }}
-          value={value}
-          key={keyName + "_text"}
           />
         );
       }

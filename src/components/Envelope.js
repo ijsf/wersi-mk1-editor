@@ -103,14 +103,23 @@ class Envelope extends Component {
       // Convert to Uint8Array
       const data = new Uint8Array(dataNormal);
       
-      // Dissect data (6 bytes each, 7 modules)
+      // Dissect attack and release data
+      let releasePhaseStart = (data[1] - 2) / 6;
+      if (releasePhaseStart > 6) {
+        // Release disabled, just enable it for now and fix it on the last module
+        releasePhaseStart = 6;
+      }
+      console.log(data[0] + ' ' + data[1] + ' releasePhaseStart ' + releasePhaseStart);
+      
+      // Dissect module data (6 bytes each, 7 modules)
       let modules = [];
       for(let i = 0; i < 7; ++i) {
         modules.push(this._handleLoadModule(i, data));
       }
       this.setState({
         modules: modules,
-        data: data
+        data: data,
+        releasePhaseStart: releasePhaseStart
       });
     });
   }
@@ -127,6 +136,11 @@ class Envelope extends Component {
   }
   
   _handleSave() {
+    // Set attack and release offsets (attack always starts at 2, module 0).
+    const releaseOffset = 2 + (this.state.releasePhaseStart * 6);
+    this.state.data[0] = 2;
+    this.state.data[1] = releaseOffset;
+    
     // Send to SysEx
     this.props.client.setAmpl(this.props.instrumentId, this.state.data)
     .then(() => {
@@ -264,28 +278,25 @@ class Envelope extends Component {
       <h3>{title}</h3>
     );
     
-    // Release slider, if type is ampl
-    let releaseSlider;
-    if (type === "ampl" ) {
-      releaseSlider = (
-        <div style={{ width: width, position: 'relative', left: moduleWidth * 0.5, marginTop: 10 }}>
-          <OverlayTrigger
-          placement="bottom"
-          overlay={<Tooltip className="info" id="tooltipRelease">Start of release phase</Tooltip>}
-          >
-            <input type="range"
-            style={{ width: width - moduleWidth }}
-            defaultValue={ releasePhaseStart }
-            min={0}
-            max={6}
-            onChange={(event) => {
-              this.setState({ releasePhaseStart: Number(event.target.value) });
-            }}
-            />
-          </OverlayTrigger>
-        </div>
-        );
-    }
+    // Release slider
+    let releaseSlider = (
+      <div style={{ width: width, position: 'relative', left: moduleWidth * 0.5, marginTop: 10 }}>
+        <OverlayTrigger
+        placement="bottom"
+        overlay={<Tooltip className="info" id="tooltipRelease">Start of release phase</Tooltip>}
+        >
+          <input type="range"
+          style={{ width: width - moduleWidth }}
+          value={ releasePhaseStart }
+          min={0}
+          max={6}
+          onChange={(event) => {
+            this.setState({ releasePhaseStart: Number(event.target.value) });
+          }}
+          />
+        </OverlayTrigger>
+      </div>
+      );
     
     return connectDropTarget(
       <div>

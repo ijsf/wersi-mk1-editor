@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { Panel, Button, Checkbox, Modal, Col, Form, FormGroup, InputGroup, FormControl, ControlLabel } from 'react-bootstrap';
 
 import EnvelopeModule from 'components/envelope/EnvelopeModule';
+import EnvelopeModuleEmpty from 'components/envelope/EnvelopeModuleEmpty';
 import EnvelopeModuleConstAbs from 'components/envelope/EnvelopeModuleConstAbs';
 import EnvelopeModuleConstRel from 'components/envelope/EnvelopeModuleConstRel';
 import EnvelopeModuleDynExpDown from 'components/envelope/EnvelopeModuleDynExpDown';
@@ -58,6 +59,7 @@ export default class EnvelopeDialog extends Component {
         </Modal.Header>
         <Modal.Body>
           <div>
+            <EnvelopeModuleEmpty {...moduleProps}/>
             <EnvelopeModuleLinUp {...moduleProps}/>
             <EnvelopeModuleExpUp {...moduleProps}/>
             <EnvelopeModuleLinDown {...moduleProps}/>
@@ -66,6 +68,7 @@ export default class EnvelopeDialog extends Component {
             <EnvelopeModuleConstRel {...moduleProps}/>
             <EnvelopeModuleVibrato1 {...moduleProps}/>
             <EnvelopeModuleVibrato2 {...moduleProps}/>
+            <EnvelopeModuleRepeat {...moduleProps}/>
           </div>
         </Modal.Body>
         <Modal.Footer>

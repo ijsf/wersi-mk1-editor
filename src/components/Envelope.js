@@ -170,8 +170,9 @@ class Envelope extends Component {
     else if (id1 === 0x3 && id23 === 0x889)    { type = 'lindown'; }
     else if (id1 === 0x2 && id23 === 0xE0D)    { type = 'expup'; }
     else if (id1 === 0x2 && id23 === 0xF09)    { type = 'expdown'; }
-    else if (id1 === 0x1 && id2 === 0x000)     { type = 'constabs'; }
-    else if (id1 === 0x5 && id2 === 0x000)     { type = 'constrel'; }
+    else if (id1 === 0x1 && id2 === 0x00)     { type = 'constabs'; }
+    else if (id1 === 0x5 && id2 === 0x00)     { type = 'constrel'; }
+    else if (id1 === 0x2 && id2 === 0x00)     { type = 'repeat'; }
     else                                       { type = 'empty'; }
 
     console.log(type + ': ' + (Array.from(moduleData).map(function (x) {return x.toString(16);})).join(";"));
@@ -185,7 +186,12 @@ class Envelope extends Component {
   
   _handleSaveModule(index, moduleData, props) {
     // Construct buffer
-    let buffer = new Uint8Array(moduleData.length + 1);
+    let buffer = new Uint8Array(6);
+    
+    // Null all 6 values
+    buffer.set([0,0,0,0,0,0], 0);
+    
+    // Set module data
     buffer.set(moduleData, 0);
     
     // Add epilogue if necessary
@@ -262,6 +268,7 @@ class Envelope extends Component {
       else if (module.type === "expdown")   { el = (<EnvelopeModuleExpDown {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
       else if (module.type === "constabs")  { el = (<EnvelopeModuleConstAbs {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
       else if (module.type === "constrel")  { el = (<EnvelopeModuleConstRel {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === "repeat")    { el = (<EnvelopeModuleRepeat {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
       else                                  { el = (<EnvelopeModuleEmpty {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
       return el;
     });

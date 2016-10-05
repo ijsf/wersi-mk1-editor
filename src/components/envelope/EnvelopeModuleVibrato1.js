@@ -19,8 +19,8 @@ const style = {
 export default class EnvelopeModuleVibrato1 extends EnvelopeModule {
   static defaultProps = {
     ...EnvelopeModule.defaultProps,
-    title: 'Vibrato A',
-    description: 'Applies centered \'amplitude\' vibrato to envelope',
+    title: 'Vibrato I',
+    description: 'Applies \'amplitude\' vibrato over a downward slope',
 		aTitle: 'Duration',
 		bTitle: 'Vibrato amplitude',
 		cTitle: 'Vibrato frequency',
@@ -53,7 +53,7 @@ export default class EnvelopeModuleVibrato1 extends EnvelopeModule {
 			data.push(
 				{
 					x: (state.timeBefore + startTime + ((endTime - startTime) / n) * i)/1000,
-					y: state.amplBefore + v
+					y: (state.amplBefore + v) * (1 - (i / n))
 				}
 			);
 		};

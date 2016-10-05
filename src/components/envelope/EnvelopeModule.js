@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { DragSource, DropTarget } from 'react-dnd';
-import { Button, Overlay, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Glyphicon, Button, Overlay, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import ToggleButton from 'react-toggle-button';
 
 import { findDOMNode } from 'react-dom';
@@ -146,6 +146,9 @@ export default class EnvelopeModule extends Component {
     color: 'silver',
     sustainEnable: false,
     
+    // Default type is graph
+    type: 'graph',
+    
     // Default min and max and step increments for 12-bit values
     aMin: 0,
     aMax: 4095,
@@ -156,6 +159,11 @@ export default class EnvelopeModule extends Component {
     cMin: 0,
     cMax: 4095,
     cStep: 1,
+    
+    // Type of value
+    aType: 'range',
+    bType: 'range',
+    cType: 'range',
     
     // Epilogue enabled?
     epilogue: true
@@ -355,12 +363,11 @@ export default class EnvelopeModule extends Component {
   }
   
   componentDidMount() {
-    const { a, b, c } = this.props;
+    const { a, b, c, type } = this.props;
     
     // Render already occurred, this._graph must be valid, so construct the graph
     if (this._graph) {
-      // Check for some props to see if we should create a graph at all
-      if (this._isNumeric(a) || this._isNumeric(b) || this._isNumeric(c)) {
+      if (type === 'graph') {
         this._createGraph();
       }
     }
@@ -382,9 +389,11 @@ export default class EnvelopeModule extends Component {
     
       // Just update the graph
       const graphData = this._graphFunction(nextState);
-      graph.series[0].data = graphData.data;
-      graph._sustain = nextState.sustain;  // _sustain is quite the hack
-      graph.update();
+      if (nextProps.type === 'graph') {
+        graph.series[0].data = graphData.data;
+        graph._sustain = nextState.sustain;  // _sustain is quite the hack
+        graph.update();
+      }
       
       // Don't re-render
       return false;
@@ -393,7 +402,7 @@ export default class EnvelopeModule extends Component {
   }
   
   render() {
-    const { isDragging, connectDragSource, connectDropTarget, width, height, margin, color, sustainEnable } = this.props;
+    const { isDragging, connectDragSource, connectDropTarget, width, height, margin, color, sustainEnable, icon, type, graphHeight } = this.props;
     const { graph, sustain } = this.state;
     const marginRight = margin;
     
@@ -409,14 +418,31 @@ export default class EnvelopeModule extends Component {
     // Determine if we should show a move cursor for specific elements
     const cursor = showCase ? 'default' : 'move';
 
-    // Update and render graph
     const graphData = this._graphFunction(this.state);
-    if (graph) {
+
+    // Create visual content
+    let iconContent = null;
+    if (graph && type === 'graph') {
+      // Update and render graph
       graph.series[0].color = color;
       graph.series[0].data = graphData.data;
       graph._sustain = this.state.sustain;  // _sustain is quite the hack
       graph.update();
       graph.render();
+    }
+    else if (type === 'icon') {
+      iconContent = (
+        <Glyphicon glyph="repeat"
+        style={{
+          fontSize: graphHeight * 0.5,
+          padding: 4,
+          color: 'silver',
+          display: 'block',
+          height: graphHeight,
+          marginTop: graphHeight * 0.25
+        }}
+        />
+      );
     }
     
     // Create sustain toggle (don't show if we're showcasing or if not enabled)
@@ -443,6 +469,7 @@ export default class EnvelopeModule extends Component {
       const valueMin = this.props[key + "Min"];
       const valueMax = this.props[key + "Max"];
       const valueStep = this.props[key + "Step"];
+      const valueType = this.props[key + "Type"];
       const title = this.props[key + "Title"];
       const keyName = "EnvelopeModule" + this.props.id + "_" + key;
 
@@ -465,40 +492,56 @@ export default class EnvelopeModule extends Component {
           return state;
         }, () => { this.saveModule() });
       };
+      
+      let handleInput = (event) => {
+        console.log('oninput ' + event.target.value);
+        // Move value into this.state._KEY
+        let update = {};
+        update['_' + key] = Number(event.target.value);
+        update.changed = true;
+        this.setState(update);
+      };
 
+      let sliderContent = null;
+      if (valueType === "range") {
+        sliderContent = (
+          <input type="range" style={{...styleSlider, width: width * 0.5 + 5 }}
+          defaultValue={value}
+          min={valueMin}
+          max={valueMax}
+          step={valueStep}
+          key={keyName + "_slider"}
+          onMouseEnter={() => {
+            // Disable drag
+            this.setState({ disableDrag: true, changed: false });
+          }}
+          onMouseUp={() => {
+            // Save changes, but only if changed
+            if (this.state.changed) {
+              this.saveModule();
+            }
+          }}
+          onMouseLeave={() => {
+            // Enable drag
+            this.setState({ disableDrag: false });
+          }}
+          onInput={handleInput}
+          />
+        );
+      } else if (valueType === 'text') {
+        sliderContent = (
+          <input type="text" style={{...styleSlider, width: width * 0.5 + 5 }}
+          value={value}
+          key={keyName + "_text"}
+          />
+        );
+      }
       if (value != null) {
         return (
           <OverlayTrigger placement="bottom" overlay={tooltip} key={keyName + "_overlay"}>
             <div style={{ display: 'block' }}>
               <Button onClick={ handleButtonDecrease } style={{...styleSliderButton, width: 17}}>-</Button>
-              <input type="range" style={{...styleSlider, width: width * 0.5 + 5 }}
-              defaultValue={value}
-              min={valueMin}
-              max={valueMax}
-              step={valueStep}
-              key={keyName + "_slider"}
-              onMouseEnter={() => {
-                // Disable drag
-                this.setState({ disableDrag: true, changed: false });
-              }}
-              onMouseUp={() => {
-                // Save changes, but only if changed
-                if (this.state.changed) {
-                  this.saveModule();
-                }
-              }}
-              onMouseLeave={() => {
-                // Enable drag
-                this.setState({ disableDrag: false });
-              }}
-              onInput={(event) => {
-                // Move value into this.state._KEY
-                let update = {};
-                update['_' + key] = Number(event.target.value);
-                update.changed = true;
-                this.setState(update);
-              }}
-              />
+              {sliderContent}
               <Button onClick={ handleButtonIncrease } style={{...styleSliderButton, width: 17}}>+</Button>
             </div>
           </OverlayTrigger>
@@ -534,6 +577,7 @@ export default class EnvelopeModule extends Component {
           >
             <div style={{ ...styleTitle }}>{this.props.title}</div>
             <div style={{ ...styleGraph }} ref={(c) => this._graph = c} />
+            {iconContent}
             <div style={{ ...styleSliderContainer }}>
               {sustainToggle}
               {sliders}

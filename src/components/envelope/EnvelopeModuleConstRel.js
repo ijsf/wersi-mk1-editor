@@ -15,7 +15,7 @@ import Rickshaw from 'rickshaw';
 export default class EnvelopeModuleConstRel extends EnvelopeModule {
   static defaultProps = {
     ...EnvelopeModule.defaultProps,
-    title: 'Constant relative',
+    title: 'Const. relative',
     description: 'Adds a value to the last envelope (wraps around at maximum)',
 		aTitle: 'Duration',
 		bTitle: 'Amplitude',

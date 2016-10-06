@@ -22,7 +22,7 @@ const styleTitle = {
 	marginTop: 5,
 	marginBottom: 5,
 	verticalAlign: 'middle',
-	fontSize: 12,
+	fontSize: 11,
   fontWeight: 'normal',
   opacity: 0.8
 };
@@ -157,6 +157,7 @@ export default class EnvelopeModule extends Component {
     graphHeight: 70,
     color: 'silver',
     sustainEnable: false,
+    index: null,
     
     // Default type is graph
     type: 'graph',

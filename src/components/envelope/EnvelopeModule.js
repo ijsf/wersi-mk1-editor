@@ -604,7 +604,7 @@ export default class EnvelopeModule extends Component {
     }
     
     // Determine Wersi style "phase index" (1, 3, 5, 7, 9, 11, 13)
-    const wersiPhase = this.props.index ? 1 + this.props.index * 2 : null;
+    const wersiPhase = this.props.index === null ? null : 1 + this.props.index * 2;
     
     // Create contents
     // We generally use bootstrap styles for colors to support flexible theming
@@ -616,7 +616,7 @@ export default class EnvelopeModule extends Component {
           className={showCase ? "btn-default" : "module"}
           >
             <div style={{ ...styleTitle }}>
-              <span style={{ opacity: styleTitle.opacity * 0.6}}>{wersiPhase ? wersiPhase + '.' : null} </span>
+              <span style={{ opacity: styleTitle.opacity * 0.6}}>{wersiPhase === null ? null : wersiPhase + '.'} </span>
               {this.props.title}
             </div>
             <div style={{ ...styleGraph }} ref={(c) => this._graph = c} />

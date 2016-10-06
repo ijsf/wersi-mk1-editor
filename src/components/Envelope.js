@@ -59,7 +59,7 @@ class Envelope extends Component {
     moduleSlots: 7,
     moduleMargin: 5,
     moduleWidth: 122,
-    moduleHeight: 190
+    moduleHeight: 210
   };
   
   constructor(props) {

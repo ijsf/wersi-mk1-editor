@@ -67,11 +67,12 @@ export default class EnvelopeModuleStepAbs extends EnvelopeModule {
   
   _graphFunction(state) {
     const { a, b, c, amplBefore, timeBefore } = state;
+    const { TIMESTEP, TIMESTEP7, TIMESTEP12 } = WersiClient.ENVELOPE;
 		return {
 			data: [
 				{ x: timeBefore, y: a },
-				{ x: timeBefore+(5)/1000, y: b },
-				{ x: timeBefore+(10)/1000, y: b }
+				{ x: timeBefore+(TIMESTEP)/1000, y: b },
+				{ x: timeBefore+(TIMESTEP * 2)/1000, y: b }
 			]
 		};
   }

@@ -68,12 +68,13 @@ export default class EnvelopeModuleStepRel extends EnvelopeModule {
   
   _graphFunction(state) {
     const { a, b, c, amplBefore, timeBefore } = state;
+    const { TIMESTEP, TIMESTEP7, TIMESTEP12 } = WersiClient.ENVELOPE;
 		return {
 			info: (((amplBefore + a) > 4095) || (amplBefore + b) > 4095) ? 'Value wrapped around at 4096' : null,
 			data: [
 				{ x: timeBefore, y: (amplBefore + a) % 4096 },
-				{ x: timeBefore+(5)/1000, y: (amplBefore + b) % 4096 },
-				{ x: timeBefore+(10)/1000, y: (amplBefore + b) % 4096 }
+				{ x: timeBefore+(TIMESTEP)/1000, y: (amplBefore + b) % 4096 },
+				{ x: timeBefore+(TIMESTEP * 2)/1000, y: (amplBefore + b) % 4096 }
 			]
 		};
   }

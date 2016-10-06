@@ -26,11 +26,15 @@ export default class WersiClient extends Client {
    *
    * Instructions (reverse engineered so far):
    *
-   *     FVVVVVVV | 0x0: delay V or infinite if F (0 to 5*127 = 635ms)
-   * VVVVVVVVVVVV | 0x1: set V (5ms)
-   * VVVVVVVVVVVV | 0x5: add V (5ms)
+   *     FVVVVVVV | 0x0: delay V or infinite if F (0 to 5*127 = 635 ms)
+   * VVVVVVVVVVVV | 0x1: set V
+   * VVVVVVVVVVVV | 0x5: add V
    */
   static ENVELOPE = {
+    TIMESTEP: 5,            // single instruction time step (5 ms)
+    TIMESTEP7: 5 * 127,     // max time step for 7-bit values
+    TIMESTEP12: 5 * 20475,  // max time step for 12-bit values
+    
     delay: function(v, f) {
       return [
         0x00,

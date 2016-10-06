@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { DragSource, DropTarget } from 'react-dnd';
+import WersiClient from 'modules/midi/WersiClient';
 
 import EnvelopeModule from 'components/envelope/EnvelopeModule';
 import Rickshaw from 'rickshaw';
@@ -66,6 +67,7 @@ export default class EnvelopeModuleExpUp extends EnvelopeModule {
   
   _graphFunction(state) {
     const { a, b, c, amplBefore, timeBefore, isFirst } = state;
+    const { TIMESTEP, TIMESTEP7, TIMESTEP12 } = WersiClient.ENVELOPE;
 		/*
 		* A (time duration)
 		* 0: 60ms

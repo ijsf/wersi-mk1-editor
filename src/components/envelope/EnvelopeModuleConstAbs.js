@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { DragSource, DropTarget } from 'react-dnd';
+import WersiClient from 'modules/midi/WersiClient';
 
 import EnvelopeModule from 'components/envelope/EnvelopeModule';
 import Rickshaw from 'rickshaw';
@@ -59,10 +60,11 @@ export default class EnvelopeModuleConstAbs extends EnvelopeModule {
   
   _graphFunction(state) {
     const { a, b, c, amplBefore, timeBefore } = state;
+    const { TIMESTEP, TIMESTEP7, TIMESTEP12 } = WersiClient.ENVELOPE;
 		/*
 		* A (time duration)
-		* 0: 5ms
-		* 127 (4079): 600ms
+		* 0: 5 ms
+		* 127 (4079): 635 ms
 		* 128 (4080): infinite
 		*
 		* B (constant amplitude)
@@ -72,7 +74,7 @@ export default class EnvelopeModuleConstAbs extends EnvelopeModule {
 		return {
 			data: [
 				{ x: timeBefore, y: b },
-				{ x: timeBefore+((5 + (a / 127) * (600 - 5)))/1000, y: b }
+				{ x: timeBefore+((TIMESTEP + (a / 127) * (TIMESTEP7 - TIMESTEP)))/1000, y: b }
 			]
 		};
   }

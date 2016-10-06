@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { DragSource, DropTarget } from 'react-dnd';
+import WersiClient from 'modules/midi/WersiClient';
 
 import EnvelopeModule from 'components/envelope/EnvelopeModule';
 import Rickshaw from 'rickshaw';
@@ -60,6 +61,7 @@ export default class EnvelopeModuleLinDown extends EnvelopeModule {
   
   _graphFunction(state) {
     const { a, b, c, amplBefore, timeBefore } = state;
+    const { TIMESTEP, TIMESTEP7, TIMESTEP12 } = WersiClient.ENVELOPE;
 		/*
 		* A (time duration)
 		* 0: 5ms
@@ -75,7 +77,7 @@ export default class EnvelopeModuleLinDown extends EnvelopeModule {
 			warning: (amplBefore < b) ? 'Start amplitude is smaller than end amplitude. Use linear-up instead' : null,
 			data: [
 				{ x: timeBefore, y: amplBefore },
-				{ x: timeBefore+this._expScale(a, 4095, 5, 20500)/1000, y: (amplBefore < b) ? amplBefore : b }
+				{ x: timeBefore+this._expScale(a, 4095, TIMESTEP, TIMESTEP12)/1000, y: (amplBefore < b) ? amplBefore : b }
 			]
 		};
   }

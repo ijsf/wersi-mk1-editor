@@ -315,10 +315,8 @@ export default class EnvelopeModule extends Component {
     }
     
     // Move values into hacky global (time is typically a and amplitude is typically b)
-    window.envelopeModules[index] = {
-      a: a,
-      b: b
-    };
+    // If we don't have a graph, just set the previous amplitude to the middle to get a nice visual.
+    window.envelopeModules[index] = this.props.type === 'graph' ? { a: a, b: b, c: c } : { a: 0, b: 2048, c: 0 };
     
     // Attempt to get timeBefore (a) and amplBefore (b) from hacky global
     //

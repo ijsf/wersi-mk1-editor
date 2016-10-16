@@ -1,18 +1,33 @@
 import React, { Component } from 'react';
 import { Panel, Button, Checkbox, Modal, Col, Form, FormGroup, InputGroup, FormControl, ControlLabel } from 'react-bootstrap';
 
-export default class InstrumentControl extends Component {
+import reactMixin from 'react-mixin';
+import reactor from 'modules/flux';
+import { toImmutable } from 'nuclear-js';
+
+import { actions as instrumentActions, getters as instrumentGetters } from 'modules/instrument';
+
+class InstrumentControl extends Component {
   constructor() {
     super();
   }
   
-  componentWillMount() {
+  getDataBindings() {
+    return {
+      icb: instrumentGetters.byId(this.props.instrumentAddress, 'icb')
+    };
+  }
+  
+  _handleLoad(data) {
+
   }
   
   _handleSave() {
   }
   
   render() {
+    const { icb } = this.state;
+    
     let header = (
       <h3>Instrument control</h3>
     );
@@ -22,7 +37,7 @@ export default class InstrumentControl extends Component {
         <FormGroup>
           <Col sm={2} componentClass={ControlLabel}>Name</Col>
           <Col sm={3}>
-            <FormControl type="text" placeholder="Instrument name" maxLength={6} />
+            <FormControl value={icb.get('name')} type="text" placeholder="Instrument name" maxLength={6} />
           </Col>
         </FormGroup>
         <FormGroup>
@@ -93,3 +108,6 @@ export default class InstrumentControl extends Component {
     );
   }
 }
+
+reactMixin.onClass(InstrumentControl, reactor.ReactMixin);
+export default InstrumentControl;

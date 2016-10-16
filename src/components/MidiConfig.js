@@ -58,36 +58,12 @@ export default class MidiConfig extends Component {
     
     // Set ports
     this.props.client.setPorts(this.state.portIn, this.state.portOut).then(() => {
-      this._populateStore();
+      if (this.props.populateCallback) {
+        this.props.populateCallback();
+      }
     });
     
     this.setState({ showConfig: false });
-  }
-  
-  _populateStore() {
-    //
-    // Although the Wersi supports a very flexible ICB with block pointers,
-    // we simply use a very naive 1-to-1 RAM address mapping for all instruments.
-    //
-    // Instrument 65 uses VCF 65, AMPL 65, FREQ 65, FIXWAVE 65.
-    // Instrument 66 uses VCF 66, AMPL 66, FREQ 66, FIXWAVE 66.
-    // etc.
-    //
-    // This leaves everything in RAM and unique to each instrument,
-    // just the way we want it.
-    //
-    // NOTE that in order to enforce this, we override the ICB,
-    // rendering any existing instruments potentially useless!
-    //
-    
-    // Request all 10 FIXWAVEs from RAM
-    this.props.client.getFixWave(65).then((wave) => {
-      instrumentActions.update(65, 'wave', toImmutable(wave));
-    });
-    // Request all 10 AMPLs from RAM
-    this.props.client.getAmpl(65).then((data) => {
-      instrumentActions.update(65, 'ampl', toImmutable(data));
-    });
   }
   
   render() {

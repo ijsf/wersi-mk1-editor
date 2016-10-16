@@ -60,7 +60,7 @@ export default class WersiClient extends Client {
     
     // Determine block lengths (in bytes)
     this.blockLength = {};
-    this.blockLength[WersiClient.BLOCK_TYPE.ICF] = 16;
+    this.blockLength[WersiClient.BLOCK_TYPE.ICB] = 16;
     this.blockLength[WersiClient.BLOCK_TYPE.VCF] = 10;
     this.blockLength[WersiClient.BLOCK_TYPE.FREQ] = 32;
     this.blockLength[WersiClient.BLOCK_TYPE.AMPL] = 44;
@@ -181,17 +181,85 @@ export default class WersiClient extends Client {
         return this._fromSysEx(data);
       });
   }
+  
+  getICB(address) {
+    return this._requestBlock(WersiClient.BLOCK_TYPE.ICB, address)
+    .then((message) => {
+      console.log("SysEx ICB receive: " + this._utohex(message.data));
+
+      const blockLength = this._getBlockLength(WersiClient.BLOCK_TYPE.ICB);
+      if (message.length != blockLength) {
+        throw "Invalid message length for ICB (got " + message.length + ", expected " + blockLength + ")";
+      }
+      
+      // Decode data
+      return {
+        nextICB: message.data[0], // Next ICB pointer, for layered sounds (0 for none)
+      
+        vcfAddress: message.data[1],
+        amplAddress: message.data[2],
+        freqAddress: message.data[3],
+        waveAddress: message.data[4],
+      
+        dynamics: message.data[5] & 0x03,
+        voiceSelectLower: (message.data[5] & 0x04) ? true : false,
+        voiceSelectUpper: (message.data[5] & 0x08) ? true : false,
+      
+        a1: (message.data[5] & 0x10) ? true : false,
+        a2: (message.data[5] & 0x20) ? true : false,
+        a3: (message.data[5] & 0x40) ? true : false,
+        a4: (message.data[5] & 0x80) ? true : false,
+      
+        routeLeft:    (message.data[6] & 0x01) ? true : false,
+        routeRight:   (message.data[6] & 0x02) ? true : false,
+        routeBright:  (message.data[6] & 0x04) ? true : false,
+        routeVCF:     (message.data[6] & 0x08) ? true : false,
+        routeWV:      (message.data[6] & 0x10) ? true : false,
+
+        b1: (message.data[6] & 0x20) ? true : false,
+        b2: (message.data[6] & 0x40) ? true : false,
+        b3: (message.data[6] & 0x80) ? true : false,
+      
+        transpose: message.data[7],
+        detune: message.data[8],
+      
+        wvMode:   message.data[9] & 0x07,
+        wvLeft:   (message.data[9] & 0x08) ? true : false,
+        wvRight:  (message.data[9] & 0x10) ? true : false,
+      
+        c1: (message.data[9] & 0x20) ? true : false,
+      
+        wvFeedbackStereoFlat: (message.data[9] & 0x40) ? true : false,
+        wvFeedbackDeep: (message.data[9] & 0x80) ? true : false,
+      
+        name: new TextDecoder("utf-8").decode(message.data.slice(10, 17))
+      };
+    });
+  }
+  
+  setICB(address) {
+    return this.send(
+      this._toSysEx({
+        type: WersiClient.BLOCK_TYPE.ICB.charCodeAt(0),
+        address: address,
+        length: data.length,
+        data: data
+      }), true)
+      .then((status) => {
+        return status;
+      });
+  }
 
   getAmpl(address) {
     return this._requestBlock(WersiClient.BLOCK_TYPE.AMPL, address)
     .then((message) => {
+      console.log("SysEx AMPL receive: " + this._utohex(message.data));
+
       // Verify AMPL length
       const blockLength = this._getBlockLength(WersiClient.BLOCK_TYPE.AMPL);
       if (message.length != blockLength) {
         throw "Invalid message length for AMPL (got " + message.length + ", expected " + blockLength + ")";
       }
-      
-      console.log("SysEx receive: " + this._utohex(message.data));
       
       return message.data;
     });
@@ -213,6 +281,8 @@ export default class WersiClient extends Client {
   getFixWave(address) {
     return this._requestBlock(WersiClient.BLOCK_TYPE.FIXWAVE, address)
     .then((message) => {
+      console.log("SysEx FIXWAVE receive");
+
       // Verify FIXWAVE length
       const blockLength = this._getBlockLength(WersiClient.BLOCK_TYPE.FIXWAVE);
       if (message.length != blockLength) {

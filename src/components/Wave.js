@@ -27,7 +27,7 @@ class Wave extends Component {
   
   getDataBindings() {
     return {
-      wave: instrumentGetters.byId(this.props.instrumentId, 'wave')
+      wave: instrumentGetters.byId(this.props.waveAddress, 'wave')
     };
   }
   
@@ -38,7 +38,7 @@ class Wave extends Component {
     });
     
     // Update store
-    instrumentActions.update(this.props.instrumentId, 'wave', wave);
+    instrumentActions.update(this.props.waveAddress, 'wave', wave);
   }
   
   // Converts from s8

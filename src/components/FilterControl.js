@@ -62,6 +62,8 @@ class FilterControl extends Component {
       const t2Time = (this.state.t2Time !== null) ? this.state.t2Time : vcf.get('t2Time');
       const t1Offset = (this.state.t1Offset !== null) ? this.state.t1Offset : vcf.get('t1Offset');
       const t2Offset = (this.state.t2Offset !== null) ? this.state.t2Offset : vcf.get('t2Offset');
+      const frequency = (this.state.frequency !== null) ? this.state.frequency : vcf.get('frequency');
+      const q = (this.state.q !== null) ? this.state.q : vcf.get('q');
     
       // End frequency calculation
       let t1Intensity = this.state.t1Intensity, t2Intensity = this.state.t2Intensity;
@@ -138,7 +140,7 @@ class FilterControl extends Component {
             <Col sm={3}>
               <InputGroup>
                 <InputGroup.Addon>Freq</InputGroup.Addon>
-                <FormControl type="text" value={vcf.get('frequency')}
+                <FormControl type="text" value={frequency}
                 onChange={(event) => this.setState({ frequency: event.target.value })}
                 onBlur={(event) => handleTextDone(0, 255, "frequency", event)}
                 />
@@ -147,7 +149,7 @@ class FilterControl extends Component {
             <Col sm={3}>
               <InputGroup>
                 <InputGroup.Addon>Q</InputGroup.Addon>
-                <FormControl type="text" value={vcf.get('q')}
+                <FormControl type="text" value={q}
                 onChange={(event) => this.setState({ q: event.target.value })}
                 onBlur={(event) => handleTextDone(0, 255, "q", event)}
                 />

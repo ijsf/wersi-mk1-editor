@@ -73,14 +73,17 @@ class Instrument extends Component {
         client={this.props.client}
       />);
       filterControl = (<FilterControl
+        instrumentAddress={this.props.instrumentAddress}
         vcfAddress={icb ? icb.get('vcfAddress') : 0}
         client={this.props.client}
       />);
       waveControl = (<WaveControl
+        instrumentAddress={this.props.instrumentAddress}
         waveAddress={icb ? icb.get('waveAddress') : 0}
         client={this.props.client}
       />);
       envelopeControl = (<EnvelopeControl
+        instrumentAddress={this.props.instrumentAddress}
         amplAddress={icb ? icb.get('amplAddress') : 0}
         freqAddress={icb ? icb.get('freqAddress') : 0}
         client={this.props.client}

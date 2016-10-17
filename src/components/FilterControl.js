@@ -29,10 +29,21 @@ class FilterControl extends Component {
     };
   }
   
-  _handleLoad(data) {
-  }
-  
   _handleSave() {
+    // Send to SysEx
+    this.props.client.setVCF(this.props.vcfAddress, this.state.vcf)
+    .then(() => {
+      // Refresh data in case the Wersi has made any changes
+      return this.props.client.getVCF(this.props.vcfAddress);
+    })
+    .then((data) => {
+      // Update store
+      instrumentActions.update(this.props.vcfAddress, 'vcf', toImmutable(data));
+      
+      // Reload instrument
+      //return this.props.client.reloadInstrument(this.props.instrumentAddress);
+    })
+    ;
   }
   
   render() {
@@ -79,6 +90,20 @@ class FilterControl extends Component {
           this.state.vcf.set(type, evaluator ? evaluator(value) : value)
         );
       };
+      // Button toggle handler
+      let handleButtonToggle = (type) => {
+        instrumentActions.update(
+          this.props.vcfAddress, 'vcf',
+          this.state.vcf.set(type, !this.state.vcf.get(type))
+        );
+      };
+      // Regular input set handler
+      let handleInputSet = (type, value) => {
+        instrumentActions.update(
+          this.props.vcfAddress, 'vcf',
+          this.state.vcf.set(type, value)
+        );
+      };
 
       // Form components
       form = (
@@ -87,20 +112,20 @@ class FilterControl extends Component {
             <Col sm={2} componentClass={ControlLabel}>Type</Col>
             <Col sm={3}>
               <ButtonGroup>
-                <Button active={vcf.get('lowPass')}>Low pass</Button>
-                <Button active={!vcf.get('lowPass')}>Band pass</Button>
+                <Button active={vcf.get('lowPass')} onClick={() => handleInputSet('lowPass', true)}>Low pass</Button>
+                <Button active={!vcf.get('lowPass')} onClick={() => handleInputSet('lowPass', false)}>Band pass</Button>
               </ButtonGroup>
             </Col>
             <Col sm={3}>
               <ButtonGroup>
-                <Button active={vcf.get('fourPole')}>4-pole</Button>
-                <Button active={!vcf.get('fourPole')}>2-pole</Button>
+                <Button active={vcf.get('fourPole')} onClick={() => handleInputSet('fourPole', true)}>4-pole</Button>
+                <Button active={!vcf.get('fourPole')} onClick={() => handleInputSet('fourPole', false)}>2-pole</Button>
               </ButtonGroup>
             </Col>
             <Col sm={3}>
               <ButtonToolbar>
-                <Button active={vcf.get('retrigger')}>Retrigger</Button>
-                <Button active={!vcf.get('tracking')}>Tracking</Button>
+                <Button active={vcf.get('retrigger')} onClick={() => handleButtonToggle('retrigger')}>Retrigger</Button>
+                <Button active={!vcf.get('tracking')} onClick={() => handleButtonToggle('tracking')}>Tracking</Button>
               </ButtonToolbar>
             </Col>
           </FormGroup>
@@ -110,10 +135,8 @@ class FilterControl extends Component {
               <InputGroup>
                 <InputGroup.Addon>Freq</InputGroup.Addon>
                 <FormControl type="text" value={vcf.get('frequency')}
-                onChange={() => {
-                }}
-                onBlur={() => {
-                }}
+                onChange={(event) => this.setState({ frequency: event.target.value })}
+                onBlur={(event) => handleTextDone(0, 255, "frequency", event)}
                 />
               </InputGroup>
             </Col>
@@ -121,17 +144,17 @@ class FilterControl extends Component {
               <InputGroup>
                 <InputGroup.Addon>Q</InputGroup.Addon>
                 <FormControl type="text" value={vcf.get('q')}
-                onChange={() => {
-                }}
-                onBlur={() => {
-                }}
+                onChange={(event) => this.setState({ q: event.target.value })}
+                onBlur={(event) => handleTextDone(0, 255, "q", event)}
                 />
               </InputGroup>
             </Col>
             <Col sm={4}>
               <InputGroup>
                 <InputGroup.Addon>Envelope</InputGroup.Addon>
-                  <FormControl componentClass="select" value={vcf.get('envType')}>
+                  <FormControl componentClass="select"
+                    value={vcf.get('envType')}
+                    onChange={(event) => handleInputSet('envType', event.target.value)}>
                   {Array.from(["T1", "T1 → T2", "T1 → Rel → T2", "T1/T2 Rotor"], (v, k) => {
                     return (<option value={k} key={"mode-" + k}>{v}</option>);
                   })}
@@ -193,7 +216,15 @@ class FilterControl extends Component {
             <Col sm={3}>
               <InputGroup>
                 <InputGroup.Addon>Noise</InputGroup.Addon>
-                  <FormControl componentClass="select" value={vcf.get('noise') ? (vcf.get('noiseType') + 1) : 0}>
+                  <FormControl componentClass="select"
+                    value={vcf.get('noise') ? (vcf.get('noiseType') + 1) : 0}
+                    onChange={(event) => {
+                      const value = event.target.value;
+                      instrumentActions.update(
+                        this.props.vcfAddress, 'vcf',
+                        this.state.vcf.set('noise', value > 0).set('noiseType', (value > 0) ? (value - 1) : 0)
+                      );
+                    }}>
                   {Array.from(["None", "Wind", "Click", "Flute"], (v, k) => {
                     return (<option value={k} key={"noise-" + k}>{v}</option>);
                   })}
@@ -202,7 +233,7 @@ class FilterControl extends Component {
             </Col>
             <Col sm={3}>
               <ButtonToolbar>
-                <Button active={vcf.get('distortion')}>Distortion</Button>
+                <Button active={vcf.get('distortion')} onClick={() => handleButtonToggle('distortion')}>Distortion</Button>
               </ButtonToolbar>
             </Col>
           </FormGroup>
@@ -210,9 +241,9 @@ class FilterControl extends Component {
             <Col sm={2} componentClass={ControlLabel}>Output</Col>
             <Col sm={6}>
               <ButtonToolbar>
-                <Button active={vcf.get('routeLeft')}>Left</Button>
-                <Button active={vcf.get('routeRight')}>Right</Button>
-                <Button active={vcf.get('routeWV')}>WersiVoice</Button>
+                <Button active={vcf.get('routeLeft')} onClick={() => handleButtonToggle('routeLeft')}>Left</Button>
+                <Button active={vcf.get('routeRight')} onClick={() => handleButtonToggle('routeRight')}>Right</Button>
+                <Button active={vcf.get('routeWV')} onClick={() => handleButtonToggle('routeWV')}>WersiVoice</Button>
               </ButtonToolbar>
             </Col>
           </FormGroup>

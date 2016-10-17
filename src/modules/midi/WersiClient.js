@@ -221,6 +221,46 @@ export default class WersiClient extends Client {
     });
   }
   
+  setVCF(address, data) {
+    // Encode data
+    let dataEncoded = new Uint8Array(this._getBlockLength(WersiClient.BLOCK_TYPE.VCF));
+    let dv = new DataView(dataEncoded.buffer);
+    dv.setUint8(0,
+        (data.get('routeLeft')      ? 0x01 : 0)
+      | (data.get('routeRight')     ? 0x02 : 0) 
+      | (data.get('lowPass')        ? 0x04 : 0)
+      | (data.get('fourPoles')      ? 0x08 : 0)
+      | (data.get('routeWV')        ? 0x10 : 0)
+      | (data.get('noise')          ? 0x20 : 0)
+      | (data.get('distortion')     ? 0x40 : 0)
+    );
+    dv.setUint8(1, data.get('frequency'));
+    dv.setUint8(2, data.get('q'));
+    dv.setUint8(3, 
+        ((data.get('noiseType') & 0x03) << 2)
+      | (data.get('retrigger') ? 0x10 : 0)
+      | ((data.get('envType') & 0x03) << 5)
+      | (data.get('tracking') ? 0x80 : 0)
+    );
+    dv.setUint8(4, data.get('t1Time'));
+    dv.setUint8(5, data.get('t2Time'));
+    dv.setInt8(6, data.get('t1Intensity'));
+    dv.setUint8(7, data.get('t1Offset'));
+    dv.setInt8(8, data.get('t2Intensity'));
+    dv.setUint8(9, data.get('t2Offset'));
+    
+    return this.send(
+      this._toSysEx({
+        type: WersiClient.BLOCK_TYPE.VCF.charCodeAt(0),
+        address: address,
+        length: dataEncoded.length,
+        data: dataEncoded
+      }), true)
+      .then((status) => {
+        return status;
+      });
+  }
+  
   getICB(address) {
     return this._requestBlock(WersiClient.BLOCK_TYPE.ICB, address)
     .then((message) => {

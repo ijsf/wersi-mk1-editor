@@ -30,12 +30,12 @@ class WaveControl extends Component {
       // Refresh data in case the Wersi has made any changes
       return this.props.client.getFixWave(this.props.waveAddress);
     })
-    .then((wave) => {
+    .then((data) => {
       // Update store
-      instrumentActions.update(65, 'wave', toImmutable(wave));
+      instrumentActions.update(this.props.waveAddress, 'wave', toImmutable(data));
       
       // Reload instrument
-      return this.props.client.reloadInstrument(this.props.waveAddress);
+      //return this.props.client.reloadInstrument(this.props.instrumentAddress);
     })
     ;
   }

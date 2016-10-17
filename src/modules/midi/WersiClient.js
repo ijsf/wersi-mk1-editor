@@ -427,7 +427,7 @@ export default class WersiClient extends Client {
   
   reloadInstrument(address) {
     // Check if address actually refers to a RAM voice
-    address -= 65;
+    address -= 66;
     if (address < 0 || address >= 10) {
       throw "Address " + address + " not in RAM voice range.";
     }

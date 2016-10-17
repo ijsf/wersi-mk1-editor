@@ -35,7 +35,7 @@ class WaveControl extends Component {
       instrumentActions.update(this.props.waveAddress, 'wave', toImmutable(data));
       
       // Reload instrument
-      //return this.props.client.reloadInstrument(this.props.instrumentAddress);
+      return this.props.client.reloadInstrument(this.props.instrumentAddress);
     })
     ;
   }

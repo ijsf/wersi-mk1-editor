@@ -41,7 +41,7 @@ class FilterControl extends Component {
       instrumentActions.update(this.props.vcfAddress, 'vcf', toImmutable(data));
       
       // Reload instrument
-      //return this.props.client.reloadInstrument(this.props.instrumentAddress);
+      return this.props.client.reloadInstrument(this.props.instrumentAddress);
     })
     ;
   }
@@ -71,6 +71,10 @@ class FilterControl extends Component {
       if (t2Intensity === null) {
         t2Intensity = vcf.get('t2Offset') + vcf.get('t2Intensity');
       }
+      
+      // End frequency bounds
+      t1Intensity = Math.min(Math.max(t1Intensity, 0), 127);
+      t2Intensity = Math.min(Math.max(t2Intensity, 0), 127);
     
       // Text change handler
       let handleTextDone = (min, max, type, event, evaluator) => {
@@ -125,7 +129,7 @@ class FilterControl extends Component {
             <Col sm={3}>
               <ButtonToolbar>
                 <Button active={vcf.get('retrigger')} onClick={() => handleButtonToggle('retrigger')}>Retrigger</Button>
-                <Button active={!vcf.get('tracking')} onClick={() => handleButtonToggle('tracking')}>Tracking</Button>
+                <Button active={vcf.get('tracking')} onClick={() => handleButtonToggle('tracking')}>Tracking</Button>
               </ButtonToolbar>
             </Col>
           </FormGroup>

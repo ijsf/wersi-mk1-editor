@@ -182,6 +182,45 @@ export default class WersiClient extends Client {
       });
   }
   
+  getVCF(address) {
+    return this._requestBlock(WersiClient.BLOCK_TYPE.VCF, address)
+    .then((message) => {
+      console.log("SysEx VCF receive: " + this._utohex(message.data));
+
+      const blockLength = this._getBlockLength(WersiClient.BLOCK_TYPE.VCF);
+      if (message.length != blockLength) {
+        throw "Invalid message length for VCF (got " + message.length + ", expected " + blockLength + ")";
+      }
+      
+      // Decode data
+      let dv = new DataView(message.data.buffer);
+      return {
+        routeLeft:    (message.data[0] & 0x01) ? true : false,  // left output routing
+        routeRight:   (message.data[0] & 0x02) ? true : false,  // right output routing
+        lowPass:      (message.data[0] & 0x04) ? true : false,  // low-pass (1) or band-pass (0)
+        fourPoles:    (message.data[0] & 0x08) ? true : false,  // 4-pole 24 dB/oct (1) or 2-pole 12 dB/oct
+        routeWV:      (message.data[0] & 0x10) ? true : false,  // WersiVoice output routing
+        noise:        (message.data[0] & 0x20) ? true : false,
+        distortion:   (message.data[0] & 0x40) ? true : false,
+        
+        frequency:    (message.data[1]),
+        q:            (message.data[2]),
+        
+        noiseType:    (message.data[3] & 0x0C) >> 2,            // noise type: wind (0), click (1), flute (2)
+        retrigger:    (message.data[3] & 0x10) ? true : false,  // retrigger VCF on note
+        envType:      (message.data[3] & 0x60) >> 5,            // envelope: T1 (0), T1->T2 (1), T1->Release->T2 (2), Rotor (3)
+        tracking:     (message.data[3] & 0x80) ? true : false,  // note tracking, frequency tracks note frequency
+        
+        t1Time:       (message.data[4]),
+        t2Time:       (message.data[5]),
+        t1Intensity:  dv.getInt8(6),
+        t1Offset:     (message.data[7]),
+        t2Intensity:  dv.getInt8(8),
+        t2Offset:     (message.data[9])
+      };
+    });
+  }
+  
   getICB(address) {
     return this._requestBlock(WersiClient.BLOCK_TYPE.ICB, address)
     .then((message) => {
@@ -205,6 +244,7 @@ export default class WersiClient extends Client {
         voiceSelectLower: (message.data[5] & 0x04) ? true : false,
         voiceSelectUpper: (message.data[5] & 0x08) ? true : false,
       
+        // Unknown
         a1: (message.data[5] & 0x10) ? true : false,
         a2: (message.data[5] & 0x20) ? true : false,
         a3: (message.data[5] & 0x40) ? true : false,
@@ -216,6 +256,7 @@ export default class WersiClient extends Client {
         routeVCF:     (message.data[6] & 0x08) ? true : false,
         routeWV:      (message.data[6] & 0x10) ? true : false,
 
+        // Unknown
         b1: (message.data[6] & 0x20) ? true : false,
         b2: (message.data[6] & 0x40) ? true : false,
         b3: (message.data[6] & 0x80) ? true : false,
@@ -223,10 +264,11 @@ export default class WersiClient extends Client {
         transpose: message.data[7],
         detune: message.data[8],
       
-        wvMode:   message.data[9] & 0x07,
+        wvMode:   message.data[9] & 0x07, // RotorSlow, RotorFast, Flanger, Strings, Chorus
         wvLeft:   (message.data[9] & 0x08) ? true : false,
         wvRight:  (message.data[9] & 0x10) ? true : false,
       
+        // Unknown
         c1: (message.data[9] & 0x20) ? true : false,
       
         wvFeedbackStereoFlat: (message.data[9] & 0x40) ? true : false,
@@ -235,19 +277,6 @@ export default class WersiClient extends Client {
         name: new TextDecoder("utf-8").decode(message.data.slice(10, 17))
       };
     });
-  }
-  
-  setICB(address) {
-    return this.send(
-      this._toSysEx({
-        type: WersiClient.BLOCK_TYPE.ICB.charCodeAt(0),
-        address: address,
-        length: data.length,
-        data: data
-      }), true)
-      .then((status) => {
-        return status;
-      });
   }
 
   getAmpl(address) {

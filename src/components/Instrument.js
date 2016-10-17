@@ -3,6 +3,7 @@ import { Grid, Row, Col } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip'
 
 import InstrumentControl from 'components/InstrumentControl';
+import FilterControl from 'components/FilterControl';
 import EnvelopeControl from 'components/EnvelopeControl';
 import WaveControl from 'components/WaveControl';
 import WersiClient from 'modules/midi/WersiClient';
@@ -47,6 +48,9 @@ class Instrument extends Component {
       const { waveAddress, amplAddress, freqAddress, vcfAddress } = data;
       
       // Load data for this ICB
+      this.props.client.getVCF(vcfAddress).then((data) => {
+        instrumentActions.update(vcfAddress, 'vcf', toImmutable(data));
+      });
       this.props.client.getFixWave(waveAddress).then((data) => {
         instrumentActions.update(waveAddress, 'wave', toImmutable(data));
       });
@@ -62,10 +66,14 @@ class Instrument extends Component {
     
     // Only construct everything once we have the ICB
     // (these components have data bindings dependent on properties set here, which cannot be changed after mounting)
-    let instrumentControl = null, waveControl = null, envelopeControl = null;
+    let instrumentControl = null, filterControl = null, waveControl = null, envelopeControl = null;
     if (icb) {
       instrumentControl = (<InstrumentControl
         instrumentAddress={this.props.instrumentAddress}
+        client={this.props.client}
+      />);
+      filterControl = (<FilterControl
+        vcfAddress={icb ? icb.get('vcfAddress') : 0}
         client={this.props.client}
       />);
       waveControl = (<WaveControl
@@ -90,6 +98,16 @@ class Instrument extends Component {
             </Col>
             <Col lg={10}>
               {instrumentControl}
+            </Col>
+          </Row>
+          <Row>
+            <Col xsHidden={true} smHidden={true} mdHidden={true} lg={2}>
+              <p>
+                Description
+              </p>
+            </Col>
+            <Col lg={10}>
+              {filterControl}
             </Col>
           </Row>
           <Row>

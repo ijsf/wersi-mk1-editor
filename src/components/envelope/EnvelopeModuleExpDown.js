@@ -36,18 +36,22 @@ export default class EnvelopeModuleExpDown extends EnvelopeModule {
   };
   
   _decode(data) {
-    const A = (((~data[1]) & 0xFF) << 4) | ((~data[0] >> 4) & 0xF);
+    let A = (((~data[1]) & 0xFF) << 4) | ((~data[0] >> 4) & 0xF);
     const B = (((data[4]) & 0xFF) << 4) | ((data[3] >> 4) & 0xF);
+    let sustain = A >= 4080;
+    if (!sustain) {
+      A = Math.min(4080 - 1, A);
+    }
     return {
       a: A,
       b: B,
       c: null,
-      sustain: A >= 4080
+      sustain: sustain
     };
   }
   
   _handleSave(state) {
-    const a = state.sustain ? 4095 : state.a;
+    const a = state.sustain ? 4080 : Math.min(4080 - 1, state.a);
     const A = ~a & 0xFFF;
     const B = state.b & 0xFFF;
     return new Uint8Array([

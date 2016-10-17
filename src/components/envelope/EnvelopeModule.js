@@ -395,7 +395,7 @@ export default class EnvelopeModule extends Component {
       nextState['_text_'] = {};
     }
 
-    // If we are dragging, don't re-render
+    // If we are dragging, don't re-render, this will also skip componentWillUpdate and reloading of data
     if (this.state._a !== nextState._a
     || this.state._b !== nextState._b
     || this.state._c !== nextState._c
@@ -468,23 +468,17 @@ export default class EnvelopeModule extends Component {
     let sustainToggle = (showCase || !sustainEnable)
     ? (<div style={{ height: 20 }} />)
     : (<div style={{ height: 20 }}>
-        <div style={{ display: 'inline-block', marginRight: 6 }}>
-          <ToggleButton
-          value={sustain}
-          thumbStyle={{ borderRadius: 2 }}
-          trackStyle={{ borderRadius: 2 }}
-          onToggle={(value) => {
+          <Button
+          style={{ fontSize: 10, fontWeight: 'normal', width: '100%' }}
+          bsSize="xsmall"
+          active={sustain}
+          onClick={() => {
             this.setState((state) => {
-              return { '_sustain': !value };
+              return { '_sustain': !sustain };
             }, () => {
               this.saveModule();
             });
-          }}
-          />
-        </div>
-        <span style={{ fontSize: 10, opacity: 0.7 }}>
-          SUSTAIN
-        </span>
+          }}>SUSTAIN</Button>
       </div>
     );
     

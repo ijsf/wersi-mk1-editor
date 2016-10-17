@@ -47,7 +47,7 @@ export default class EnvelopeModuleLinUp extends EnvelopeModule {
   }
   
   _handleSave(state) {
-    const a = state.sustain ? 4095 : state.a;
+    const a = state.sustain ? 4095 : Math.min(state.a, 4094);
     const A = ~a & 0xFFF;
     const B = state.b & 0xFFF;
     return new Uint8Array([

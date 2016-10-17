@@ -47,7 +47,7 @@ export default class EnvelopeModuleConstRel extends EnvelopeModule {
   }
   
   _handleSave(state) {
-    const A = state.sustain ? 0x80 : state.a;
+    const A = state.sustain ? 0x80 : Math.min(state.a, 0x7F);
     const B = state.b & 0xFFF;
     return new Uint8Array([
       ((B & 0xF) << 4) | 0x5,

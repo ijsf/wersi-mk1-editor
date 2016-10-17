@@ -52,8 +52,6 @@ export default class EnvelopeModuleExpUp extends EnvelopeModule {
   
   _handleSave(state) {
     const a = state.sustain ? 4080 : Math.min(4080 - 1, state.a);
-    console.log(state.sustain);
-    console.log(a);
     const A = ~a & 0xFFF;
     const B = state.b & 0xFFF;
     return new Uint8Array([

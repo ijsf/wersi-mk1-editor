@@ -16,14 +16,16 @@ export default class EnvelopeControl extends Component {
           title="Amplitude envelope"
           type="ampl"
           icon="volume-up"
-          instrumentId={this.props.amplAddress}
+          instrumentAddress={this.props.instrumentAddress}
+          envAddress={this.props.amplAddress}
           client={this.props.client}
         />
         <Envelope
           title="Frequency envelope"
           type="freq"
           icon="music"
-          instrumentId={this.props.freqAddress}
+          instrumentAddress={this.props.instrumentAddress}
+          envAddress={this.props.freqAddress}
           client={this.props.client}
         />
       </div>

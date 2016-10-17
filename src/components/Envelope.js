@@ -100,7 +100,7 @@ class Envelope extends Component {
   
   componentWillMount() {
     // Register observer (databindings do not work because of retarded conflicts with decorators)
-    this._unwatch = reactor.observe(instrumentGetters.byId(this.props.instrumentId, this.props.type), (dataNormal) => {
+    this._unwatch = reactor.observe(instrumentGetters.byId(this.props.envAddress, this.props.type), (dataNormal) => {
       // Convert to Uint8Array
       const data = new Uint8Array(dataNormal);
       
@@ -151,17 +151,17 @@ class Envelope extends Component {
     this.state.data[1] = releaseOffset;
     
     // Send to SysEx
-    this.props.client.setAmpl(this.props.instrumentId, this.state.data)
+    this.props.client.setAmpl(this.props.envAddress, this.state.data)
     .then(() => {
       // Refresh data in case the Wersi has made any changes
-      return this.props.client.getAmpl(this.props.instrumentId);
+      return this.props.client.getAmpl(this.props.envAddress);
     })
     .then((data) => {
       // Update store
       instrumentActions.update(65, 'ampl', toImmutable(data));
       
       // Reload instrument
-      return this.props.client.reloadInstrument(this.props.instrumentId);
+      return this.props.client.reloadInstrument(this.props.instrumentAddress);
     })
     ;
   }
@@ -222,7 +222,7 @@ class Envelope extends Component {
     data.set(buffer, 2 + index * 6);
     
     // Update store (store as normal array)
-    instrumentActions.update(this.props.instrumentId, this.props.type, Array.prototype.slice.call(data));
+    instrumentActions.update(this.props.envAddress, this.props.type, Array.prototype.slice.call(data));
   }
   
   _moveModule(id, atIndex) {

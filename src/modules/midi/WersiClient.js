@@ -272,6 +272,7 @@ export default class WersiClient extends Client {
       }
       
       // Decode data
+      let dv = new DataView(message.data.buffer);
       return {
         nextICB: message.data[0], // Next ICB pointer, for layered sounds (0 for none)
       
@@ -301,8 +302,8 @@ export default class WersiClient extends Client {
         b2: (message.data[6] & 0x40) ? true : false,
         b3: (message.data[6] & 0x80) ? true : false,
       
-        transpose: message.data[7],
-        detune: message.data[8],
+        transpose: dv.getInt8(7),
+        detune: dv.getInt8(8),
       
         wvMode:   message.data[9] & 0x07, // RotorSlow, RotorFast, Flanger, Strings, Chorus
         wvLeft:   (message.data[9] & 0x08) ? true : false,
@@ -317,6 +318,52 @@ export default class WersiClient extends Client {
         name: new TextDecoder("utf-8").decode(message.data.slice(10, 17))
       };
     });
+  }
+  
+  setICB(address, data) {
+    // Encode data
+    let dataEncoded = new Uint8Array(this._getBlockLength(WersiClient.BLOCK_TYPE.ICB));
+    let dv = new DataView(dataEncoded.buffer);
+    dv.setUint8(0, data.get('nextICB'));
+    
+    dv.setUint8(1, data.get('vcfAddress'));
+    dv.setUint8(2, data.get('amplAddress'));
+    dv.setUint8(3, data.get('freqAddress'));
+    dv.setUint8(4, data.get('waveAddress'));
+    
+    dv.setUint8(5,
+        (data.get('dynamics') & 0x03)
+      | (data.get('voiceSelectLower') ? 0x04 : 0)
+      | (data.get('voiceSelectUpper') ? 0x08 : 0)
+    );
+    dv.setUint8(6,
+        (data.get('routeLeft') ? 0x01 : 0)
+      | (data.get('routeRight') ? 0x02 : 0)
+      | (data.get('routeBright') ? 0x04 : 0)
+      | (data.get('routeVCF') ? 0x08 : 0)
+      | (data.get('routeWV') ? 0x10 : 0)
+    );
+    dv.setInt8(7, data.get('transpose'));
+    dv.setInt8(8, data.get('detune'));
+    dv.setUint8(9,
+        (data.get('wvMode') & 0x07)
+      | (data.get('wvLeft') ? 0x08 : 0)
+      | (data.get('wvRight') ? 0x10 : 0)
+      | (data.get('wvFeedbackStereoFlat') ? 0x40 : 0)
+      | (data.get('wvFeedbackDeep') ? 0x80 : 0)
+    );
+    dataEncoded.set(new TextEncoder("utf-8").encode(data.get('name')), 10);
+    
+    return this.send(
+      this._toSysEx({
+        type: WersiClient.BLOCK_TYPE.ICB.charCodeAt(0),
+        address: address,
+        length: dataEncoded.length,
+        data: dataEncoded
+      }), true)
+      .then((status) => {
+        return status;
+      });
   }
 
   getAmpl(address) {

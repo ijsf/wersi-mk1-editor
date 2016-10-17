@@ -19,21 +19,58 @@ class InstrumentControl extends Component {
   }
   
   _handleSave() {
+    // Send to SysEx
+    this.props.client.setICB(this.props.instrumentAddress, this.state.icb)
+    .then(() => {
+      // Refresh data in case the Wersi has made any changes
+      return this.props.client.getICB(this.props.instrumentAddress);
+    })
+    .then((data) => {
+      // Update store
+      instrumentActions.update(this.props.instrumentAddress, 'icb', toImmutable(data));
+      
+      // Reload instrument
+      return this.props.client.reloadInstrument(this.props.instrumentAddress);
+    })
+    ;
   }
   
   render() {
     const { icb } = this.state;
+    console.log(JSON.stringify(toImmutable(this.state)));
     
+    const name = (this.state.name !== null) ? this.state.name : icb.get('name');
+
     let header = (
       <h3>Instrument control</h3>
     );
+
+    // Button toggle handler
+    let handleButtonToggle = (type) => {
+      instrumentActions.update(
+        this.props.instrumentAddress, 'icb',
+        this.state.icb.set(type, !this.state.icb.get(type))
+      );
+    };
+    // Regular input set handler
+    let handleInputSet = (type, value) => {
+      instrumentActions.update(
+        this.props.instrumentAddress, 'icb',
+        this.state.icb.set(type, value)
+      );
+    };
+    
+    const transposeRange = 2, detuneRange = 2;  // times 12 (octave)
     
     let form = (
       <Form horizontal>
         <FormGroup controlId="name">
           <Col sm={2} componentClass={ControlLabel}>Name</Col>
           <Col sm={3}>
-            <FormControl value={icb.get('name')} type="text" placeholder="Instrument name" maxLength={6} />
+            <FormControl value={name} type="text" maxlength="6" placeholder="Instrument name" maxLength={6}
+            onChange={(event) => this.setState({ name: event.target.value })}
+            onBlur={(event) => handleInputSet("name", event.target.value)}
+            />
           </Col>
         </FormGroup>
         <FormGroup controlId="dynamics">
@@ -46,9 +83,11 @@ class InstrumentControl extends Component {
           <Col sm={3}>
             <InputGroup>
               <InputGroup.Addon>Transpose</InputGroup.Addon>
-              <FormControl componentClass="select">
-                {Array.from({length: 25}, (v, k) => {
-                  const val = -12 + k;
+              <FormControl componentClass="select"
+                value={icb.get('transpose')}
+                onChange={(event) => handleInputSet('transpose', event.target.value)}>
+                {Array.from({length: 1 + 12 * transposeRange * 2}, (v, k) => {
+                  const val = -12 * transposeRange + k;
                   return (<option value={val} key={"transpose-" + k}>{val > 0 ? "+" : ""}{val}</option>);
                 })}
               </FormControl>
@@ -57,7 +96,9 @@ class InstrumentControl extends Component {
           <Col sm={3}>
             <InputGroup>
               <InputGroup.Addon>Detune</InputGroup.Addon>
-              <FormControl componentClass="select">
+              <FormControl componentClass="select"
+                value={icb.get('detune')}
+                onChange={(event) => handleInputSet('detune', event.target.value)}>
                 {Array.from({length: 25}, (v, k) => {
                   const val = -12 + k;
                   return (<option value={val} key={"detune-" + k}>{val > 0 ? "+" : ""}{val}</option>);
@@ -70,15 +111,15 @@ class InstrumentControl extends Component {
           <Col sm={2} componentClass={ControlLabel}>Output</Col>
           <Col sm={3}>
             <ButtonToolbar>
-              <Button active={icb.get('routeLeft')}>Left</Button>
-              <Button active={icb.get('routeRight')}>Right</Button>
-              <Button active={icb.get('routeBright')}>Bright</Button>
+              <Button active={icb.get('routeLeft')} onClick={() => handleButtonToggle('routeLeft')}>Left</Button>
+              <Button active={icb.get('routeRight')} onClick={() => handleButtonToggle('routeRight')}>Right</Button>
+              <Button active={icb.get('routeBright')} onClick={() => handleButtonToggle('routeBright')}>Bright</Button>
             </ButtonToolbar>
           </Col>
           <Col sm={3}>
             <ButtonToolbar>
-              <Button active={icb.get('routeVCF')}>VCF</Button>
-              <Button active={icb.get('routeWV')}>WersiVoice</Button>
+              <Button active={icb.get('routeVCF')} onClick={() => handleButtonToggle('routeVCF')}>VCF</Button>
+              <Button active={icb.get('routeWV')} onClick={() => handleButtonToggle('routeWV')}>WersiVoice</Button>
             </ButtonToolbar>
           </Col>
         </FormGroup>
@@ -96,8 +137,8 @@ class InstrumentControl extends Component {
           </Col>
           <Col sm={5}>
             <ButtonToolbar>
-              <Button active={icb.get('wvFeedbackStereoFlat')}>Flat</Button>
-              <Button active={icb.get('wvFeedbackDeep')}>Deep</Button>
+              <Button active={icb.get('wvFeedbackStereoFlat')} onClick={() => handleButtonToggle('wvFeedbackStereoFlat')}>Flat</Button>
+              <Button active={icb.get('wvFeedbackDeep')} onClick={() => handleButtonToggle('wvFeedbackDeep')}>Deep</Button>
             </ButtonToolbar>
           </Col>
         </Row>

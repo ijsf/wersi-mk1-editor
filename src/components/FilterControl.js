@@ -49,8 +49,6 @@ class FilterControl extends Component {
   render() {
     const { vcf } = this.state;
     
-    console.log(JSON.stringify(toImmutable(this.state)));
-    
     let header = (
       <h3>Filter control</h3>
     );

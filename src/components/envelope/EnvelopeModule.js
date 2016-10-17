@@ -198,6 +198,9 @@ export default class EnvelopeModule extends Component {
       isFirst: true,
       sustain: false,
       
+      // Temporary variables
+      _text_: {},
+      
       // Drag copies of values
       _a: null,
       _b: null,
@@ -386,6 +389,11 @@ export default class EnvelopeModule extends Component {
   
   shouldComponentUpdate(nextProps, nextState) {
     const { graph } = this.state;
+    
+    // If we are showing values, reset the associated state variables
+    if (!this.props.showValues && nextProps.showValues) {
+      nextState['_text_'] = {};
+    }
 
     // If we are dragging, don't re-render
     if (this.state._a !== nextState._a
@@ -393,9 +401,9 @@ export default class EnvelopeModule extends Component {
     || this.state._c !== nextState._c
     || this.state._sustain !== nextState._sustain) {
       // Copy drag values into real values
-      nextState.a = nextState._a ? nextState._a : this.state.a;
-      nextState.b = nextState._b ? nextState._b : this.state.b;
-      nextState.c = nextState._c ? nextState._c : this.state.c;
+      nextState.a = nextState._a !== null ? nextState._a : this.state.a;
+      nextState.b = nextState._b !== null ? nextState._b : this.state.b;
+      nextState.c = nextState._c !== null ? nextState._c : this.state.c;
       nextState.sustain = (nextState._sustain !== null) ? nextState._sustain : this.state.sustain;
     
       // Just update the graph
@@ -493,11 +501,11 @@ export default class EnvelopeModule extends Component {
       let tooltip = (<Tooltip className="info" id={keyName + "_tooltip"} key={keyName + "_tooltip"}>{title}</Tooltip>);
       
       // Use temporary state values to allow for input text field changes
-      const textInputValue = this.state["_text_" + key];
+      const textInputValue = this.state['_text_'][key];
       let handleTextInputChange = (event) => {
         const value = event.target.value;
         this.setState((state) => {
-          state['_text_' + key] = value;
+          state['_text_'][key] = value;
           return state;
         });
       };
@@ -505,7 +513,7 @@ export default class EnvelopeModule extends Component {
         const value = event.target.value;
         this.setState((state) => {
           state['_' + key] = value;
-          state['_text_' + key] = undefined;
+          state['_text_'][key] = undefined;
           return state;
         }, () => { this.saveModule() });
       };
@@ -543,7 +551,7 @@ export default class EnvelopeModule extends Component {
           <input type="text" style={{...styleText, width: width * 0.5 + 5 }}
           onChange={handleTextInputChange}
           onBlur={handleTextInputDone}
-          value={this.state['_text_' + key] || value}
+          value={this.state['_text_'][key] !== undefined ? this.state['_text_'][key] : value}
           key={keyName + "_text"}
           />
         );

@@ -3006,14 +3006,18 @@ fieldset[disabled] a.btn {
 }
 .btn-default:focus,
 .btn-default.focus {
+  /*
   color: #ffffff;
   background-color: #232628;
   border-color: #000000;
+  */
 }
 .btn-default:hover {
+  /*
   color: #ffffff;
   background-color: #232628;
   border-color: #1e2023;
+  */
 }
 .btn-default:active,
 .btn-default.active,
@@ -3031,9 +3035,11 @@ fieldset[disabled] a.btn {
 .btn-default:active.focus,
 .btn-default.active.focus,
 .open > .dropdown-toggle.btn-default.focus {
+  /*
   color: #ffffff;
   background-color: #121415;
   border-color: #000000;
+  */
 }
 .btn-default:active,
 .btn-default.active,
@@ -3049,8 +3055,10 @@ fieldset[disabled] .btn-default:focus,
 .btn-default.disabled.focus,
 .btn-default[disabled].focus,
 fieldset[disabled] .btn-default.focus {
+  /*
   background-color: #3a3f44;
   border-color: #3a3f44;
+  */
 }
 .btn-default .badge {
   color: #3a3f44;
@@ -6569,6 +6577,7 @@ button.close {
           filter: none;
 }
 .btn-default:hover {
+  /*
   background-image: -webkit-linear-gradient(#020202, #101112 40%, #141618);
   background-image: -o-linear-gradient(#020202, #101112 40%, #141618);
   background-image: -webkit-gradient(linear, left top, left bottom, from(#020202), color-stop(40%, #101112), to(#141618));
@@ -6577,6 +6586,7 @@ button.close {
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff020202', endColorstr='#ff141618', GradientType=0);
   -webkit-filter: none;
           filter: none;
+  */
 }
 .btn-primary {
   background-image: -webkit-linear-gradient(#8a9196, #7a8288 60%, #70787d);

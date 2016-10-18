@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import update from 'react/lib/update';
-import { Overlay, OverlayTrigger, Tooltip, Well, Panel, Button, Checkbox, Modal, Col, Form, FormGroup, InputGroup, FormControl, ControlLabel } from 'react-bootstrap';
+import { Overlay, OverlayTrigger, Tooltip, Well, Panel, Button, ButtonToolbar, Checkbox, Modal, Col, Form, FormGroup, InputGroup, FormControl, ControlLabel } from 'react-bootstrap';
 
 import reactMixin from 'react-mixin';
 import reactor from 'modules/flux';
@@ -337,17 +337,11 @@ class Envelope extends Component {
           addedModule={this._handleAddedModule.bind(this)}
           save={this._handleSaveModule.bind(this, 6)}   // always add in the 6th slot
           />
-          <div className="clearfix" style={{ paddingBottom: 10 }}>
-            <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">
-              Save
-            </Button>
-            <Button onClick={this._handleToggleValues.bind(this)} className="pull-right">
-              Show {this.state.showValues ? "sliders" : "values"}
-            </Button>
-            <Button onClick={this._handleAdd.bind(this)} className="pull-right">
-              Add
-            </Button>
-          </div>
+          <ButtonToolbar style={{ paddingBottom: 10 }}>
+            <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">Save</Button>
+            <Button onClick={this._handleToggleValues.bind(this)} className="pull-right">Show {this.state.showValues ? "sliders" : "values"}</Button>
+            <Button onClick={this._handleAdd.bind(this)} className="pull-right">Add</Button>
+          </ButtonToolbar>
           <Well bsSize="small">
           <div style={{
             width: width,

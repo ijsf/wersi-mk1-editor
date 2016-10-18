@@ -257,11 +257,9 @@ class FilterControl extends Component {
     
     return (
       <Panel header={header} collapsible defaultExpanded>
-        <div>
-          <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">
-            Save
-          </Button>
-        </div>
+        <ButtonToolbar>
+          <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">Save</Button>
+        </ButtonToolbar>
         {form}
       </Panel>
     );

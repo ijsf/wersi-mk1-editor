@@ -170,21 +170,21 @@ class FilterControl extends Component {
             <Col sm={2} componentClass={ControlLabel}>Envelope</Col>
             <Col sm={3}>
                 <InputGroup>
-                  <InputGroup.Addon style={{ width: "10ch" }}>T1 Time</InputGroup.Addon>
+                  <InputGroup.Addon style={{ width: "12ch" }}>T1 Time</InputGroup.Addon>
                   <FormControl type="text" value={t1Time}
                   onChange={(event) => this.setState({ t1Time: event.target.value })}
                   onBlur={(event) => handleTextDone(0, 255, "t1Time", event)}
                   />
                 </InputGroup>
               <InputGroup>
-                <InputGroup.Addon style={{ width: "10ch" }}>T1 Freq 1</InputGroup.Addon>
+                <InputGroup.Addon style={{ width: "12ch" }}>T1 Freq 1</InputGroup.Addon>
                 <FormControl type="text" value={t1Offset}
                 onChange={(event) => this.setState({ t1Offset: event.target.value })}
                 onBlur={(event) => handleTextDone(0, 127, "t1Offset", event)}
                 />
               </InputGroup>
               <InputGroup>
-                <InputGroup.Addon style={{ width: "10ch" }}>T1 Freq 2</InputGroup.Addon>
+                <InputGroup.Addon style={{ width: "12ch" }}>T1 Freq 2</InputGroup.Addon>
                 <FormControl type="text" value={t1Intensity}
                 onChange={(event) => this.setState({ t1Intensity: event.target.value })}
                 onBlur={(event) => handleTextDone(0, 127, "t1Intensity", event, (v) => v - t1Offset)}
@@ -193,21 +193,21 @@ class FilterControl extends Component {
             </Col>
             <Col sm={3}>
               <InputGroup>
-                <InputGroup.Addon style={{ width: "10ch" }}>T2 Time</InputGroup.Addon>
+                <InputGroup.Addon style={{ width: "12ch" }}>T2 Time</InputGroup.Addon>
                 <FormControl type="text" value={t2Time}
                 onChange={(event) => this.setState({ t2Time: event.target.value })}
                 onBlur={(event) => handleTextDone(0, 255, "t2Time", event)}
                 />
               </InputGroup>
               <InputGroup>
-                <InputGroup.Addon style={{ width: "10ch" }}>T2 Freq 1</InputGroup.Addon>
+                <InputGroup.Addon style={{ width: "12ch" }}>T2 Freq 1</InputGroup.Addon>
                 <FormControl type="text" value={t2Offset}
                 onChange={(event) => this.setState({ t2Offset: event.target.value })}
                 onBlur={(event) => handleTextDone(0, 127, "t2Offset", event)}
                 />
               </InputGroup>
               <InputGroup>
-                <InputGroup.Addon style={{ width: "10ch" }}>T2 Freq 2</InputGroup.Addon>
+                <InputGroup.Addon style={{ width: "12ch" }}>T2 Freq 2</InputGroup.Addon>
                 <FormControl type="text" value={t2Intensity}
                 onChange={(event) => this.setState({ t2Intensity: event.target.value })}
                 onBlur={(event) => handleTextDone(0, 127, "t2Intensity", event, (v) => v - t2Offset)}

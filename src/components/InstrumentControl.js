@@ -10,12 +10,40 @@ import { actions as instrumentActions, getters as instrumentGetters } from 'modu
 class InstrumentControl extends Component {
   constructor() {
     super();
+    
+    this.state = {
+      name: null
+    };
   }
   
   getDataBindings() {
     return {
       icb: instrumentGetters.byId(this.props.instrumentAddress, 'icb')
     };
+  }
+  
+  _handleImport() {
+  }
+  
+  _handleExport() {
+    // Export entire instrument store to JSON
+    const icb = this.state.icb;
+    const vcf = reactor.evaluate(instrumentGetters.byId(icb.get('vcfAddress'), 'vcf')).toJS();
+    const wave = reactor.evaluate(instrumentGetters.byId(icb.get('waveAddress'), 'wave')).toJS();
+    const ampl = reactor.evaluate(instrumentGetters.byId(icb.get('amplAddress'), 'ampl'));
+    const freq = reactor.evaluate(instrumentGetters.byId(icb.get('freqAddress'), 'freq'));
+    const json = {
+      icb: icb.toJS(),
+      vcf: vcf,
+      wave: wave,
+      ampl: ampl,
+      freq: freq
+    };
+
+    // Store to state
+    let file = new Blob([JSON.stringify(json)], { type: "application/json" });
+    let url = URL.createObjectURL(file);
+    this.setState({ export: url });
   }
   
   _handleSave() {
@@ -37,7 +65,6 @@ class InstrumentControl extends Component {
   
   render() {
     const { icb } = this.state;
-    console.log(JSON.stringify(toImmutable(this.state)));
     
     const name = (this.state.name !== null) ? this.state.name : icb.get('name');
 
@@ -62,12 +89,36 @@ class InstrumentControl extends Component {
     
     const transposeRange = 2, detuneRange = 2;  // times 12 (octave)
     
+    // Import/export modal
+    let modal = (
+      <Modal show={(this.state.export || this.state.import) ? true : false}>
+        <Modal.Header>
+          <Modal.Title>{(this.state.export ? "Export" : "Import") + " instrument"}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>
+            {this.state.export ? "Your instrument has been exported to a JSON file." : null}
+          </p>
+          <p>
+            {this.state.export ?
+              (<a download={icb.get('name') + '.json'} href={this.state.export} onClick={() => this.setState({ export: null })}>
+                Click here to download.
+              </a>) : null
+            }
+          </p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button bsStyle="primary" onClick={() => this.setState({ export: null, import: null })}>Cancel</Button>
+        </Modal.Footer>
+      </Modal>
+    );
+    
     let form = (
       <Form horizontal>
         <FormGroup controlId="name">
           <Col sm={2} componentClass={ControlLabel}>Name</Col>
           <Col sm={3}>
-            <FormControl value={name} type="text" maxlength="6" placeholder="Instrument name" maxLength={6}
+            <FormControl value={name} type="text" maxLength="6" placeholder="Instrument name" maxLength={6}
             onChange={(event) => this.setState({ name: event.target.value })}
             onBlur={(event) => handleInputSet("name", event.target.value)}
             />
@@ -75,7 +126,23 @@ class InstrumentControl extends Component {
         </FormGroup>
         <FormGroup controlId="dynamics">
           <Col sm={2} componentClass={ControlLabel}>Dynamics</Col>
-          <Col sm={10}>
+          <Col sm={3}>
+            <InputGroup>
+              <InputGroup.Addon>Level</InputGroup.Addon>
+              <FormControl componentClass="select"
+                value={icb.get('dynamics')}
+                onChange={(event) => handleInputSet('dynamics', event.target.value)}>
+                {Array.from(['None', 'Medium', 'Strong', 'Full'], (v, k) => {
+                  return (<option value={k} key={"dynamics-" + k}>{v}</option>);
+                })}
+              </FormControl>
+            </InputGroup>
+          </Col>
+          <Col sm={3}>
+            <ButtonToolbar>
+              <Button active={icb.get('voiceSelectLower')} onClick={() => handleButtonToggle('voiceSelectLower')}>Lower</Button>
+              <Button active={icb.get('voiceSelectUpper')} onClick={() => handleButtonToggle('voiceSelectUpper')}>Upper</Button>
+            </ButtonToolbar>
           </Col>
         </FormGroup>
         <FormGroup controlId="tuning">
@@ -99,8 +166,8 @@ class InstrumentControl extends Component {
               <FormControl componentClass="select"
                 value={icb.get('detune')}
                 onChange={(event) => handleInputSet('detune', event.target.value)}>
-                {Array.from({length: 25}, (v, k) => {
-                  const val = -12 + k;
+                {Array.from({length: 1 + 12 * detuneRange * 2}, (v, k) => {
+                  const val = -12 * detuneRange + k;
                   return (<option value={val} key={"detune-" + k}>{val > 0 ? "+" : ""}{val}</option>);
                 })}
               </FormControl>
@@ -146,14 +213,17 @@ class InstrumentControl extends Component {
     );
     
     return (
-      <Panel header={header} collapsible defaultExpanded>
-        <div>
-          <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">
-            Save
-          </Button>
-        </div>
-        {form}
-      </Panel>
+      <div>
+        {modal}
+        <Panel header={header} collapsible defaultExpanded>
+          <ButtonToolbar>
+            <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">Save</Button>
+            <Button onClick={this._handleExport.bind(this)} className="pull-right" bsStyle="default">Export</Button>
+            <Button onClick={this._handleImport.bind(this)} className="pull-right" bsStyle="default">Import</Button>
+          </ButtonToolbar>
+          {form}
+        </Panel>
+      </div>
     );
   }
 }

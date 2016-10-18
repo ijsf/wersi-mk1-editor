@@ -33,8 +33,8 @@ class InstrumentControl extends Component {
     const icb = this.state.icb;
     const vcf = reactor.evaluate(instrumentGetters.byId(icb.get('vcfAddress'), 'vcf')).toJS();
     const wave = reactor.evaluate(instrumentGetters.byId(icb.get('waveAddress'), 'wave')).toJS();
-    const ampl = reactor.evaluate(instrumentGetters.byId(icb.get('amplAddress'), 'ampl'));
-    const freq = reactor.evaluate(instrumentGetters.byId(icb.get('freqAddress'), 'freq'));
+    const ampl = Array.from(reactor.evaluate(instrumentGetters.byId(icb.get('amplAddress'), 'ampl')));
+    const freq = null; //Array.from(reactor.evaluate(instrumentGetters.byId(icb.get('freqAddress'), 'freq')));
     const json = {
       icb: icb.toJS(),
       vcf: vcf,
@@ -151,7 +151,7 @@ class InstrumentControl extends Component {
                         //.then((data) => instrumentActions.update(waveAddress, 'wave', toImmutable(data)))
                         .then(() => instrumentActions.update(waveAddress, 'wave', toImmutable(json.wave)))
 
-                        .then((data) => this.props.client.setAmpl(amplAddress, toImmutable(json.ampl)))
+                        .then((data) => this.props.client.setAmpl(amplAddress, json.ampl))
                         //.then(() => this.props.client.getAmpl(amplAddress))
                         //.then((data) => instrumentActions.update(amplAddress, 'ampl', toImmutable(data)))
                         .then(() => instrumentActions.update(amplAddress, 'ampl', toImmutable(json.ampl)))

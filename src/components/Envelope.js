@@ -158,7 +158,7 @@ class Envelope extends Component {
     })
     .then((data) => {
       // Update store
-      instrumentActions.update(65, 'ampl', toImmutable(data));
+      instrumentActions.update(this.props.envAddress, 'ampl', toImmutable(data));
       
       // Reload instrument
       return this.props.client.reloadInstrument(this.props.instrumentAddress);

@@ -57,6 +57,7 @@
     "react-dnd": "^2.1.4",
     "react-dnd-html5-backend": "^2.1.2",
     "react-dom": "^0.14.6",
+    "react-dropzone": "^3.6.0",
     "react-fontawesome": "^1.2.0",
     "react-toggle-button": "^2.1.0",
     "react-tooltip": "^3.2.1",

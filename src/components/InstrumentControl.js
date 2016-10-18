@@ -249,23 +249,7 @@ class InstrumentControl extends Component {
             </InputGroup>
           </Col>
         </FormGroup>
-        <FormGroup controlId="outputRouting">
-          <Col sm={2} componentClass={ControlLabel}>Output</Col>
-          <Col sm={3}>
-            <ButtonToolbar>
-              <Button active={icb.get('routeLeft')} onClick={() => handleButtonToggle('routeLeft')}>Left</Button>
-              <Button active={icb.get('routeRight')} onClick={() => handleButtonToggle('routeRight')}>Right</Button>
-              <Button active={icb.get('routeBright')} onClick={() => handleButtonToggle('routeBright')}>Bright</Button>
-            </ButtonToolbar>
-          </Col>
-          <Col sm={3}>
-            <ButtonToolbar>
-              <Button active={icb.get('routeVCF')} onClick={() => handleButtonToggle('routeVCF')}>VCF</Button>
-              <Button active={icb.get('routeWV')} onClick={() => handleButtonToggle('routeWV')}>WersiVoice</Button>
-            </ButtonToolbar>
-          </Col>
-        </FormGroup>
-        <Row>
+        <FormGroup>
           <Col sm={2} componentClass={ControlLabel}>WersiVoice</Col>
           <Col sm={3}>
             <InputGroup>
@@ -283,7 +267,22 @@ class InstrumentControl extends Component {
               <Button active={icb.get('wvFeedbackDeep')} onClick={() => handleButtonToggle('wvFeedbackDeep')}>Deep</Button>
             </ButtonToolbar>
           </Col>
-        </Row>
+        </FormGroup>
+        <FormGroup>
+          <Col sm={2} componentClass={ControlLabel}>Output</Col>
+          <Col sm={8}>
+            <ButtonToolbar>
+              <span className="btn btn-link">Voice</span>
+              <span className="btn btn-link">⤑</span>
+              <Button active={icb.get('routeBright')} onClick={() => handleButtonToggle('routeBright')}>Bright</Button>
+              <span className="btn btn-link">⤑</span>
+              <Button active={icb.get('routeLeft')} onClick={() => handleButtonToggle('routeLeft')}>Left</Button>
+              <Button active={icb.get('routeRight')} onClick={() => handleButtonToggle('routeRight')}>Right</Button>
+              <Button active={icb.get('routeWV')} onClick={() => handleButtonToggle('routeWV')}>WersiVoice</Button>
+              <Button active={icb.get('routeVCF')} onClick={() => handleButtonToggle('routeVCF')}>VCF</Button>
+            </ButtonToolbar>
+          </Col>
+        </FormGroup>
       </Form>
     );
     

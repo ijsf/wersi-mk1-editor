@@ -243,8 +243,10 @@ class FilterControl extends Component {
           </FormGroup>
           <FormGroup>
             <Col sm={2} componentClass={ControlLabel}>Output</Col>
-            <Col sm={6}>
+            <Col sm={8}>
               <ButtonToolbar>
+                <span className="btn btn-link">VCF</span>
+                <span className="btn btn-link">⤑</span>
                 <Button active={vcf.get('routeLeft')} onClick={() => handleButtonToggle('routeLeft')}>Left</Button>
                 <Button active={vcf.get('routeRight')} onClick={() => handleButtonToggle('routeRight')}>Right</Button>
                 <Button active={vcf.get('routeWV')} onClick={() => handleButtonToggle('routeWV')}>WersiVoice</Button>

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Panel, Button, ButtonGroup, ButtonToolbar, Glyphicon, Checkbox, Modal, Col, Row, Form, FormGroup, InputGroup, FormControl, ControlLabel } from 'react-bootstrap';
+import { Panel, Button, ButtonGroup, ButtonToolbar, Glyphicon, Checkbox, Modal, Col, Row, Form, FormGroup, InputGroup, FormControl, ControlLabel, Tooltip, OverlayTrigger } from 'react-bootstrap';
 import Dropzone from 'react-dropzone';
 
 import reactor from 'modules/flux';
@@ -338,11 +338,19 @@ export default class InstrumentControl extends Component {
           <ButtonToolbar>
             <ButtonToolbar className="pull-right">
               <ButtonGroup>
-                <Button onClick={() => this.props.handlePrevInstrument()} bsStyle="info" disabled={firstInstrument}><Glyphicon glyph="chevron-left"/></Button>
-                <Button onClick={() => this.props.handleNextInstrument(icb.get('nextInstrumentAddress'))} bsStyle="info" disabled={!nextInstrument}><Glyphicon glyph="chevron-right"/></Button>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info">Previous voice layer</Tooltip>)}>
+                  <Button onClick={() => this.props.handlePrevInstrument()} bsStyle="info" disabled={firstInstrument}><Glyphicon glyph="chevron-left"/></Button>
+                </OverlayTrigger>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info">Next voice layer</Tooltip>)}>
+                  <Button onClick={() => this.props.handleNextInstrument(icb.get('nextInstrumentAddress'))} bsStyle="info" disabled={!nextInstrument}><Glyphicon glyph="chevron-right"/></Button>
+                </OverlayTrigger>
                 <Button bsStyle="link" style={{ width: '11ch' }}>Voice {currentInstrumentLayer} ({this.props.instrumentAddress})</Button>
-                <Button onClick={() => this.props.handleNewInstrument(nextNewInstrumentAddress)} bsStyle="info" disabled={nextInstrument}><Glyphicon glyph="file"/></Button>
-                <Button onClick={() => handleInputSet('nextInstrumentAddress', 0)} bsStyle="info" disabled={!nextInstrument}><Glyphicon glyph="remove"/></Button>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info">Add next layer</Tooltip>)}>
+                  <Button onClick={() => this.props.handleNewInstrument(nextNewInstrumentAddress)} bsStyle="info" disabled={nextInstrument}><Glyphicon glyph="file"/></Button>
+                </OverlayTrigger>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info">Remove next layers</Tooltip>)}>
+                  <Button onClick={() => handleInputSet('nextInstrumentAddress', 0)} bsStyle="info" disabled={!nextInstrument}><Glyphicon glyph="remove"/></Button>
+                </OverlayTrigger>
               </ButtonGroup>
               <ButtonGroup>
                 <Button onClick={this._handleImport.bind(this)} bsStyle="primary">Import</Button>

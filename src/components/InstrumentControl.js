@@ -328,8 +328,6 @@ export default class InstrumentControl extends Component {
     const currentInstrumentLayer = WersiClient.ADDRESS.layer(this.props.instrumentAddress) + 1; // 1-based for front-end
     const nextInstrument = icb.get('nextInstrumentAddress') !== 0;
     const nextNewInstrumentAddress = WersiClient.ADDRESS.RAM(WersiClient.ADDRESS.id(firstInstrument), currentInstrumentLayer + 1);
-    console.log(icb.get('nextInstrumentAddress'));
-    console.log(this.props.instrumentAddress);
     
     return (
       <div>
@@ -338,17 +336,17 @@ export default class InstrumentControl extends Component {
           <ButtonToolbar>
             <ButtonToolbar className="pull-right">
               <ButtonGroup>
-                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info">Previous voice layer</Tooltip>)}>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="prevtooltip">Previous voice layer</Tooltip>)}>
                   <Button onClick={() => this.props.handlePrevInstrument()} bsStyle="info" disabled={firstInstrument}><Glyphicon glyph="chevron-left"/></Button>
                 </OverlayTrigger>
-                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info">Next voice layer</Tooltip>)}>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="nexttooltip">Next voice layer</Tooltip>)}>
                   <Button onClick={() => this.props.handleNextInstrument(icb.get('nextInstrumentAddress'))} bsStyle="info" disabled={!nextInstrument}><Glyphicon glyph="chevron-right"/></Button>
                 </OverlayTrigger>
                 <Button bsStyle="link" style={{ width: '11ch' }}>Voice {currentInstrumentLayer} ({this.props.instrumentAddress})</Button>
-                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info">Add next layer</Tooltip>)}>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="nextlayertooltip">Add next layer</Tooltip>)}>
                   <Button onClick={() => this.props.handleNewInstrument(nextNewInstrumentAddress)} bsStyle="info" disabled={nextInstrument}><Glyphicon glyph="file"/></Button>
                 </OverlayTrigger>
-                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info">Remove next layers</Tooltip>)}>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="removenextlayerstooltip">Remove next layers</Tooltip>)}>
                   <Button onClick={() => handleInputSet('nextInstrumentAddress', 0)} bsStyle="info" disabled={!nextInstrument}><Glyphicon glyph="remove"/></Button>
                 </OverlayTrigger>
               </ButtonGroup>

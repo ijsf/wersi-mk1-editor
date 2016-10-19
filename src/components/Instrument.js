@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Grid, Row, Col } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip'
+import { Notification } from 'react-notification';
 
 import InstrumentControl from 'components/InstrumentControl';
 import FilterControl from 'components/FilterControl';
@@ -19,7 +20,8 @@ class Instrument extends Component {
     super();
     
     this.state = {
-      instrumentAddresses: toImmutable([])
+      instrumentAddresses: toImmutable([]),
+      error: null
     };
   }
   
@@ -81,6 +83,12 @@ class Instrument extends Component {
   }
   
   _handleNewInstrument(newInstrumentAddress) {
+    if (newInstrumentAddress !== null) {
+    }
+    else {
+      // Invalid address
+      this.setState({ error: "No more RAM space for new voice layers!" });
+    }
   }
   
   componentWillMount() {
@@ -93,7 +101,7 @@ class Instrument extends Component {
   }
   
   render() {
-    const { icb, instrumentAddresses } = this.state;
+    const { icb, instrumentAddresses, error } = this.state;
 
     // Get instrument address
     const instrumentAddress = instrumentAddresses.last();
@@ -179,6 +187,12 @@ class Instrument extends Component {
             </Col>
           </Row>
         </Grid>
+        <Notification
+          isActive={error !== null}
+          message={(error !== null) ? error : ""}
+          onDismiss={() => this.setState({ error: null })}
+          barStyle={{ fontSize: 16, zIndex: 9999, backgroundColor: '#e9322d', borderColor: '#e82924', opacity: 0.9 }}
+        />
       </div>
     );
   }

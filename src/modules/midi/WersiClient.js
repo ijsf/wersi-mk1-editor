@@ -46,13 +46,13 @@ export default class WersiClient extends Client {
   static ADDRESS = {
     // Unique ICB address (range [0:19], includes BANK 2) and voice layer id (range [0:2])
     CV(id, voiceLayer) {
-      const address = (!voiceLayer) ? (66 + id) : (87 + id + voiceLayer * 20);
+      const address = (!voiceLayer) ? (66 + id) : (87 + id + (voiceLayer - 1) * 20);
       return (id >= 0 && id < 20 && address >= 64 && address < 128) ? address : null;
     },
     
     // Unique RAM address for VCF/AMPL/FREQ/FIXWAVE (range [0:19], includes BANK 2) and voice layer id (range [0:2])
     RAM(id, voiceLayer) {
-      const address = (voiceLayer == 0) ? (65 + id) : (86 + id + voiceLayer * 20);
+      const address = (voiceLayer == 0) ? (65 + id) : (86 + id + (voiceLayer - 1) * 20);
       return (id >= 0 && id < 20 && address >= 64 && address < 128) ? address : null;
     },
     
@@ -61,7 +61,7 @@ export default class WersiClient extends Client {
       return icbAddress - 66;
     },
     
-    // Reverse ICB to layer id napping
+    // Reverse ICB to layer id mapping
     layer(icbAddress) {
       return (icbAddress >= 66 && icbAddress < 87) ? 0 : ((icbAddress - 87) / 20) + 1;
     }

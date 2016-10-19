@@ -82,13 +82,8 @@ class Instrument extends Component {
     });
   }
   
-  _handleNewInstrument(newInstrumentAddress) {
-    if (newInstrumentAddress !== null) {
-    }
-    else {
-      // Invalid address
-      this.setState({ error: "No more RAM space for new voice layers!" });
-    }
+  _showError(error) {
+    this.setState({ error: error });
   }
   
   componentWillMount() {
@@ -115,23 +110,26 @@ class Instrument extends Component {
         instrumentAddress={instrumentAddress}
         handleNextInstrument={this._handleNextInstrument.bind(this)}
         handlePrevInstrument={this._handlePrevInstrument.bind(this)}
-        handleNewInstrument={this._handleNewInstrument.bind(this)}
+        showError={this._showError.bind(this)}
         client={this.props.client}
       />);
       filterControl = (<FilterControl
         instrumentAddress={instrumentAddress}
         vcfAddress={icb ? icb.get('vcfAddress') : 0}
+        showError={this._showError.bind(this)}
         client={this.props.client}
       />);
       waveControl = (<WaveControl
         instrumentAddress={instrumentAddress}
         waveAddress={icb ? icb.get('waveAddress') : 0}
+        showError={this._showError.bind(this)}
         client={this.props.client}
       />);
       envelopeControl = (<EnvelopeControl
         instrumentAddress={instrumentAddress}
         amplAddress={icb ? icb.get('amplAddress') : 0}
         freqAddress={icb ? icb.get('freqAddress') : 0}
+        showError={this._showError.bind(this)}
         client={this.props.client}
       />);
     }

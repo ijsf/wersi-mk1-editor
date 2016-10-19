@@ -102,6 +102,47 @@ export default class InstrumentControl extends Component {
     ;
   }
   
+  _getDefaultInstrumentData(icb) {
+    // Return default settings for a new instrument based
+    // (Always sets nextInstrumentAddress to 0, among other things).
+    return icb.set('nextInstrumentAddress', 0).set('name', 'NEW');
+  }
+  
+  _handleNewInstrument(newInstrumentAddress) {
+    if (newInstrumentAddress !== null) {
+      // Change nextInstrumentAddress
+      this.setState({ icb: this.state.icb.set('nextInstrumentAddress', newInstrumentAddress) }, () => {
+        // Update store
+        instrumentActions.update(this.props.instrumentAddress, 'icb', this.state.icb);
+        
+        // Set default data for new instrument
+        this.props.client.setICB(newInstrumentAddress, this._getDefaultInstrumentData(this.state.icb));
+
+        // Send to SysEx
+        this.props.client.setICB(this.props.instrumentAddress, this.state.icb)
+        .then(() => {
+          // Switch to next instrument
+          this.props.handleNextInstrument(newInstrumentAddress);
+        });
+      });
+    }
+    else {
+      // Invalid address
+      this.props.showError("No more RAM space for new voice layers!");
+    }
+  }
+  
+  _handleRemoveInstruments() {
+    // Change nextInstrumentAddress to 0
+    this.setState({ icb: this.state.icb.set('nextInstrumentAddress', 0) }, () => {
+      // Update store
+      instrumentActions.update(this.props.instrumentAddress, 'icb', this.state.icb);
+
+      // Send to SysEx
+      this.props.client.setICB(this.props.instrumentAddress, this.state.icb);
+    });
+  }
+  
   render() {
     const { icb } = this.state;
     
@@ -325,9 +366,9 @@ export default class InstrumentControl extends Component {
     // Determine variables related to layering, use default 1-to-1 Wersi mapping for any next instrument addresses
     const firstInstrument = this.props.instrumentAddresses.first() == this.props.instrumentAddress;
     const firstInstrumentId = WersiClient.ADDRESS.id(this.props.instrumentAddresses.first());
-    const currentInstrumentLayer = WersiClient.ADDRESS.layer(this.props.instrumentAddress) + 1; // 1-based for front-end
+    const currentInstrumentLayer = WersiClient.ADDRESS.layer(this.props.instrumentAddress);
     const nextInstrument = icb.get('nextInstrumentAddress') !== 0;
-    const nextNewInstrumentAddress = WersiClient.ADDRESS.RAM(WersiClient.ADDRESS.id(firstInstrument), currentInstrumentLayer + 1);
+    const nextNewInstrumentAddress = WersiClient.ADDRESS.CV(firstInstrumentId, currentInstrumentLayer + 1);
     
     return (
       <div>
@@ -342,12 +383,12 @@ export default class InstrumentControl extends Component {
                 <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="nexttooltip">Next voice layer</Tooltip>)}>
                   <Button onClick={() => this.props.handleNextInstrument(icb.get('nextInstrumentAddress'))} bsStyle="info" disabled={!nextInstrument}><Glyphicon glyph="chevron-right"/></Button>
                 </OverlayTrigger>
-                <Button bsStyle="link" style={{ width: '11ch' }}>Voice {currentInstrumentLayer} ({this.props.instrumentAddress})</Button>
+                <Button bsStyle="link" style={{ width: '11ch' }}>Voice {currentInstrumentLayer + 1} ({this.props.instrumentAddress})</Button>
                 <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="nextlayertooltip">Add next layer</Tooltip>)}>
-                  <Button onClick={() => this.props.handleNewInstrument(nextNewInstrumentAddress)} bsStyle="info" disabled={nextInstrument}><Glyphicon glyph="file"/></Button>
+                  <Button onClick={() => this._handleNewInstrument(nextNewInstrumentAddress)} bsStyle="info" disabled={nextInstrument}><Glyphicon glyph="file"/></Button>
                 </OverlayTrigger>
                 <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="removenextlayerstooltip">Remove next layers</Tooltip>)}>
-                  <Button onClick={() => handleInputSet('nextInstrumentAddress', 0)} bsStyle="info" disabled={!nextInstrument}><Glyphicon glyph="remove"/></Button>
+                  <Button onClick={() => this._handleRemoveInstruments()} bsStyle="info" disabled={!nextInstrument}><Glyphicon glyph="remove"/></Button>
                 </OverlayTrigger>
               </ButtonGroup>
               <ButtonGroup>

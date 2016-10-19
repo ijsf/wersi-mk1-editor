@@ -33,6 +33,7 @@ export default class MidiConnector {
         }
         catch (e) {
           console.error("Websocket error: failed to decode message.");
+          console.error(e);
           console.error(event.data);
         }
       };

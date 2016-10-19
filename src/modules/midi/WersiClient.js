@@ -143,6 +143,11 @@ export default class WersiClient extends Client {
     return (lo & 0x0F) | ((hi & 0x0F) << 4);
   }
   
+  // Validate SysEx header
+  _isSysExHeaderValid(sysex) {
+    return (sysex[0] == 0xF0 && sysex[1] == 0x25 && sysex[2] == this.deviceId);
+  }
+  
   // Message object to binary SysEx message
   _toSysEx(message) {
     let sysexHeader = new Uint8Array(
@@ -180,26 +185,25 @@ export default class WersiClient extends Client {
   
   // Binary SysEx message to message object
   _fromSysEx(sysex) {
-    let message = {}, i = 0;
+    let message = {};
     
     // Validate MIDI SysEx header
-    if (sysex[i++] != 0xF0 || sysex[i++] != 0x25 || sysex[i++] != this.deviceId) {
+    if (!this._isSysExHeaderValid(sysex)) {
       throw "Invalid SysEx message: " + this._utohex(sysex);
     }
     
     // Parse Wersi specific content
+    let i = 3;
     message.type = this._ntou(3, sysex[i++], sysex[i++]);
     message.address = this._ntou(2, sysex[i++], sysex[i++]);
     message.length = this._ntou(1, sysex[i++], sysex[i++]);
     
-    // TODO: Ignore any transform buffer messages as these are spurious but unnecessary
-
     // Calculate expected (byte non-nibble) length
     const expectedLength = (sysex.length - i - 1) / 2;
     if (expectedLength != message.length) {
       throw "Invalid SysEx length (type " + String.fromCharCode(message.type) +
       ", address " + message.address +
-      ", length got " + message.length +", expected " + expectedLength + "): " + this._utohex(sysex);
+      ", length got " + message.length + ", expected " + expectedLength + "): " + this._utohex(sysex);
     }
     
     // Decode nibbles
@@ -226,6 +230,33 @@ export default class WersiClient extends Client {
       .then((data) => {
         return this._fromSysEx(data);
       });
+  }
+  
+  // Returns whether the received SysEx message is valid and should be further processed
+  isValid(sysex) {
+    // Validate MIDI SysEx header
+    if (!this._isSysExHeaderValid(sysex)) {
+      throw "Invalid SysEx message: " + this._utohex(sysex);
+    }
+    
+    // Parse Wersi specific content
+    let i = 3;
+    const messageType = String.fromCharCode(this._ntou(3, sysex[i++], sysex[i++]));
+    
+    // Ignore everything but the types we expect from any previously sent messages
+    if (  messageType === WersiClient.BLOCK_TYPE.ICB
+      ||  messageType === WersiClient.BLOCK_TYPE.VCF
+      ||  messageType === WersiClient.BLOCK_TYPE.FREQ
+      ||  messageType === WersiClient.BLOCK_TYPE.AMPL
+      ||  messageType === WersiClient.BLOCK_TYPE.FIXWAVE
+      ||  messageType === WersiClient.BLOCK_TYPE.RELWAVE
+    ) {
+      return true;
+    }
+    else {
+      console.log("Ignoring SysEx message with type " + messageType);
+    }
+    return false;
   }
   
   getVCF(address) {

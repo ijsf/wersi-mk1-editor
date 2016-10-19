@@ -100,11 +100,18 @@ export default class Client extends MidiConnector {
     }
     else if (object.type == "midimessage") {
       let u8 = new Uint8Array(atob(object.data).split("").map((c) => { return c.charCodeAt(0); }));
-      this._resolve(u8);
+      if (this.isValid(u8)) {
+        this._resolve(u8);
+      }
     }
     else {
       this._resolve(object.data);
     }
+  }
+  
+  // Returns whether the received SysEx message is valid and should be further processed
+  isValid(message) {
+    return true;
   }
   
   _onError() {

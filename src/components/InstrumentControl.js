@@ -1,14 +1,15 @@
 import React, { Component } from 'react';
-import { Panel, Button, ButtonGroup, ButtonToolbar, Checkbox, Modal, Col, Row, Form, FormGroup, InputGroup, FormControl, ControlLabel } from 'react-bootstrap';
+import { Panel, Button, ButtonGroup, ButtonToolbar, Glyphicon, Checkbox, Modal, Col, Row, Form, FormGroup, InputGroup, FormControl, ControlLabel } from 'react-bootstrap';
 import Dropzone from 'react-dropzone';
 
-import reactMixin from 'react-mixin';
 import reactor from 'modules/flux';
 import { toImmutable } from 'nuclear-js';
 
+import WersiClient from 'modules/midi/WersiClient';
+
 import { actions as instrumentActions, getters as instrumentGetters } from 'modules/instrument';
 
-class InstrumentControl extends Component {
+export default class InstrumentControl extends Component {
   constructor() {
     super();
     
@@ -17,10 +18,45 @@ class InstrumentControl extends Component {
     };
   }
   
-  getDataBindings() {
-    return {
-      icb: instrumentGetters.byId(this.props.instrumentAddress, 'icb')
-    };
+  _watch(id, type) {
+    const getter = instrumentGetters.byId(id, type);
+    
+    // Unwatch if possible
+    this._unwatch();
+    
+    // Add observer
+    this._unwatchFn = reactor.observe(getter, (v) => {
+      this.setState((state) => {
+        state[type] = v;
+        return state;
+      });
+    });
+    // Get initial data
+    this.setState((state) => {
+      state[type] = reactor.evaluate(getter);
+      return state;
+    });
+  }
+  _unwatch() {
+    // Remove observer if it exists
+    if (this._unwatchFn) {
+      this._unwatchFn();
+    }
+  }
+  
+  componentWillUnmount() {
+    this._unwatch();
+  }
+  
+  componentWillMount() {
+    this._watch(this.props.instrumentAddress, 'icb');
+  }
+  
+  componentWillUpdate(nextProps, nextState) {
+    // Check if instrument has changed
+    if (this.props.instrumentAddress !== nextProps.instrumentAddress) {
+      this._watch(nextProps.instrumentAddress, 'icb');
+    }
   }
   
   _handleImport() {
@@ -286,21 +322,38 @@ class InstrumentControl extends Component {
       </Form>
     );
     
+    // Determine variables related to layering, use default 1-to-1 Wersi mapping for any next instrument addresses
+    const firstInstrument = this.props.instrumentAddresses.first() == this.props.instrumentAddress;
+    const firstInstrumentId = WersiClient.ADDRESS.id(this.props.instrumentAddresses.first());
+    const currentInstrumentLayer = WersiClient.ADDRESS.layer(this.props.instrumentAddress) + 1; // 1-based for front-end
+    const nextInstrument = icb.get('nextInstrumentAddress') !== 0;
+    const nextNewInstrumentAddress = WersiClient.ADDRESS.RAM(WersiClient.ADDRESS.id(firstInstrument), currentInstrumentLayer + 1);
+    console.log(icb.get('nextInstrumentAddress'));
+    console.log(this.props.instrumentAddress);
+    
     return (
       <div>
         {modal}
         <Panel header={header} collapsible defaultExpanded>
           <ButtonToolbar>
-            <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">Save</Button>
-            <Button onClick={this._handleExport.bind(this)} className="pull-right" bsStyle="default">Export</Button>
-            <Button onClick={this._handleImport.bind(this)} className="pull-right" bsStyle="default">Import</Button>
+            <ButtonToolbar className="pull-right">
+              <ButtonGroup>
+                <Button onClick={() => this.props.handlePrevInstrument()} bsStyle="info" disabled={firstInstrument}><Glyphicon glyph="chevron-left"/></Button>
+                <Button onClick={() => this.props.handleNextInstrument(icb.get('nextInstrumentAddress'))} bsStyle="info" disabled={!nextInstrument}><Glyphicon glyph="chevron-right"/></Button>
+                <Button bsStyle="link" style={{ width: '11ch' }}>Voice {currentInstrumentLayer} ({this.props.instrumentAddress})</Button>
+                <Button onClick={() => this.props.handleNewInstrument(nextNewInstrumentAddress)} bsStyle="info" disabled={nextInstrument}><Glyphicon glyph="file"/></Button>
+                <Button onClick={() => handleInputSet('nextInstrumentAddress', 0)} bsStyle="info" disabled={!nextInstrument}><Glyphicon glyph="remove"/></Button>
+              </ButtonGroup>
+              <ButtonGroup>
+                <Button onClick={this._handleImport.bind(this)} bsStyle="primary">Import</Button>
+                <Button onClick={this._handleExport.bind(this)} bsStyle="primary">Export</Button>
+              </ButtonGroup>
+              <Button onClick={this._handleSave.bind(this)} bsStyle="primary">Save</Button>
+            </ButtonToolbar>
           </ButtonToolbar>
-          {form}
+        {form}
         </Panel>
       </div>
     );
   }
 }
-
-reactMixin.onClass(InstrumentControl, reactor.ReactMixin);
-export default InstrumentControl;

@@ -22,6 +22,52 @@ export default class WersiClient extends Client {
   };
   
   /**
+   * Wersi addresses
+   *
+   * [0:5]  Identifier (64)
+   * [6]    RAM
+   * [7]    Cartridge (unused)
+   *
+   * RAM (CV / Control Voice) address range is therefore [64:127].
+   *
+   * ICB addresses are layed out as follows, according to the technical manual:
+   *
+   * Instrument 65 (DRAWBAR):      special drawbar instrument. We ignore this instrument.
+   * Instrument 66 (CV 1):         ICB 66 VCF 65 AMPL 65 FREQ 65 FIXWAVE 65 (Voice 1), 87, 86, 86, 86 (Voice 2).
+   * ...
+   * Instrument 75 (CV 10):        ICB 75 VCF 74 AMPL 74 FREQ 74 FIXWAVE 74 (Voice 1), 96, 95, 95, 95 (Voice 2).
+   * Instrument 76 (CV 1 BANK 2):  ICB 76 VCF 75 AMPL 75 FREQ 75 FIXWAVE 75 (Voice 1), 97, 96, 96, 96 (Voice 2).
+   * ...
+   * Instrument 85 (CV 10 BANK 2): ICB 85 VCF 84 AMPL 84 FREQ 84 FIXWAVE 84 (Voice 1), 106, 105, 105, 105 (Voice 2).
+   *
+   * ICB address range: [66:85] (20).
+   * RAM address range: [86:127] (42).
+   */
+  static ADDRESS = {
+    // Unique ICB address (range [0:19], includes BANK 2) and voice layer id (range [0:2])
+    CV(id, voiceLayer) {
+      const address = (!voiceLayer) ? (66 + id) : (87 + id + voiceLayer * 20);
+      return (id >= 0 && id < 20 && address >= 64 && address < 128) ? address : null;
+    },
+    
+    // Unique RAM address for VCF/AMPL/FREQ/FIXWAVE (range [0:19], includes BANK 2) and voice layer id (range [0:2])
+    RAM(id, voiceLayer) {
+      const address = (voiceLayer == 0) ? (65 + id) : (86 + id + voiceLayer * 20);
+      return (id >= 0 && id < 20 && address >= 64 && address < 128) ? address : null;
+    },
+    
+    // Reverse ICB to CV id mapping
+    id(icbAddress) {
+      return icbAddress - 66;
+    },
+    
+    // Reverse ICB to layer id napping
+    layer(icbAddress) {
+      return (icbAddress >= 66 && icbAddress < 87) ? 0 : ((icbAddress - 87) / 20) + 1;
+    }
+  };
+  
+  /**
    * Wersi instruction explanation for envelopes
    *
    * Instructions (reverse engineered so far):
@@ -274,7 +320,7 @@ export default class WersiClient extends Client {
       // Decode data
       let dv = new DataView(message.data.buffer);
       return {
-        nextICB: message.data[0], // Next ICB pointer, for layered sounds (0 for none)
+        nextInstrumentAddress: message.data[0], // Next ICB pointer, for layered sounds (0 for none)
       
         vcfAddress: message.data[1],
         amplAddress: message.data[2],
@@ -324,7 +370,7 @@ export default class WersiClient extends Client {
     // Encode data
     let dataEncoded = new Uint8Array(this._getBlockLength(WersiClient.BLOCK_TYPE.ICB));
     let dv = new DataView(dataEncoded.buffer);
-    dv.setUint8(0, data.get('nextICB'));
+    dv.setUint8(0, data.get('nextInstrumentAddress'));
     
     dv.setUint8(1, data.get('vcfAddress'));
     dv.setUint8(2, data.get('amplAddress'));

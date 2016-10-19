@@ -17,6 +17,10 @@ import { actions as instrumentActions, getters as instrumentGetters } from 'modu
 class Instrument extends Component {
   constructor() {
     super();
+    
+    this.state = {
+      instrumentAddresses: toImmutable([])
+    };
   }
   
   getDataBindings() {
@@ -25,24 +29,14 @@ class Instrument extends Component {
     };
   }
   
-  populate() {
-    //
-    // Although the Wersi supports a very flexible ICB with block pointers,
-    // we simply use a very naive 1-to-1 RAM address mapping for all instruments,
-    // as described in the Wersi manual.
-    //
-    // Instrument 65 is the inaccessible drawbar instrument, and thus ignored.
-    //
-    // Instrument 66 uses VCF 65, AMPL 65, FREQ 65, FIXWAVE 65 for 1st voice and 87, 86, 86, 86 for 2nd voice.
-    // Instrument 67 uses VCF 66, AMPL 66, FREQ 66, FIXWAVE 66 for 1st voice and 88, 87, 87, 87 for 2nd voice.
-    // etc.
-    //
-    // This leaves everything in RAM and unique to each instrument,
-    // just the way we want it.
-    //
-    
-    this.props.client.getICB(this.props.instrumentAddress).then((data) => {
-      instrumentActions.update(this.props.instrumentAddress, 'icb', toImmutable(data));
+  ready() {
+    const instrumentAddress = this.state.instrumentAddresses.last();
+    this.populate(instrumentAddress);
+  }
+  
+  populate(instrumentAddress, callback) {
+    this.props.client.getICB(instrumentAddress).then((data) => {
+      instrumentActions.update(instrumentAddress, 'icb', toImmutable(data));
       console.log(JSON.stringify(data));
       
       const { waveAddress, amplAddress, freqAddress, vcfAddress } = data;
@@ -57,33 +51,77 @@ class Instrument extends Component {
       this.props.client.getAmpl(amplAddress).then((data) => {
         instrumentActions.update(amplAddress, 'ampl', toImmutable(data));
       });
+      
+      // Call callback if possible
+      if (callback) {
+        callback();
+      }
+    });
+  }
+  
+  _handlePrevInstrument() {
+    // Pop last instrument
+    this.setState((state) => {
+      return {
+        instrumentAddresses: state.instrumentAddresses.pop()
+      };
+    });
+  }
+  
+  _handleNextInstrument(nextInstrumentAddress) {
+    // Populate new instrument
+    this.populate(nextInstrumentAddress, () => {
+      // Push given instrument
+      this.setState((state) => {
+        return {
+          instrumentAddresses: state.instrumentAddresses.push(nextInstrumentAddress)
+        };
+      });
+    });
+  }
+  
+  _handleNewInstrument(newInstrumentAddress) {
+  }
+  
+  componentWillMount() {
+    this.setState((state) => {
+      // First instrument address is always the original instrumentAddress from the props
+      return {
+        instrumentAddresses: toImmutable([ this.props.instrumentAddress ])
+      };
     });
   }
   
   render() {
-    const { instrumentAddress } = this.props;
-    const { icb } = this.state;
+    const { icb, instrumentAddresses } = this.state;
+
+    // Get instrument address
+    const instrumentAddress = instrumentAddresses.last();
     
     // Only construct everything once we have the ICB
     // (these components have data bindings dependent on properties set here, which cannot be changed after mounting)
     let instrumentControl = null, filterControl = null, waveControl = null, envelopeControl = null;
     if (icb) {
       instrumentControl = (<InstrumentControl
-        instrumentAddress={this.props.instrumentAddress}
+        instrumentAddresses={instrumentAddresses}
+        instrumentAddress={instrumentAddress}
+        handleNextInstrument={this._handleNextInstrument.bind(this)}
+        handlePrevInstrument={this._handlePrevInstrument.bind(this)}
+        handleNewInstrument={this._handleNewInstrument.bind(this)}
         client={this.props.client}
       />);
       filterControl = (<FilterControl
-        instrumentAddress={this.props.instrumentAddress}
+        instrumentAddress={instrumentAddress}
         vcfAddress={icb ? icb.get('vcfAddress') : 0}
         client={this.props.client}
       />);
       waveControl = (<WaveControl
-        instrumentAddress={this.props.instrumentAddress}
+        instrumentAddress={instrumentAddress}
         waveAddress={icb ? icb.get('waveAddress') : 0}
         client={this.props.client}
       />);
       envelopeControl = (<EnvelopeControl
-        instrumentAddress={this.props.instrumentAddress}
+        instrumentAddress={instrumentAddress}
         amplAddress={icb ? icb.get('amplAddress') : 0}
         freqAddress={icb ? icb.get('freqAddress') : 0}
         client={this.props.client}

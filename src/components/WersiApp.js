@@ -27,7 +27,7 @@ export default class WersiApp extends Component {
       token={"5UOfQAtnjnNIaZUWzpX2LLBkHNxrXALECEpj0ssklTM7ptYCuSOVQNn0qemO8Zat"}
       populateCallback={() => {
         if (this.instrument) {
-          this.instrument.populate();
+          this.instrument.ready();
         }
       }}
     />);
@@ -36,7 +36,7 @@ export default class WersiApp extends Component {
       <div>
         {midiConfig}
         <Instrument
-          instrumentAddress={66}
+          instrumentAddress={WersiClient.ADDRESS.CV(0)}
           client={this.client}
           ref={(ref) => {
             this.instrument = ref;

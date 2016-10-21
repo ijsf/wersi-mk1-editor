@@ -89,8 +89,10 @@ export default class EnvelopeModuleExpUp extends EnvelopeModule {
     if (amplBefore < 16) {
       error = "Previous amplitude must be higher than 16";
     }
+    else if (amplBefore > b) {
+      error = "Start amplitude is bigger than end amplitude. Use exponential-down instead";
+    }
 		return {
-			warning: (amplBefore > b) ? 'Start amplitude is bigger than end amplitude. Use exponential-down instead' : null,
 			error: error,
 			data: data
 		};

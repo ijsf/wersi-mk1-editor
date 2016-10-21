@@ -110,7 +110,6 @@ class Envelope extends Component {
         // Release disabled, just enable it for now and fix it on the last module
         releasePhaseStart = 6;
       }
-      console.log(data[0] + ' ' + data[1] + ' releasePhaseStart ' + releasePhaseStart);
       
       // Dissect module data (6 bytes each, 7 modules)
       let modules = [];

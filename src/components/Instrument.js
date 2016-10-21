@@ -160,7 +160,14 @@ class Instrument extends Component {
           <Row>
             <Col xsHidden={true} smHidden={true} mdHidden={true} lg={2}>
               <p>
-                Description
+                The sound of a voice is defined by means of a wavetable, representing one period of the sound wave.
+                Each voice contains four wavetables which are used for different octave ranges: bass (lowest pitch, first wavetable to the right), tenor, alto, soprano (highest pitch, last wavetable).
+              </p>
+              <p>
+                The sound can be shaped by dragging the points of each of the wavetables up or down.
+              </p>
+              <p>
+                By layering multiple voices (see above) you will also be able to play multiple wavetables in parallel.
               </p>
             </Col>
             <Col lg={10}>

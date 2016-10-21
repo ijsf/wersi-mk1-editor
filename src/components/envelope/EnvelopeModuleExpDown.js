@@ -76,7 +76,7 @@ export default class EnvelopeModuleExpDown extends EnvelopeModule {
 		* 0 to 4095
 		*
 		*/
-		var i, n = 25, data = [], error = null;
+		var i, n = 25, data = [];
 		for(i = 0; i < n; i++) {
 			data.push(
 				{
@@ -86,9 +86,8 @@ export default class EnvelopeModuleExpDown extends EnvelopeModule {
 			);
 		};
 		return {
-			warning: (amplBefore < b) ? 'Start amplitude is smaller than end amplitude. Use exponential-up instead' : null,
-			data: data,
-      error: error
+			error: (amplBefore < b) ? 'Start amplitude is smaller than end amplitude. Use exponential-up instead' : null,
+			data: data
 		};
   }
 }

@@ -58,7 +58,7 @@ export default class EnvelopeModuleVibrato1 extends EnvelopeModule {
 			);
 		};
 		return {
-			warning: (state.c > 4079) ? 'Frequency must be lower than 4080' : null,
+			error: (state.c > 4079) ? 'Frequency must be lower than 4080' : null,
 			data: data
 		};
   }

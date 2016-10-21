@@ -179,7 +179,11 @@ export default class EnvelopeModule extends Component {
     cType: 'range',
     
     // Epilogue enabled?
-    epilogue: true
+    epilogue: true,
+    
+    // Notifications
+    error: null,
+    info: null
   };
   
   constructor(props) {
@@ -389,12 +393,16 @@ export default class EnvelopeModule extends Component {
   
   shouldComponentUpdate(nextProps, nextState) {
     const { graph } = this.state;
+    const showCase = (this.props.findModule) ? false : true;
+    let render = true;
     
     // If we are showing values, reset the associated state variables
     if (!this.props.showValues && nextProps.showValues) {
       nextState['_text_'] = {};
     }
 
+    const graphData = this._graphFunction(nextState);
+    
     // If we are dragging, don't re-render, this will also skip componentWillUpdate and reloading of data
     if (this.state._a !== nextState._a
     || this.state._b !== nextState._b
@@ -407,7 +415,6 @@ export default class EnvelopeModule extends Component {
       nextState.sustain = (nextState._sustain !== null) ? nextState._sustain : this.state.sustain;
     
       // Just update the graph
-      const graphData = this._graphFunction(nextState);
       if (nextProps.type === 'graph') {
         graph.series[0].data = graphData.data;
         graph._sustain = nextState.sustain;  // _sustain is quite the hack
@@ -415,9 +422,19 @@ export default class EnvelopeModule extends Component {
       }
       
       // Don't re-render
-      return false;
+      render = false;
     }
-    return true;
+
+    // Check if we have any new errors or info
+    if (!this._dragging && !showCase) {
+      if (graphData.error && graphData.error !== this.state.error) {
+        nextState.error = graphData.error;
+      } else if (graphData.info && graphData.info !== this.state.info) {
+        nextState.info = graphData.info;
+      }
+    }
+
+    return render;
   }
   
   render() {
@@ -531,7 +548,6 @@ export default class EnvelopeModule extends Component {
       };
       
       let handleInput = (event) => {
-        console.log('oninput ' + event.target.value);
         // Move value into this.state._KEY
         let update = {};
         update['_' + key] = Number(event.target.value);
@@ -589,47 +605,31 @@ export default class EnvelopeModule extends Component {
       }
     });
     
-    // Tooltip
-    const overlayProps = {
-      show: true,
-      container: this,
-      target: () => findDOMNode(this.refs.target)
-    };
-    let tooltip = (<div/>);
-    if (!this._dragging && !showCase) {
-      if (graphData.error) {
-        tooltip = (<Tooltip className="error" id={"EnvelopeModule" + this.props.id + "_tooltip"}>{graphData.error}</Tooltip>);
-      } else if (graphData.warning) {
-        tooltip = (<Tooltip className="warning" id={"EnvelopeModule" + this.props.id + "_tooltip"}>{graphData.warning}</Tooltip>);
-      } else if (graphData.info) {
-        tooltip = (<Tooltip className="info" id={"EnvelopeModule" + this.props.id + "_tooltip"}>{graphData.info}</Tooltip>);
-      }
-    }
-    
     // Determine Wersi style "phase index" (1, 3, 5, 7, 9, 11, 13)
     const wersiPhase = this.props.index === null ? null : 1 + this.props.index * 2;
+    
+    // Select backgroundImage
+    const backgroundImage = this.state.error ? 'linear-gradient(#550000, #550000 60%, #550000)' : undefined;
     
     // Create contents
     // We generally use bootstrap styles for colors to support flexible theming
     const contents = (
       <div style={{ display: 'inline-block', position: 'relative' }} onClick={() => { if(showCase){ this.saveModule(); } }}>
-        <OverlayTrigger
-          placement="top" overlay={tooltip} key={"EnvelopeModule" + this.props.id + "_overlay"}>
-          <div style={{ ...style, opacity, width, height, marginRight, marginBottom, cursor }}
+        <div
+          style={{ ...style, opacity, width, height, marginRight, marginBottom, cursor, backgroundImage }}
           className={showCase ? "btn-default" : "module"}
-          >
-            <div style={{ ...styleTitle }}>
-              <span style={{ opacity: styleTitle.opacity * 0.6}}>{wersiPhase === null ? null : wersiPhase + '.'} </span>
-              {this.props.title}
-            </div>
-            <div style={{ ...styleGraph }} ref={(c) => this._graph = c} />
-            {iconContent}
-            <div style={{ ...styleSliderContainer }}>
-              {sustainToggle}
-              {sliders}
-            </div>
+        >
+          <div style={{ ...styleTitle }}>
+            <span style={{ opacity: styleTitle.opacity * 0.6}}>{wersiPhase === null ? null : wersiPhase + '.'} </span>
+            {this.props.title}
           </div>
-        </OverlayTrigger>
+          <div style={{ ...styleGraph }} ref={(c) => this._graph = c} />
+          {iconContent}
+          <div style={{ ...styleSliderContainer }}>
+            {sustainToggle}
+            {sliders}
+          </div>
+        </div>
       </div>
     );
     

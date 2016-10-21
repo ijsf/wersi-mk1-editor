@@ -429,8 +429,14 @@ export default class EnvelopeModule extends Component {
     if (!this._dragging && !showCase) {
       if (graphData.error && graphData.error !== this.state.error) {
         nextState.error = graphData.error;
+        if (this.props.showError) {
+          this.props.showError(graphData.error);
+        }
       } else if (graphData.info && graphData.info !== this.state.info) {
         nextState.info = graphData.info;
+        if (this.props.showInfo) {
+          this.props.showInfo(graphData.info);
+        }
       }
     }
 

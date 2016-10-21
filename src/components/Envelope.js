@@ -164,6 +164,16 @@ class Envelope extends Component {
     })
     ;
   }
+  
+  _handleSaveRelease() {
+    // Set attack and release offsets (attack always starts at 2, module 0).
+    const releaseOffset = 2 + (this.state.releasePhaseStart * 6);
+    this.state.data[0] = 2;
+    this.state.data[1] = releaseOffset;
+    
+    // Update store
+    instrumentActions.update(this.props.envAddress, 'ampl', this.state.data);
+  }
 
   _handleLoadModule(id, data) {
     const offset = 2 + id * 6;
@@ -260,6 +270,9 @@ class Envelope extends Component {
       // Determine if this is a release module
       const release = (index >= this.state.releasePhaseStart);
       
+      // Determine Wersi style "phase index" (1, 3, 5, 7, 9, 11, 13)
+      const wersiPhase = 1 + index * 2;
+
       // Set up props
       let moduleProps = {
         key: module.id,
@@ -274,7 +287,8 @@ class Envelope extends Component {
         data: module.data,
         color: release ? 'thistle' : 'lightsteelblue',
         release: release,
-        showValues: this.state.showValues
+        showValues: this.state.showValues,
+        showError: (message) => { this.setState({ error: "Error for module " + wersiPhase + ": " + message }) }
       };
   
       // Create element
@@ -317,7 +331,9 @@ class Envelope extends Component {
           min={0}
           max={6}
           onChange={(event) => {
-            this.setState({ releasePhaseStart: Number(event.target.value) });
+            this.setState({ releasePhaseStart: Number(event.target.value) }, () => {
+              this._handleSaveRelease();
+            });
           }}
           />
         </OverlayTrigger>
@@ -337,6 +353,9 @@ class Envelope extends Component {
           save={this._handleSaveModule.bind(this, 6)}   // always add in the 6th slot
           />
           <ButtonToolbar style={{ paddingBottom: 10 }}>
+            <div className="pull-left" style={{ height: 18, padding: 8, verticalAlign: 'middle' }}>
+              {this.state.error}
+            </div>
             <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">Save</Button>
             <Button onClick={this._handleToggleValues.bind(this)} className="pull-right">Show {this.state.showValues ? "sliders" : "values"}</Button>
             <Button onClick={this._handleAdd.bind(this)} className="pull-right">Add</Button>

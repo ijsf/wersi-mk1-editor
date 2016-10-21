@@ -66,11 +66,21 @@ export default class InstrumentControl extends Component {
   
   _handleExport() {
     // Export entire instrument store to JSON
-    const icb = this.state.icb;
+    let icb = this.state.icb;
     const vcf = reactor.evaluate(instrumentGetters.byId(icb.get('vcfAddress'), 'vcf')).toJS();
     const wave = reactor.evaluate(instrumentGetters.byId(icb.get('waveAddress'), 'wave')).toJS();
     const ampl = Array.from(reactor.evaluate(instrumentGetters.byId(icb.get('amplAddress'), 'ampl')));
     const freq = null; //Array.from(reactor.evaluate(instrumentGetters.byId(icb.get('freqAddress'), 'freq')));
+    
+    // Strip addresses as we will regenerate them
+    icb = icb
+    .delete('nextInstrumentAddress')
+    .delete('vcfAddress')
+    .delete('waveAddress')
+    .delete('amplAddress')
+    .delete('freqAddress')
+    ;
+    
     const json = {
       icb: icb.toJS(),
       vcf: vcf,
@@ -97,29 +107,38 @@ export default class InstrumentControl extends Component {
       instrumentActions.update(this.props.instrumentAddress, 'icb', toImmutable(data));
       
       // Reload instrument
-      return this.props.client.reloadInstrument(this.props.instrumentAddress);
+      return this.props.client.reloadInstrument(this.props.firstInstrumentAddress);
     })
     ;
   }
   
-  _getDefaultInstrumentData(icb) {
+  _getDefaultInstrumentData(icb, instrumentAddress) {
     // Return default settings for a new instrument based
-    // (Always sets nextInstrumentAddress to 0, among other things).
-    return icb.set('nextInstrumentAddress', 0).set('name', 'NEW');
+    // Always sets nextInstrumentAddress to 0, regenerate addresses (1-to-1 Wersi mapping).
+    console.log("NEW INSTRUMENT ADDRESS " + instrumentAddress);
+    return icb
+    .set('nextInstrumentAddress', 0)
+    .set('vcfAddress', instrumentAddress - 1)
+    .set('waveAddress', instrumentAddress - 1)
+    .set('amplAddress', instrumentAddress - 1)
+    .set('freqAddress', instrumentAddress - 1)
+    .set('name', 'NEW')
+    ;
   }
   
   _handleNewInstrument(newInstrumentAddress) {
     if (newInstrumentAddress !== null) {
       // Change nextInstrumentAddress
       this.setState({ icb: this.state.icb.set('nextInstrumentAddress', newInstrumentAddress) }, () => {
-        // Update store
+        // Update store of CURRENT instrument
         instrumentActions.update(this.props.instrumentAddress, 'icb', this.state.icb);
         
-        // Set default data for new instrument
-        this.props.client.setICB(newInstrumentAddress, this._getDefaultInstrumentData(this.state.icb));
+        // Send SysEx for NEW instrument
+        const icbNew = this._getDefaultInstrumentData(this.state.icb, newInstrumentAddress);
+        this.props.client.setICB(newInstrumentAddress, icbNew);
 
-        // Send to SysEx
-        this.props.client.setICB(this.props.instrumentAddress, this.state.icb)
+        // Send SysEx for CURRENT instrument
+        this.props.client.setICB(this.props.instrumentAddress, icbNew)
         .then(() => {
           // Switch to next instrument
           this.props.handleNextInstrument(newInstrumentAddress);
@@ -149,7 +168,7 @@ export default class InstrumentControl extends Component {
     const name = (this.state.name !== null) ? this.state.name : icb.get('name');
 
     let header = (
-      <h3>Instrument control</h3>
+      <h3>Instrument control ({this.props.instrumentAddress})</h3>
     );
 
     // Button toggle handler
@@ -196,21 +215,23 @@ export default class InstrumentControl extends Component {
                     fr.onload = (e) => {
                       try {
                         const json = JSON.parse(e.target.result);
-                        const icb = json.icb;
                         
                         // Retrieve ICB addresses
-                        let vcfAddress = icb.vcfAddress;
-                        let waveAddress = icb.waveAddress;
-                        let amplAddress = icb.amplAddress;
-                        let freqAddress = icb.freqAddress;
+                        const vcfAddress = json.icb.vcfAddress;
+                        const waveAddress = json.icb.waveAddress;
+                        const amplAddress = json.icb.amplAddress;
+                        const freqAddress = json.icb.freqAddress;
                         console.log("Original ICB addresses: vcf " + vcfAddress + " wave " + waveAddress + " ampl " + amplAddress + " freq " + freqAddress);
                         
+                        // Disable next instrument
+                        json.icb.nextInstrumentAddress = 0;
+                        
                         // Override these with 1-to-1 Wersi mapping
-                        vcfAddress = this.props.instrumentAddress - 1;
-                        waveAddress = this.props.instrumentAddress - 1;
-                        amplAddress = this.props.instrumentAddress - 1;
-                        freqAddress = this.props.instrumentAddress - 1;
-                        console.log("Remapped ICB addresses: vcf " + vcfAddress + " wave " + waveAddress + " ampl " + amplAddress + " freq " + freqAddress);
+                        json.icb.vcfAddress = this.props.instrumentAddress - 1;
+                        json.icb.waveAddress = this.props.instrumentAddress - 1;
+                        json.icb.amplAddress = this.props.instrumentAddress - 1;
+                        json.icb.freqAddress = this.props.instrumentAddress - 1;
+                        console.log("Remapped ICB addresses: vcf " + json.icb.vcfAddress + " wave " + json.icb.waveAddress + " ampl " + json.icb.amplAddress + " freq " + json.icb.freqAddress);
 
                         // Send to SysEx
                         this.props.client.setICB(this.props.instrumentAddress, toImmutable(json.icb))
@@ -237,7 +258,7 @@ export default class InstrumentControl extends Component {
 //                          .then(() => this.props.client.getFreq(freqAddress))
 //                          .then((data) => instrumentActions.update(freqAddress, 'freq', toImmutable(data)))
 
-                        .then(() => this.props.client.reloadInstrument(this.props.instrumentAddress))
+                        .then(() => this.props.client.reloadInstrument(this.props.firstInstrumentAddress))
                         ;
                         
                         // Hide modal and reset state variables
@@ -395,7 +416,7 @@ export default class InstrumentControl extends Component {
                 <Button onClick={this._handleImport.bind(this)} bsStyle="primary">Import</Button>
                 <Button onClick={this._handleExport.bind(this)} bsStyle="primary">Export</Button>
               </ButtonGroup>
-              <Button onClick={this._handleSave.bind(this)} bsStyle="primary">Save</Button>
+              <Button onClick={this._handleSave.bind(this)} bsStyle="primary">Send</Button>
             </ButtonToolbar>
           </ButtonToolbar>
         {form}

@@ -160,7 +160,7 @@ class Envelope extends Component {
       instrumentActions.update(this.props.envAddress, 'ampl', toImmutable(data));
       
       // Reload instrument
-      return this.props.client.reloadInstrument(this.props.instrumentAddress);
+      return this.props.client.reloadInstrument(this.props.firstInstrumentAddress);
     })
     ;
   }
@@ -315,7 +315,7 @@ class Envelope extends Component {
     const padding = moduleMargin;
     
     let header = (
-      <h3>{title}</h3>
+      <h3>{title} ({this.props.envAddress})</h3>
     );
     
     // Release slider
@@ -356,7 +356,7 @@ class Envelope extends Component {
             <div className="pull-left" style={{ height: 18, padding: 8, verticalAlign: 'middle' }}>
               {this.state.error}
             </div>
-            <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">Save</Button>
+            <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">Send</Button>
             <Button onClick={this._handleToggleValues.bind(this)} className="pull-right">Show {this.state.showValues ? "sliders" : "values"}</Button>
             <Button onClick={this._handleAdd.bind(this)} className="pull-right">Add</Button>
           </ButtonToolbar>

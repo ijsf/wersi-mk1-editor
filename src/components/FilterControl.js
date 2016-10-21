@@ -41,7 +41,7 @@ class FilterControl extends Component {
       instrumentActions.update(this.props.vcfAddress, 'vcf', toImmutable(data));
       
       // Reload instrument
-      return this.props.client.reloadInstrument(this.props.instrumentAddress);
+      return this.props.client.reloadInstrument(this.props.firstInstrumentAddress);
     })
     ;
   }
@@ -50,7 +50,7 @@ class FilterControl extends Component {
     const { vcf } = this.state;
     
     let header = (
-      <h3>Filter control</h3>
+      <h3>Filter control ({this.props.vcfAddress})</h3>
     );
     
     let form = null;

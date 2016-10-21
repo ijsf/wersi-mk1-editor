@@ -35,7 +35,7 @@ class WaveControl extends Component {
       instrumentActions.update(this.props.waveAddress, 'wave', toImmutable(data));
       
       // Reload instrument
-      return this.props.client.reloadInstrument(this.props.instrumentAddress);
+      return this.props.client.reloadInstrument(this.props.firstInstrumentAddress);
     })
     ;
   }
@@ -44,14 +44,14 @@ class WaveControl extends Component {
     const { waveAddress } = this.props;
     
     let header = (
-      <h3>Wavetable control</h3>
+      <h3>Wavetable control ({this.props.waveAddress})</h3>
     );
     
     return (
       <Panel header={header} collapsible defaultExpanded>
         <div className="clearfix">
           <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">
-            Save
+            Send
           </Button>
         </div>
         <Wave client={this.props.client} waveSet='bassData' waveAddress={waveAddress} />

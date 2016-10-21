@@ -550,9 +550,10 @@ export default class WersiClient extends Client {
   }
   
   reloadInstrument(address) {
+    console.log('ACHTUNG reload ' + address);
     // Check if address actually refers to a RAM voice
     address -= 66;
-    if (address < 0 || address >= 10) {
+    if (address < 0 || address >= 20) {
       throw "Address " + address + " not in RAM voice range.";
     }
     

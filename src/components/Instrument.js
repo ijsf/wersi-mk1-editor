@@ -9,13 +9,12 @@ import EnvelopeControl from 'components/EnvelopeControl';
 import WaveControl from 'components/WaveControl';
 import WersiClient from 'modules/midi/WersiClient';
 
-import reactMixin from 'react-mixin';
 import reactor from 'modules/flux';
 import { toImmutable } from 'nuclear-js';
 
 import { actions as instrumentActions, getters as instrumentGetters } from 'modules/instrument';
 
-class Instrument extends Component {
+export default class Instrument extends Component {
   constructor() {
     super();
     
@@ -25,10 +24,30 @@ class Instrument extends Component {
     };
   }
   
-  getDataBindings() {
-    return {
-      icb: instrumentGetters.byId(this.props.instrumentAddress, 'icb')
-    };
+  _watch(id, type) {
+    const getter = instrumentGetters.byId(id, type);
+    
+    // Unwatch if possible
+    this._unwatch();
+    
+    // Add observer
+    this._unwatchFn = reactor.observe(getter, (v) => {
+      this.setState((state) => {
+        state[type] = v;
+        return state;
+      });
+    });
+    // Get initial data
+    this.setState((state) => {
+      state[type] = reactor.evaluate(getter);
+      return state;
+    });
+  }
+  _unwatch() {
+    // Remove observer if it exists
+    if (this._unwatchFn) {
+      this._unwatchFn();
+    }
   }
   
   ready() {
@@ -67,6 +86,9 @@ class Instrument extends Component {
       return {
         instrumentAddresses: state.instrumentAddresses.pop()
       };
+    }, () => {
+      const instrumentAddress = this.state.instrumentAddresses.last();
+      this._watch(instrumentAddress, 'icb');
     });
   }
   
@@ -78,6 +100,9 @@ class Instrument extends Component {
         return {
           instrumentAddresses: state.instrumentAddresses.push(nextInstrumentAddress)
         };
+      }, () => {
+        const instrumentAddress = this.state.instrumentAddresses.last();
+        this._watch(instrumentAddress, 'icb');
       });
     });
   }
@@ -86,12 +111,18 @@ class Instrument extends Component {
     this.setState({ error: error });
   }
   
+  componentWillUnmount() {
+    this._unwatch();
+  }
+  
   componentWillMount() {
     this.setState((state) => {
       // First instrument address is always the original instrumentAddress from the props
       return {
         instrumentAddresses: toImmutable([ this.props.instrumentAddress ])
       };
+    }, () => {
+      this._watch(this.props.instrumentAddress, 'icb');
     });
   }
   
@@ -100,6 +131,7 @@ class Instrument extends Component {
 
     // Get instrument address
     const instrumentAddress = instrumentAddresses.last();
+    const firstInstrumentAddress = instrumentAddresses.first();
     
     // Only construct everything once we have the ICB
     // (these components have data bindings dependent on properties set here, which cannot be changed after mounting)
@@ -107,6 +139,7 @@ class Instrument extends Component {
     if (icb) {
       instrumentControl = (<InstrumentControl
         instrumentAddresses={instrumentAddresses}
+        firstInstrumentAddress={firstInstrumentAddress}
         instrumentAddress={instrumentAddress}
         handleNextInstrument={this._handleNextInstrument.bind(this)}
         handlePrevInstrument={this._handlePrevInstrument.bind(this)}
@@ -115,23 +148,27 @@ class Instrument extends Component {
       />);
       filterControl = (<FilterControl
         instrumentAddress={instrumentAddress}
+        firstInstrumentAddress={firstInstrumentAddress}
         vcfAddress={icb ? icb.get('vcfAddress') : 0}
         showError={this._showError.bind(this)}
         client={this.props.client}
       />);
       waveControl = (<WaveControl
         instrumentAddress={instrumentAddress}
+        firstInstrumentAddress={firstInstrumentAddress}
         waveAddress={icb ? icb.get('waveAddress') : 0}
         showError={this._showError.bind(this)}
         client={this.props.client}
       />);
       envelopeControl = (<EnvelopeControl
         instrumentAddress={instrumentAddress}
+        firstInstrumentAddress={firstInstrumentAddress}
         amplAddress={icb ? icb.get('amplAddress') : 0}
         freqAddress={icb ? icb.get('freqAddress') : 0}
         showError={this._showError.bind(this)}
         client={this.props.client}
       />);
+      console.log('ACHTUNG ' + JSON.stringify(icb.toJS()));
     }
     
     return (
@@ -202,6 +239,3 @@ class Instrument extends Component {
     );
   }
 }
-
-reactMixin.onClass(Instrument, reactor.ReactMixin);
-export default Instrument;

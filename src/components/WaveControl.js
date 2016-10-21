@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Panel, Button, Checkbox, Modal, Col, Form, FormGroup, InputGroup, FormControl, ControlLabel } from 'react-bootstrap';
 
-import reactMixin from 'react-mixin';
 import reactor from 'modules/flux';
 import { toImmutable } from 'nuclear-js';
 
@@ -9,7 +8,7 @@ import Wave from 'components/Wave';
 
 import { actions as instrumentActions, getters as instrumentGetters } from 'modules/instrument';
 
-class WaveControl extends Component {
+export default class WaveControl extends Component {
   constructor() {
     super();
     
@@ -17,10 +16,47 @@ class WaveControl extends Component {
     };
   }
   
-  getDataBindings() {
-    return {
-      wave: instrumentGetters.byId(this.props.waveAddress, 'wave')
-    };
+  _watch(id, type) {
+    const getter = instrumentGetters.byId(id, type);
+    console.log('WATCHING ' + id);
+    
+    // Unwatch if possible
+    this._unwatch();
+    
+    // Add observer
+    this._unwatchFn = reactor.observe(getter, (v) => {
+      console.log('CHANGED');
+      this.setState((state) => {
+        state[type] = v;
+        return state;
+      });
+    });
+    // Get initial data
+    this.setState((state) => {
+      state[type] = reactor.evaluate(getter);
+      return state;
+    });
+  }
+  _unwatch() {
+    // Remove observer if it exists
+    if (this._unwatchFn) {
+      this._unwatchFn();
+    }
+  }
+  
+  componentWillUnmount() {
+    this._unwatch();
+  }
+  
+  componentWillMount() {
+    this._watch(this.props.waveAddress, 'wave');
+  }
+  
+  componentWillUpdate(nextProps, nextState) {
+    // Check if instrument has changed
+    if (this.props.waveAddress !== nextProps.waveAddress) {
+      this._watch(nextProps.waveAddress, 'wave');
+    }
   }
   
   _handleSave() {
@@ -63,5 +99,3 @@ class WaveControl extends Component {
   }
 }
 
-reactMixin.onClass(WaveControl, reactor.ReactMixin);
-export default WaveControl;

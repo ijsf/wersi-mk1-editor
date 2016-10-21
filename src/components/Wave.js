@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { Panel, Button, Checkbox, Modal, Col, Form, FormGroup, InputGroup, FormControl, ControlLabel } from 'react-bootstrap';
 import FontAwesome from 'react-fontawesome';
 
-import reactMixin from 'react-mixin';
 import reactor from 'modules/flux';
 import { toImmutable } from 'nuclear-js';
 
@@ -11,7 +10,7 @@ import ChartistGraph from 'react-chartist';
 
 import { actions as instrumentActions, getters as instrumentGetters } from 'modules/instrument';
 
-class Wave extends Component {
+export default class Wave extends Component {
   static defaultProps = {
     low: 0,
     high: 1
@@ -25,10 +24,45 @@ class Wave extends Component {
     };
   }
   
-  getDataBindings() {
-    return {
-      wave: instrumentGetters.byId(this.props.waveAddress, 'wave')
-    };
+  _watch(id, type) {
+    const getter = instrumentGetters.byId(id, type);
+    
+    // Unwatch if possible
+    this._unwatch();
+    
+    // Add observer
+    this._unwatchFn = reactor.observe(getter, (v) => {
+      this.setState((state) => {
+        state[type] = v;
+        return state;
+      });
+    });
+    // Get initial data
+    this.setState((state) => {
+      state[type] = reactor.evaluate(getter);
+      return state;
+    });
+  }
+  _unwatch() {
+    // Remove observer if it exists
+    if (this._unwatchFn) {
+      this._unwatchFn();
+    }
+  }
+  
+  componentWillUnmount() {
+    this._unwatch();
+  }
+  
+  componentWillMount() {
+    this._watch(this.props.waveAddress, 'wave');
+  }
+  
+  componentWillUpdate(nextProps, nextState) {
+    // Check if instrument has changed
+    if (this.props.waveAddress !== nextProps.waveAddress) {
+      this._watch(nextProps.waveAddress, 'wave');
+    }
   }
   
   _updateWave(index, value) {
@@ -187,6 +221,3 @@ class Wave extends Component {
     );
   }
 }
-
-reactMixin.onClass(Wave, reactor.ReactMixin);
-export default Wave;

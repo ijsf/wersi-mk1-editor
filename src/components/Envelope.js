@@ -73,7 +73,7 @@ class Envelope extends Component {
       releasePhaseStart: 3
     };
     
-    this._unwatch = null;
+    this._unwatchFn = null;
     
     // References to all EnvelopeModule components
     this._moduleEls = [];
@@ -98,39 +98,65 @@ class Envelope extends Component {
     return true;
   }
   
-  componentWillMount() {
-    // Register observer (databindings do not work because of retarded conflicts with decorators)
-    this._unwatch = reactor.observe(instrumentGetters.byId(this.props.envAddress, this.props.type), (dataNormal) => {
-      // Convert to Uint8Array
-      const data = new Uint8Array(dataNormal);
-      
-      // Dissect attack and release data
-      let releasePhaseStart = (data[1] - 2) / 6;
-      if (releasePhaseStart > 6) {
-        // Release disabled, just enable it for now and fix it on the last module
-        releasePhaseStart = 6;
-      }
-      
-      // Dissect module data (6 bytes each, 7 modules)
-      let modules = [];
-      for(let i = 0; i < 7; ++i) {
-        modules.push(this._handleLoadModule(i, data));
-      }
-      this.setState({
-        modules: modules,
-        data: data,
-        releasePhaseStart: releasePhaseStart
-      });
+  _handleData(dataNormal) {
+    // Convert to Uint8Array
+    const data = new Uint8Array(dataNormal);
+    
+    // Dissect attack and release data
+    let releasePhaseStart = (data[1] - 2) / 6;
+    if (releasePhaseStart > 6) {
+      // Release disabled, just enable it for now and fix it on the last module
+      releasePhaseStart = 6;
+    }
+    
+    // Dissect module data (6 bytes each, 7 modules)
+    let modules = [];
+    for(let i = 0; i < 7; ++i) {
+      modules.push(this._handleLoadModule(i, data));
+    }
+    this.setState({
+      modules: modules,
+      data: data,
+      releasePhaseStart: releasePhaseStart
     });
   }
   
-  componentWillUnmount() {
-    // Unregister observer
-    if (this._unwatch) {
-      this._unwatch();
+  _watch(envAddress, type) {
+    const getter = instrumentGetters.byId(envAddress, type);
+
+    // Unwatch if possible
+    this._unwatch();
+    
+    // Register observer (databindings do not work because of retarded conflicts with decorators)
+    this._unwatchFn = reactor.observe(getter, this._handleData.bind(this));
+    
+    // Get initial data
+    const data = reactor.evaluate(getter);
+    if (data) {
+      this._handleData(data);
+    }
+  }
+  _unwatch() {
+    // Remove observer if it exists
+    if (this._unwatchFn) {
+      this._unwatchFn();
     }
   }
   
+  componentWillUnmount() {
+    this._unwatch();
+  }
+  
+  componentWillMount() {
+    this._watch(this.props.envAddress, this.props.type);
+  }
+  
+  componentWillUpdate(nextProps, nextState) {
+    // Check if instrument has changed
+    if (this.props.envAddress !== nextProps.envAddress) {
+      this._watch(nextProps.envAddress, nextProps.type);
+    }
+  }
   _handleAdd() {
     this.setState({ showAdd: true });
   }

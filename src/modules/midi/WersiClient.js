@@ -66,7 +66,7 @@ export default class WersiClient extends Client {
     
     // Reverse ICB to layer id mapping
     layer(icbAddress) {
-      return (icbAddress >= 66 && icbAddress < 87) ? 0 : ((icbAddress - 87) / WersiClient.ADDRESS.maxCVs) + 1;
+      return (icbAddress >= 66 && icbAddress < 87) ? 0 : Math.floor((icbAddress - 87) / WersiClient.ADDRESS.maxCVs) + 1;
     }
   };
   

@@ -180,9 +180,6 @@ export default class WersiClient extends Client {
     // Prepend MIDI SysEx footer
     sysex[sysexHeader.length + sysexData.length] = 0xF7;
     
-    // Debug
-    console.log("SysEx send: " + this._utohex(sysex));
-    
     return sysex;
   }
   
@@ -553,7 +550,6 @@ export default class WersiClient extends Client {
   }
   
   reloadInstrument(address) {
-    console.log('ACHTUNG reload ' + address);
     // Check if address actually refers to a RAM voice
     address -= 66;
     if (address < 0 || address >= 20) {

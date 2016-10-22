@@ -120,7 +120,6 @@ export default class InstrumentControl extends Component {
   _getDefaultInstrumentData(icb, instrumentAddress) {
     // Return default settings for a new instrument based
     // Always sets nextInstrumentAddress to 0, regenerate addresses (1-to-1 Wersi mapping).
-    console.log("NEW INSTRUMENT ADDRESS " + instrumentAddress);
     return icb
     .set('nextInstrumentAddress', 0)
     .set('vcfAddress', instrumentAddress - 1)

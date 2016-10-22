@@ -58,7 +58,6 @@ export default class Instrument extends Component {
   populate(instrumentAddress) {
     return this.props.client.getICB(instrumentAddress).then((data) => {
       instrumentActions.update(instrumentAddress, 'icb', toImmutable(data));
-      console.log(JSON.stringify(data));
       
       const { waveAddress, amplAddress, freqAddress, vcfAddress } = data;
       
@@ -183,7 +182,7 @@ export default class Instrument extends Component {
         showError={this._showError.bind(this)}
         client={this.props.client}
       />);
-      console.log('ACHTUNG ' + JSON.stringify(icb.toJS()));
+      console.log('ICB ' + JSON.stringify(icb.toJS()));
     }
     
     return (

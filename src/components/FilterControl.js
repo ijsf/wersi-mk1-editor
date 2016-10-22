@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Panel, Button, ButtonGroup, ButtonToolbar, Checkbox, Modal, Col, Row, Form, FormGroup, InputGroup, FormControl, ControlLabel } from 'react-bootstrap';
+import Loader from 'react-loader-advanced';
 
 import reactMixin from 'react-mixin';
 import reactor from 'modules/flux';
@@ -19,7 +20,9 @@ class FilterControl extends Component {
       t2Offset: null,
       t2Intensity: null,
       frequency: null,
-      q: null
+      q: null,
+      
+      loading: false
     };
   }
   
@@ -31,19 +34,22 @@ class FilterControl extends Component {
   
   _handleSave() {
     // Send to SysEx
-    this.props.client.setVCF(this.props.vcfAddress, this.state.vcf)
-    .then(() => {
-      // Refresh data in case the Wersi has made any changes
-      return this.props.client.getVCF(this.props.vcfAddress);
-    })
-    .then((data) => {
-      // Update store
-      instrumentActions.update(this.props.vcfAddress, 'vcf', toImmutable(data));
+    this.setState({ loading: true }, () => {
+      this.props.client.setVCF(this.props.vcfAddress, this.state.vcf)
+      .then(() => {
+        // Refresh data in case the Wersi has made any changes
+        return this.props.client.getVCF(this.props.vcfAddress);
+      })
+      .then((data) => {
+        // Update store
+        instrumentActions.update(this.props.vcfAddress, 'vcf', toImmutable(data));
+        this.setState({ loading: false });
       
-      // Reload instrument
-      return this.props.client.reloadInstrument(this.props.firstInstrumentAddress);
-    })
-    ;
+        // Reload instrument
+        return this.props.client.reloadInstrument(this.props.firstInstrumentAddress);
+      })
+      ;
+    });
   }
   
   render() {
@@ -258,12 +264,14 @@ class FilterControl extends Component {
     }
     
     return (
-      <Panel header={header} collapsible defaultExpanded>
-        <ButtonToolbar>
-          <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">Send</Button>
-        </ButtonToolbar>
-        {form}
-      </Panel>
+      <Loader show={this.state.loading} message={(<p>Downloading...</p>)} contentBlur={2}>
+        <Panel header={header} collapsible defaultExpanded>
+          <ButtonToolbar>
+            <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">Send</Button>
+          </ButtonToolbar>
+          {form}
+        </Panel>
+      </Loader>
     );
   }
 }

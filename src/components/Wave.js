@@ -10,6 +10,14 @@ import ChartistGraph from 'react-chartist';
 
 import { actions as instrumentActions, getters as instrumentGetters } from 'modules/instrument';
 
+const bgStyle = {
+  position: 'absolute', left: 0, top: 0, width: '100%',
+  paddingTop: 16, paddingLeft: 24,
+  fontSize: 48, textAlign: 'left', letterSpacing: '0.2em',
+  fontFamily: 'Raleway',
+  opacity: 0.08
+};
+
 export default class Wave extends Component {
   static defaultProps = {
     low: 0,
@@ -213,13 +221,6 @@ export default class Wave extends Component {
         }
       ]
     }
-    
-    const bgStyle = {
-      position: 'absolute', left: 0, top: 0, width: '100%',
-      paddingTop: 16, paddingLeft: 24,
-      fontSize: 48, textAlign: 'left', letterSpacing: '0.2em',
-      opacity: 0.1
-    };
     
     return (
       <div style={{ position: 'relative', width: '100%', height: '100px' }}>

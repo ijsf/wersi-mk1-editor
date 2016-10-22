@@ -2,13 +2,12 @@ import React, { Component } from 'react';
 import { Panel, Button, ButtonGroup, ButtonToolbar, Checkbox, Modal, Col, Row, Form, FormGroup, InputGroup, FormControl, ControlLabel } from 'react-bootstrap';
 import Loader from 'react-loader-advanced';
 
-import reactMixin from 'react-mixin';
 import reactor from 'modules/flux';
 import { toImmutable } from 'nuclear-js';
 
 import { actions as instrumentActions, getters as instrumentGetters } from 'modules/instrument';
 
-class FilterControl extends Component {
+export default class FilterControl extends Component {
   constructor() {
     super();
     
@@ -26,12 +25,47 @@ class FilterControl extends Component {
     };
   }
   
-  getDataBindings() {
-    return {
-      vcf: instrumentGetters.byId(this.props.vcfAddress, 'vcf')
-    };
+  _watch(id, type) {
+    const getter = instrumentGetters.byId(id, type);
+    
+    // Unwatch if possible
+    this._unwatch();
+    
+    // Add observer
+    this._unwatchFn = reactor.observe(getter, (v) => {
+      this.setState((state) => {
+        state[type] = v;
+        return state;
+      });
+    });
+    // Get initial data
+    this.setState((state) => {
+      state[type] = reactor.evaluate(getter);
+      return state;
+    });
+  }
+  _unwatch() {
+    // Remove observer if it exists
+    if (this._unwatchFn) {
+      this._unwatchFn();
+    }
   }
   
+  componentWillUnmount() {
+    this._unwatch();
+  }
+  
+  componentWillMount() {
+    this._watch(this.props.vcfAddress, 'vcf');
+  }
+  
+  componentWillUpdate(nextProps, nextState) {
+    // Check if instrument has changed
+    if (this.props.vcfAddress !== nextProps.vcfAddress) {
+      this._watch(nextProps.vcfAddress, 'vcf');
+    }
+  }
+    
   _handleSave() {
     // Send to SysEx
     this.setState({ loading: true }, () => {
@@ -56,7 +90,7 @@ class FilterControl extends Component {
     const { vcf } = this.state;
     
     let header = (
-      <h3>Filter control ({this.props.vcfAddress})</h3>
+      <h3>Filter control ({this.props.vcfAddress}/global)</h3>
     );
     
     let form = null;
@@ -275,6 +309,3 @@ class FilterControl extends Component {
     );
   }
 }
-
-reactMixin.onClass(FilterControl, reactor.ReactMixin);
-export default FilterControl;

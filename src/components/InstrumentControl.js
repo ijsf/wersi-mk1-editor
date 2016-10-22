@@ -358,10 +358,10 @@ export default class InstrumentControl extends Component {
           <Col sm={9}>
             <ButtonToolbar>
               <ButtonGroup>
-                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="prevcvtooltip">Previous control voice</Tooltip>)}>
+                <OverlayTrigger placement="bottom" overlay={firstCV ? (<div/>) : (<Tooltip className="info" id="prevcvtooltip">Previous control voice</Tooltip>)}>
                   <Button onClick={() => this._setInstrument(prevCV)} bsStyle="primary" disabled={firstCV}><Glyphicon glyph="chevron-left"/></Button>
                 </OverlayTrigger>
-                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="nextcvtooltip">Next control voice</Tooltip>)}>
+                <OverlayTrigger placement="bottom" overlay={lastCV ? (<div/>) : (<Tooltip className="info" id="nextcvtooltip">Next control voice</Tooltip>)}>
                   <Button onClick={() => this._setInstrument(nextCV)} bsStyle="primary" disabled={lastCV}><Glyphicon glyph="chevron-right"/></Button>
                 </OverlayTrigger>
                 <Button bsStyle="link" style={{ width: '12ch' }}>CV {firstInstrumentId} ({firstInstrumentAddress})</Button>
@@ -373,10 +373,10 @@ export default class InstrumentControl extends Component {
                 </OverlayTrigger>
               </ButtonGroup>
               <ButtonGroup>
-                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="prevtooltip">Previous layer</Tooltip>)}>
+                <OverlayTrigger placement="bottom" overlay={firstInstrument ? (<div/>) : (<Tooltip className="info" id="prevtooltip">Previous layer</Tooltip>)}>
                   <Button onClick={() => this._prevInstrument()} bsStyle="info" disabled={firstInstrument}><Glyphicon glyph="chevron-left"/></Button>
                 </OverlayTrigger>
-                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="nexttooltip">Next layer</Tooltip>)}>
+                <OverlayTrigger placement="bottom" overlay={!nextInstrument ? (<div/>) : (<Tooltip className="info" id="nexttooltip">Next layer</Tooltip>)}>
                   <Button onClick={() => this._nextInstrument(icb.get('nextInstrumentAddress'))} bsStyle="info" disabled={!nextInstrument}><Glyphicon glyph="chevron-right"/></Button>
                 </OverlayTrigger>
                 <Button bsStyle="link" style={{ width: '12ch' }}>Layer {currentInstrumentLayer + 1} ({this.props.instrumentAddress})</Button>
@@ -388,10 +388,10 @@ export default class InstrumentControl extends Component {
                 </OverlayTrigger>
               </ButtonGroup>
               <ButtonGroup>
-                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="nextlayertooltip">Add next layer</Tooltip>)}>
+                <OverlayTrigger placement="bottom" overlay={nextInstrument ? (<div/>) : (<Tooltip className="info" id="nextlayertooltip">Add next layer</Tooltip>)}>
                   <Button onClick={() => this._handleNewInstrument(nextNewInstrumentAddress)} bsStyle="info" disabled={nextInstrument}><Glyphicon glyph="file"/></Button>
                 </OverlayTrigger>
-                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="removenextlayerstooltip">Remove next layers</Tooltip>)}>
+                <OverlayTrigger placement="bottom" overlay={!nextInstrument ? (<div/>) : (<Tooltip className="info" id="removenextlayerstooltip">Remove next layers</Tooltip>)}>
                   <Button onClick={() => this._handleRemoveInstruments()} bsStyle="info" disabled={!nextInstrument}><Glyphicon glyph="remove"/></Button>
                 </OverlayTrigger>
               </ButtonGroup>
@@ -482,7 +482,9 @@ export default class InstrumentControl extends Component {
             <ButtonToolbar>
               <span className="btn btn-link">Voice</span>
               <span className="btn btn-link">⤑</span>
-              <Button active={icb.get('routeBright')} onClick={() => handleButtonToggle('routeBright')}>Bright</Button>
+              <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="brighttooltip">80 Hz low-pass filter</Tooltip>)}>
+                <Button active={icb.get('routeBright')} onClick={() => handleButtonToggle('routeBright')}>Bright</Button>
+              </OverlayTrigger>
               <span className="btn btn-link">⤑</span>
               <Button active={icb.get('routeLeft')} onClick={() => handleButtonToggle('routeLeft')}>Left</Button>
               <Button active={icb.get('routeRight')} onClick={() => handleButtonToggle('routeRight')}>Right</Button>

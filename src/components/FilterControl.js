@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Panel, Button, ButtonGroup, ButtonToolbar, Checkbox, Modal, Col, Row, Form, FormGroup, InputGroup, FormControl, ControlLabel } from 'react-bootstrap';
+import { Panel, Button, ButtonGroup, ButtonToolbar, Checkbox, Modal, Col, Row, Form, FormGroup, InputGroup, FormControl, ControlLabel, Tooltip, OverlayTrigger } from 'react-bootstrap';
 import Loader from 'react-loader-advanced';
 
 import reactor from 'modules/flux';
@@ -162,14 +162,22 @@ export default class FilterControl extends Component {
             </Col>
             <Col sm={3}>
               <ButtonGroup>
-                <Button active={vcf.get('fourPole')} onClick={() => handleInputSet('fourPole', true)}>4-pole</Button>
-                <Button active={!vcf.get('fourPole')} onClick={() => handleInputSet('fourPole', false)}>2-pole</Button>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="fourpoletooltip">4-pole filter (24 dB/oct)</Tooltip>)}>
+                  <Button active={vcf.get('fourPole')} onClick={() => handleInputSet('fourPole', true)}>4-pole</Button>
+                </OverlayTrigger>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="twopoletooltip">2-pole filter (12 dB/oct)</Tooltip>)}>
+                  <Button active={!vcf.get('fourPole')} onClick={() => handleInputSet('fourPole', false)}>2-pole</Button>
+                </OverlayTrigger>
               </ButtonGroup>
             </Col>
             <Col sm={3}>
               <ButtonToolbar>
-                <Button active={vcf.get('retrigger')} onClick={() => handleButtonToggle('retrigger')}>Retrigger</Button>
-                <Button active={vcf.get('tracking')} onClick={() => handleButtonToggle('tracking')}>Tracking</Button>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="retriggertooltip">Retrigger VCF on every note</Tooltip>)}>
+                  <Button active={vcf.get('retrigger')} onClick={() => handleButtonToggle('retrigger')}>Retrigger</Button>
+                </OverlayTrigger>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="trackingtooltip">VCF tracks note pitch</Tooltip>)}>
+                  <Button active={vcf.get('tracking')} onClick={() => handleButtonToggle('tracking')}>Tracking</Button>
+                </OverlayTrigger>
               </ButtonToolbar>
             </Col>
           </FormGroup>
@@ -277,7 +285,9 @@ export default class FilterControl extends Component {
             </Col>
             <Col sm={3}>
               <ButtonToolbar>
-                <Button active={vcf.get('distortion')} onClick={() => handleButtonToggle('distortion')}>Distortion</Button>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="distortiontooltip">Distortion pre-effect</Tooltip>)}>
+                  <Button active={vcf.get('distortion')} onClick={() => handleButtonToggle('distortion')}>Distortion</Button>
+                </OverlayTrigger>
               </ButtonToolbar>
             </Col>
           </FormGroup>

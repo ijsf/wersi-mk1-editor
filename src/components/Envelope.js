@@ -386,9 +386,13 @@ class Envelope extends Component {
               <div className="pull-left" style={{ height: 18, padding: 8, verticalAlign: 'middle' }}>
                 {this.state.error}
               </div>
-              <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">Send</Button>
-              <Button onClick={this._handleToggleValues.bind(this)} className="pull-right">{this.state.showValues ? (<Glyphicon glyph="tasks"/>) : (<Glyphicon glyph="pencil"/>)}</Button>
-              <Button onClick={this._handleAdd.bind(this)} className="pull-right"><Glyphicon glyph="plus"/></Button>
+                <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">Send</Button>
+              <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="showvaluessliderstooltip">Show values or sliders</Tooltip>)}>
+                <Button onClick={this._handleToggleValues.bind(this)} className="pull-right">{this.state.showValues ? (<Glyphicon glyph="tasks"/>) : (<Glyphicon glyph="pencil"/>)}</Button>
+              </OverlayTrigger>
+              <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="addmoduletooltip">Add module to end</Tooltip>)}>
+                <Button onClick={this._handleAdd.bind(this)} className="pull-right"><Glyphicon glyph="plus"/></Button>
+              </OverlayTrigger>
             </ButtonToolbar>
             <Well bsSize="small">
             <div style={{

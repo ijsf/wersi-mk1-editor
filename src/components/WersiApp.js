@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Grid, Row, Col } from 'react-bootstrap';
+import { Grid, Row, Col, PageHeader } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip'
 
 import Instrument from 'components/Instrument';
@@ -34,6 +34,9 @@ export default class WersiApp extends Component {
     
     return (
       <div>
+        <PageHeader>
+          Wersi MK1/EX20 editor
+        </PageHeader>
         {midiConfig}
         <Instrument
           instrumentAddress={WersiClient.ADDRESS.CV(0)}

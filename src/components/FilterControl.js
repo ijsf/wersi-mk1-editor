@@ -298,7 +298,7 @@ export default class FilterControl extends Component {
     }
     
     return (
-      <Loader show={this.state.loading} message={(<p>Downloading...</p>)} contentBlur={2}>
+      <Loader show={this.state.loading} message={(<h5>« Downloading... »</h5>)} contentBlur={2}>
         <Panel header={header} collapsible defaultExpanded>
           <ButtonToolbar>
             <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">Send</Button>

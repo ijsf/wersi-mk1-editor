@@ -473,7 +473,7 @@ export default class InstrumentControl extends Component {
     );
     
     return (
-      <Loader show={this.state.loading} message={(<p>Downloading...</p>)} contentBlur={2}>
+      <Loader show={this.state.loading} message={(<h5>« Downloading... »</h5>)} contentBlur={2}>
         {modal}
         <Panel header={header} collapsible defaultExpanded>
           <ButtonToolbar className="pull-right">

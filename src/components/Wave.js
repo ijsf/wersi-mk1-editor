@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
 import { Panel, Button, Checkbox, Modal, Col, Form, FormGroup, InputGroup, FormControl, ControlLabel } from 'react-bootstrap';
 
 import reactor from 'modules/flux';
@@ -213,9 +214,24 @@ export default class Wave extends Component {
       ]
     }
     
+    const bgStyle = {
+      position: 'absolute', left: 0, top: 0, width: '100%',
+      paddingTop: 16, paddingLeft: 24,
+      fontSize: 48, textAlign: 'left', letterSpacing: '0.2em',
+      opacity: 0.1
+    };
+    
     return (
-      <div>
-        <ChartistGraph data={lineChartData} options={lineChartOptions} type={'Line'} />
+      <div style={{ position: 'relative', width: '100%', height: '100px' }}>
+        <div style={{...bgStyle}}>
+          {this.props.waveSet.substr(0, this.props.waveSet.length - 4)}
+        </div>
+        <ChartistGraph
+          data={lineChartData}
+          options={lineChartOptions}
+          type={'Line'}
+          style={{ position: 'absolute', left: 0, top: 0, width: '100%' }}
+        />
       </div>
     );
   }

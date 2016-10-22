@@ -358,17 +358,17 @@ export default class InstrumentControl extends Component {
           <Col sm={9}>
             <ButtonToolbar>
               <ButtonGroup>
-                <OverlayTrigger placement="bottom" overlay={firstCV ? (<div/>) : (<Tooltip className="info" id="prevcvtooltip">Previous control voice</Tooltip>)}>
+                <OverlayTrigger placement="bottom" overlay={firstCV ? (<div/>) : (<Tooltip className="info" id="prevcvtooltip">Previous CV</Tooltip>)}>
                   <Button onClick={() => this._setInstrument(prevCV)} bsStyle="primary" disabled={firstCV}><Glyphicon glyph="chevron-left"/></Button>
                 </OverlayTrigger>
-                <OverlayTrigger placement="bottom" overlay={lastCV ? (<div/>) : (<Tooltip className="info" id="nextcvtooltip">Next control voice</Tooltip>)}>
+                <OverlayTrigger placement="bottom" overlay={lastCV ? (<div/>) : (<Tooltip className="info" id="nextcvtooltip">Next CV</Tooltip>)}>
                   <Button onClick={() => this._setInstrument(nextCV)} bsStyle="primary" disabled={lastCV}><Glyphicon glyph="chevron-right"/></Button>
                 </OverlayTrigger>
                 <Button bsStyle="link" style={{ width: '12ch' }}>CV {firstInstrumentId} ({firstInstrumentAddress})</Button>
-                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="importcvtooltip">Import control voice</Tooltip>)}>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="importcvtooltip">Import this CV</Tooltip>)}>
                   <Button onClick={this._handleImport.bind(this)} bsStyle="primary"><Glyphicon glyph="import"/></Button>
                 </OverlayTrigger>
-                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="exportcvtooltip">Export control voice</Tooltip>)}>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="exportcvtooltip">Export this CV</Tooltip>)}>
                   <Button onClick={this._handleExport.bind(this)} bsStyle="primary"><Glyphicon glyph="export"/></Button>
                 </OverlayTrigger>
               </ButtonGroup>
@@ -391,8 +391,8 @@ export default class InstrumentControl extends Component {
                 <OverlayTrigger placement="bottom" overlay={nextInstrument ? (<div/>) : (<Tooltip className="info" id="nextlayertooltip">Add next layer</Tooltip>)}>
                   <Button onClick={() => this._handleNewInstrument(nextNewInstrumentAddress)} bsStyle="info" disabled={nextInstrument}><Glyphicon glyph="file"/></Button>
                 </OverlayTrigger>
-                <OverlayTrigger placement="bottom" overlay={!nextInstrument ? (<div/>) : (<Tooltip className="info" id="removenextlayerstooltip">Remove next layers</Tooltip>)}>
-                  <Button onClick={() => this._handleRemoveInstruments()} bsStyle="info" disabled={!nextInstrument}><Glyphicon glyph="remove"/></Button>
+                <OverlayTrigger placement="bottom" overlay={!nextInstrument ? (<div/>) : (<Tooltip className="info" id="removenextlayerstooltip">Eject all next layers</Tooltip>)}>
+                  <Button onClick={() => this._handleRemoveInstruments()} bsStyle="info" disabled={!nextInstrument}><Glyphicon glyph="eject"/></Button>
                 </OverlayTrigger>
               </ButtonGroup>
             </ButtonToolbar>
@@ -401,10 +401,12 @@ export default class InstrumentControl extends Component {
         <FormGroup controlId="name">
           <Col sm={2} componentClass={ControlLabel}>Name</Col>
           <Col sm={3}>
-            <FormControl value={name} type="text" maxLength="6" placeholder="Instrument name" maxLength={6}
-            onChange={(event) => this.setState({ name: event.target.value })}
-            onBlur={(event) => handleInputSet("name", event.target.value)}
-            />
+            <OverlayTrigger placement="bottom" overlay={firstInstrument ? (<div/>) : (<Tooltip className="info" id="nametooltip">Only the first layer name will affect the CV name</Tooltip>)}>
+              <FormControl value={name} type="text" maxLength="6" placeholder="Instrument name" maxLength={6}
+                onChange={(event) => this.setState({ name: event.target.value })}
+                onBlur={(event) => handleInputSet("name", event.target.value)}
+              />
+            </OverlayTrigger>
           </Col>
         </FormGroup>
         <FormGroup controlId="dynamics">
@@ -462,7 +464,7 @@ export default class InstrumentControl extends Component {
           <Col sm={3}>
             <InputGroup>
               <InputGroup.Addon>Mode</InputGroup.Addon>
-                <FormControl componentClass="select" value={icb.get('wvMode')}>
+                <FormControl componentClass="select" value={icb.get('wvMode')} disabled={!firstInstrument}>
                 {Array.from(["Rotor Slow", "Rotor Fast", "Flanger", "Strings", "Chorus"], (v, k) => {
                   return (<option value={k} key={"mode-" + k}>{v}</option>);
                 })}
@@ -471,8 +473,8 @@ export default class InstrumentControl extends Component {
           </Col>
           <Col sm={5}>
             <ButtonToolbar>
-              <Button active={icb.get('wvFeedbackStereoFlat')} onClick={() => handleButtonToggle('wvFeedbackStereoFlat')}>Flat</Button>
-              <Button active={icb.get('wvFeedbackDeep')} onClick={() => handleButtonToggle('wvFeedbackDeep')}>Deep</Button>
+              <Button active={icb.get('wvFeedbackStereoFlat')} disabled={!firstInstrument} onClick={() => handleButtonToggle('wvFeedbackStereoFlat')}>Flat</Button>
+              <Button active={icb.get('wvFeedbackDeep')} disabled={!firstInstrument} onClick={() => handleButtonToggle('wvFeedbackDeep')}>Deep</Button>
             </ButtonToolbar>
           </Col>
         </FormGroup>

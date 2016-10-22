@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Panel, Button, ButtonGroup, ButtonToolbar, Glyphicon, Checkbox, Modal, Col, Row, Form, FormGroup, InputGroup, FormControl, ControlLabel, Tooltip, OverlayTrigger } from 'react-bootstrap';
 import Dropzone from 'react-dropzone';
 import Loader from 'react-loader-advanced';
+import { Notification } from 'react-notification';
 
 import reactor from 'modules/flux';
 import { toImmutable } from 'nuclear-js';
@@ -16,6 +17,7 @@ export default class InstrumentControl extends Component {
     
     this.state = {
       name: null,
+      notification: null,
       loading: false
     };
   }
@@ -119,10 +121,18 @@ export default class InstrumentControl extends Component {
   
   _getDefaultInstrumentData(icb, instrumentAddress) {
     // Return default settings for a new instrument based
-    // Always sets nextInstrumentAddress to 0, regenerate addresses (1-to-1 Wersi mapping).
+    //
+    // * always set nextInstrumentAddress to 0
+    // * regenerate addresses (1-to-1 Wersi mapping)
+    // * use first instrument VCF address
+    //
+    // NOTE: we are assuming the first instrument ICB is actually stored in the store!
+    const firstInstrumentAddress = this.props.instrumentAddresses.first();
+    const firstVCFAddress = reactor.evaluate(instrumentGetters.byId(firstInstrumentAddress, 'icb')).get('vcfAddress');
+    
     return icb
     .set('nextInstrumentAddress', 0)
-    .set('vcfAddress', instrumentAddress - 1)
+    .set('vcfAddress', firstVCFAddress)
     .set('waveAddress', instrumentAddress - 1)
     .set('amplAddress', instrumentAddress - 1)
     .set('freqAddress', instrumentAddress - 1)
@@ -142,7 +152,7 @@ export default class InstrumentControl extends Component {
         this.props.client.setICB(newInstrumentAddress, icbNew);
 
         // Send SysEx for CURRENT instrument
-        this.props.client.setICB(this.props.instrumentAddress, icbNew)
+        this.props.client.setICB(this.props.instrumentAddress, this.state.icb)
         .then(() => {
           // Switch to next instrument
           this.props.handleNextInstrument(newInstrumentAddress);
@@ -257,6 +267,7 @@ export default class InstrumentControl extends Component {
                     fr.onload = (e) => {
                       try {
                         const json = JSON.parse(e.target.result);
+                        let notification = null, useVCF = true;
                         
                         // Retrieve ICB addresses
                         const vcfAddress = json.icb.vcfAddress;
@@ -269,23 +280,35 @@ export default class InstrumentControl extends Component {
                         json.icb.nextInstrumentAddress = 0;
                         
                         // Override these with 1-to-1 Wersi mapping
-                        json.icb.vcfAddress = this.props.instrumentAddress - 1;
                         json.icb.waveAddress = this.props.instrumentAddress - 1;
                         json.icb.amplAddress = this.props.instrumentAddress - 1;
                         json.icb.freqAddress = this.props.instrumentAddress - 1;
+
+                        // Check if we are importing the first layer
+                        if (currentInstrumentLayer === 0) {
+                          // Use a legit VCF address
+                          json.icb.vcfAddress = this.props.instrumentAddress - 1;
+                        }
+                        else {
+                          // Use global VCF address equal to VCF address of first address
+                          // NOTE: we are assuming the first instrument ICB is actually stored in the store!
+                          const firstVCFAddress = reactor.evaluate(instrumentGetters.byId(firstInstrumentAddress, 'icb')).get('vcfAddress');
+                          console.log('Using VCF address from first instrument/layer: ' + firstVCFAddress);
+                          notification = "Ignored VCF settings. VCF importing only supported for first layer.";
+                          json.icb.vcfAddress = firstVCFAddress;
+                          useVCF = false;
+                        }
                         console.log("Remapped ICB addresses: vcf " + json.icb.vcfAddress + " wave " + json.icb.waveAddress + " ampl " + json.icb.amplAddress + " freq " + json.icb.freqAddress);
 
                         // Send to SysEx
-                        this.setState({ loading: true, import: null, name: null }, () => {
-                          this.props.client.setICB(this.props.instrumentAddress, toImmutable(json.icb))
+                        this.setState({ loading: true, import: null, name: null, notification }, () => {
+                          // react-notification onDismiss failure workaround
+                          setTimeout(() => this.setState({ notification: null }), 2000);
+                          
+                          let p = this.props.client.setICB(this.props.instrumentAddress, toImmutable(json.icb))
                           //.then(() => this.props.client.getICB(this.props.instrumentAddress))
                           //.then((data) => instrumentActions.update(this.props.instrumentAddress, 'icb', toImmutable(data)))
                           .then(() => instrumentActions.update(this.props.instrumentAddress, 'icb', toImmutable(json.icb)))
-
-                          .then((data) => this.props.client.setVCF(vcfAddress, toImmutable(json.vcf)))
-                          //.then(() => this.props.client.getVCF(vcfAddress))
-                          //.then((data) => instrumentActions.update(vcfAddress, 'vcf', toImmutable(data)))
-                          .then(() => instrumentActions.update(vcfAddress, 'vcf', toImmutable(json.vcf)))
 
                           .then((data) => this.props.client.setFixWave(waveAddress, json.wave))
                           //.then(() => this.props.client.getFixWave(waveAddress))
@@ -300,8 +323,17 @@ export default class InstrumentControl extends Component {
   //                          .then((data) => this.props.client.setFreq(freqAddress, toImmutable(json.freq)))
   //                          .then(() => this.props.client.getFreq(freqAddress))
   //                          .then((data) => instrumentActions.update(freqAddress, 'freq', toImmutable(data)))
+                          ;
 
-                          .then(() => this.props.client.reloadInstrument(this.props.firstInstrumentAddress))
+                          if (useVCF) {
+                            p = p.then((data) => this.props.client.setVCF(vcfAddress, toImmutable(json.vcf)))
+                            //.then(() => this.props.client.getVCF(vcfAddress))
+                            //.then((data) => instrumentActions.update(vcfAddress, 'vcf', toImmutable(data)))
+                            .then(() => instrumentActions.update(vcfAddress, 'vcf', toImmutable(json.vcf)))
+                            ;
+                          }
+
+                          p = p.then(() => this.props.client.reloadInstrument(this.props.firstInstrumentAddress))
                           .then(() => this.setState({ loading: false }))
                           ;
                         });
@@ -472,15 +504,22 @@ export default class InstrumentControl extends Component {
     );
     
     return (
-      <Loader show={this.state.loading} message={(<h5>« Downloading... »</h5>)} contentBlur={2}>
-        {modal}
-        <Panel header={header} collapsible defaultExpanded>
-          <ButtonToolbar className="pull-right">
-            <Button onClick={this._handleSave.bind(this)} bsStyle="primary">Send</Button>
-          </ButtonToolbar>
-          {form}
-        </Panel>
-      </Loader>
+      <div>
+        <Loader show={this.state.loading} message={(<h5>« Downloading... »</h5>)} contentBlur={2}>
+          {modal}
+          <Panel header={header} collapsible defaultExpanded>
+            <ButtonToolbar className="pull-right">
+              <Button onClick={this._handleSave.bind(this)} bsStyle="primary">Send</Button>
+            </ButtonToolbar>
+            {form}
+          </Panel>
+        </Loader>
+        <Notification
+          isActive={this.state.notification !== null}
+          message={(this.state.notification !== null) ? this.state.notification : ""}
+          barStyle={{ fontSize: 16, zIndex: 9999, opacity: 0.9 }}
+        />
+      </div>
     );
   }
 }

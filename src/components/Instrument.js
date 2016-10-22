@@ -76,19 +76,24 @@ export default class Instrument extends Component {
   }
   
   _handlePrevInstrument() {
-    // Pop last instrument
-    return this.setState((state) => {
-      return {
-        instrumentAddresses: state.instrumentAddresses.pop()
-      };
-    }, () => {
-      const instrumentAddress = this.state.instrumentAddresses.last();
-      this._watch(instrumentAddress, 'icb');
+    const newInstrumentAddresses = this.state.instrumentAddresses.pop();
+    const prevInstrumentAddress = newInstrumentAddresses.last();
+    
+    // Populate instrument
+    return this.populate(prevInstrumentAddress).then(() => {
+      // Update instrumentAddresses
+      this.setState((state) => {
+        return {
+          instrumentAddresses: newInstrumentAddresses
+        };
+      }, () => {
+        this._watch(prevInstrumentAddress, 'icb');
+      });
     });
   }
   
   _handleNextInstrument(nextInstrumentAddress) {
-    // Populate new instrument
+    // Populate instrument
     return this.populate(nextInstrumentAddress).then(() => {
       // Push given instrument
       this.setState((state) => {

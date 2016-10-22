@@ -299,6 +299,7 @@ export default class WersiClient extends Client {
   }
   
   setVCF(address, data) {
+    console.log("SysEx VCF send (" + address +")");
     // Encode data
     let dataEncoded = new Uint8Array(this._getBlockLength(WersiClient.BLOCK_TYPE.VCF));
     let dv = new DataView(dataEncoded.buffer);
@@ -398,6 +399,7 @@ export default class WersiClient extends Client {
   }
   
   setICB(address, data) {
+    console.log("SysEx ICB send (" + address +")");
     // Encode data
     let dataEncoded = new Uint8Array(this._getBlockLength(WersiClient.BLOCK_TYPE.ICB));
     let dv = new DataView(dataEncoded.buffer);
@@ -459,6 +461,7 @@ export default class WersiClient extends Client {
   }
   
   setAmpl(address, data) {
+    console.log("SysEx AMPL send (" + address +")");
     return this.send(
       this._toSysEx({
         type: WersiClient.BLOCK_TYPE.AMPL.charCodeAt(0),
@@ -508,6 +511,7 @@ export default class WersiClient extends Client {
   }
   
   setFixWave(address, wave) {
+    console.log("SysEx FIXWAVE send (" + address +")");
     // Encode FIXWAVE
     let data = new Uint8Array(this._getBlockLength(WersiClient.BLOCK_TYPE.FIXWAVE));
     let dv = new DataView(data.buffer);

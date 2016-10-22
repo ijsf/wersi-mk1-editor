@@ -306,30 +306,21 @@ export default class InstrumentControl extends Component {
                           setTimeout(() => this.setState({ notification: null }), 2000);
                           
                           let p = this.props.client.setICB(this.props.instrumentAddress, toImmutable(json.icb))
-                          //.then(() => this.props.client.getICB(this.props.instrumentAddress))
-                          //.then((data) => instrumentActions.update(this.props.instrumentAddress, 'icb', toImmutable(data)))
                           .then(() => instrumentActions.update(this.props.instrumentAddress, 'icb', toImmutable(json.icb)))
 
-                          .then((data) => this.props.client.setFixWave(waveAddress, json.wave))
-                          //.then(() => this.props.client.getFixWave(waveAddress))
-                          //.then((data) => instrumentActions.update(waveAddress, 'wave', toImmutable(data)))
-                          .then(() => instrumentActions.update(waveAddress, 'wave', toImmutable(json.wave)))
+                          .then((data) => this.props.client.setFixWave(json.icb.waveAddress, json.wave))
+                          .then(() => instrumentActions.update(json.icb.waveAddress, 'wave', toImmutable(json.wave)))
 
-                          .then((data) => this.props.client.setAmpl(amplAddress, json.ampl))
-                          //.then(() => this.props.client.getAmpl(amplAddress))
-                          //.then((data) => instrumentActions.update(amplAddress, 'ampl', toImmutable(data)))
-                          .then(() => instrumentActions.update(amplAddress, 'ampl', toImmutable(json.ampl)))
+                          .then((data) => this.props.client.setAmpl(json.icb.amplAddress, json.ampl))
+                          .then(() => instrumentActions.update(json.icb.amplAddress, 'ampl', toImmutable(json.ampl)))
                         
-  //                          .then((data) => this.props.client.setFreq(freqAddress, toImmutable(json.freq)))
-  //                          .then(() => this.props.client.getFreq(freqAddress))
-  //                          .then((data) => instrumentActions.update(freqAddress, 'freq', toImmutable(data)))
+                          //.then((data) => this.props.client.setFreq(json.icb.freqAddress, toImmutable(json.freq)))
+                          //.then(() => instrumentActions.update(json.icb.freqAddress, 'freq', toImmutable(data)))
                           ;
 
                           if (useVCF) {
-                            p = p.then((data) => this.props.client.setVCF(vcfAddress, toImmutable(json.vcf)))
-                            //.then(() => this.props.client.getVCF(vcfAddress))
-                            //.then((data) => instrumentActions.update(vcfAddress, 'vcf', toImmutable(data)))
-                            .then(() => instrumentActions.update(vcfAddress, 'vcf', toImmutable(json.vcf)))
+                            p = p.then((data) => this.props.client.setVCF(json.icb.vcfAddress, toImmutable(json.vcf)))
+                            .then(() => instrumentActions.update(json.icb.vcfAddress, 'vcf', toImmutable(json.vcf)))
                             ;
                           }
 

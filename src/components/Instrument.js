@@ -52,11 +52,11 @@ export default class Instrument extends Component {
   
   ready() {
     const instrumentAddress = this.state.instrumentAddresses.last();
-    this.populate(instrumentAddress);
+    return this.populate(instrumentAddress);
   }
   
-  populate(instrumentAddress, callback) {
-    this.props.client.getICB(instrumentAddress).then((data) => {
+  populate(instrumentAddress) {
+    return this.props.client.getICB(instrumentAddress).then((data) => {
       instrumentActions.update(instrumentAddress, 'icb', toImmutable(data));
       console.log(JSON.stringify(data));
       
@@ -72,17 +72,12 @@ export default class Instrument extends Component {
       this.props.client.getAmpl(amplAddress).then((data) => {
         instrumentActions.update(amplAddress, 'ampl', toImmutable(data));
       });
-      
-      // Call callback if possible
-      if (callback) {
-        callback();
-      }
     });
   }
   
   _handlePrevInstrument() {
     // Pop last instrument
-    this.setState((state) => {
+    return this.setState((state) => {
       return {
         instrumentAddresses: state.instrumentAddresses.pop()
       };
@@ -94,7 +89,7 @@ export default class Instrument extends Component {
   
   _handleNextInstrument(nextInstrumentAddress) {
     // Populate new instrument
-    this.populate(nextInstrumentAddress, () => {
+    return this.populate(nextInstrumentAddress).then(() => {
       // Push given instrument
       this.setState((state) => {
         return {
@@ -109,7 +104,7 @@ export default class Instrument extends Component {
   
   _handleSetInstrument(instrumentAddress) {
     // Populate new instrument
-    this.populate(instrumentAddress, () => {
+    return this.populate(instrumentAddress).then(() => {
       // Push given instrument
       this.setState((state) => {
         return {

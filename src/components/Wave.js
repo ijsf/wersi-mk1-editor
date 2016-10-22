@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Panel, Button, Checkbox, Modal, Col, Form, FormGroup, InputGroup, FormControl, ControlLabel } from 'react-bootstrap';
-import FontAwesome from 'react-fontawesome';
 
 import reactor from 'modules/flux';
 import { toImmutable } from 'nuclear-js';

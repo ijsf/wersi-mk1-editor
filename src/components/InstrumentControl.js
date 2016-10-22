@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Panel, Button, ButtonGroup, ButtonToolbar, Glyphicon, Checkbox, Modal, Col, Row, Form, FormGroup, InputGroup, FormControl, ControlLabel, Tooltip, OverlayTrigger } from 'react-bootstrap';
 import Dropzone from 'react-dropzone';
+import Loader from 'react-loader-advanced';
 
 import reactor from 'modules/flux';
 import { toImmutable } from 'nuclear-js';
@@ -14,7 +15,8 @@ export default class InstrumentControl extends Component {
     super();
     
     this.state = {
-      name: null
+      name: null,
+      loading: false
     };
   }
   
@@ -97,19 +99,22 @@ export default class InstrumentControl extends Component {
   
   _handleSave() {
     // Send to SysEx
-    this.props.client.setICB(this.props.instrumentAddress, this.state.icb)
-    .then(() => {
-      // Refresh data in case the Wersi has made any changes
-      return this.props.client.getICB(this.props.instrumentAddress);
-    })
-    .then((data) => {
-      // Update store
-      instrumentActions.update(this.props.instrumentAddress, 'icb', toImmutable(data));
+    this.setState({ loading: true }, () => {
+      this.props.client.setICB(this.props.instrumentAddress, this.state.icb)
+      .then(() => {
+        // Refresh data in case the Wersi has made any changes
+        return this.props.client.getICB(this.props.instrumentAddress);
+      })
+      .then((data) => {
+        // Update store
+        instrumentActions.update(this.props.instrumentAddress, 'icb', toImmutable(data));
+        this.setState({ loading: false });
       
-      // Reload instrument
-      return this.props.client.reloadInstrument(this.props.firstInstrumentAddress);
-    })
-    ;
+        // Reload instrument
+        return this.props.client.reloadInstrument(this.props.firstInstrumentAddress);
+      })
+      ;
+    });
   }
   
   _getDefaultInstrumentData(icb, instrumentAddress) {
@@ -129,7 +134,7 @@ export default class InstrumentControl extends Component {
   _handleNewInstrument(newInstrumentAddress) {
     if (newInstrumentAddress !== null) {
       // Change nextInstrumentAddress
-      this.setState({ icb: this.state.icb.set('nextInstrumentAddress', newInstrumentAddress) }, () => {
+      this.setState({ loading: true, icb: this.state.icb.set('nextInstrumentAddress', newInstrumentAddress) }, () => {
         // Update store of CURRENT instrument
         instrumentActions.update(this.props.instrumentAddress, 'icb', this.state.icb);
         
@@ -142,6 +147,7 @@ export default class InstrumentControl extends Component {
         .then(() => {
           // Switch to next instrument
           this.props.handleNextInstrument(newInstrumentAddress);
+          this.setState({ loading: false });
         });
       });
     }
@@ -159,6 +165,30 @@ export default class InstrumentControl extends Component {
 
       // Send to SysEx
       this.props.client.setICB(this.props.instrumentAddress, this.state.icb);
+    });
+  }
+  
+  _prevInstrument() {
+    this.setState({ loading: true }, () => {
+      this.props.handlePrevInstrument().then(() => {
+        this.setState({ loading: false });
+      });
+    });
+  }
+
+  _nextInstrument(address) {
+    this.setState({ loading: true }, () => {
+      this.props.handleNextInstrument(address).then(() => {
+        this.setState({ loading: false });
+      });
+    });
+  }
+
+  _setInstrument(address) {
+    this.setState({ loading: true }, () => {
+      this.props.handleSetInstrument(address).then(() => {
+        this.setState({ loading: false });
+      });
     });
   }
   
@@ -247,35 +277,35 @@ export default class InstrumentControl extends Component {
                         console.log("Remapped ICB addresses: vcf " + json.icb.vcfAddress + " wave " + json.icb.waveAddress + " ampl " + json.icb.amplAddress + " freq " + json.icb.freqAddress);
 
                         // Send to SysEx
-                        this.props.client.setICB(this.props.instrumentAddress, toImmutable(json.icb))
-                        //.then(() => this.props.client.getICB(this.props.instrumentAddress))
-                        //.then((data) => instrumentActions.update(this.props.instrumentAddress, 'icb', toImmutable(data)))
-                        .then(() => instrumentActions.update(this.props.instrumentAddress, 'icb', toImmutable(json.icb)))
+                        this.setState({ loading: true, import: null, name: null }, () => {
+                          this.props.client.setICB(this.props.instrumentAddress, toImmutable(json.icb))
+                          //.then(() => this.props.client.getICB(this.props.instrumentAddress))
+                          //.then((data) => instrumentActions.update(this.props.instrumentAddress, 'icb', toImmutable(data)))
+                          .then(() => instrumentActions.update(this.props.instrumentAddress, 'icb', toImmutable(json.icb)))
 
-                        .then((data) => this.props.client.setVCF(vcfAddress, toImmutable(json.vcf)))
-                        //.then(() => this.props.client.getVCF(vcfAddress))
-                        //.then((data) => instrumentActions.update(vcfAddress, 'vcf', toImmutable(data)))
-                        .then(() => instrumentActions.update(vcfAddress, 'vcf', toImmutable(json.vcf)))
+                          .then((data) => this.props.client.setVCF(vcfAddress, toImmutable(json.vcf)))
+                          //.then(() => this.props.client.getVCF(vcfAddress))
+                          //.then((data) => instrumentActions.update(vcfAddress, 'vcf', toImmutable(data)))
+                          .then(() => instrumentActions.update(vcfAddress, 'vcf', toImmutable(json.vcf)))
 
-                        .then((data) => this.props.client.setFixWave(waveAddress, json.wave))
-                        //.then(() => this.props.client.getFixWave(waveAddress))
-                        //.then((data) => instrumentActions.update(waveAddress, 'wave', toImmutable(data)))
-                        .then(() => instrumentActions.update(waveAddress, 'wave', toImmutable(json.wave)))
+                          .then((data) => this.props.client.setFixWave(waveAddress, json.wave))
+                          //.then(() => this.props.client.getFixWave(waveAddress))
+                          //.then((data) => instrumentActions.update(waveAddress, 'wave', toImmutable(data)))
+                          .then(() => instrumentActions.update(waveAddress, 'wave', toImmutable(json.wave)))
 
-                        .then((data) => this.props.client.setAmpl(amplAddress, json.ampl))
-                        //.then(() => this.props.client.getAmpl(amplAddress))
-                        //.then((data) => instrumentActions.update(amplAddress, 'ampl', toImmutable(data)))
-                        .then(() => instrumentActions.update(amplAddress, 'ampl', toImmutable(json.ampl)))
+                          .then((data) => this.props.client.setAmpl(amplAddress, json.ampl))
+                          //.then(() => this.props.client.getAmpl(amplAddress))
+                          //.then((data) => instrumentActions.update(amplAddress, 'ampl', toImmutable(data)))
+                          .then(() => instrumentActions.update(amplAddress, 'ampl', toImmutable(json.ampl)))
                         
-//                          .then((data) => this.props.client.setFreq(freqAddress, toImmutable(json.freq)))
-//                          .then(() => this.props.client.getFreq(freqAddress))
-//                          .then((data) => instrumentActions.update(freqAddress, 'freq', toImmutable(data)))
+  //                          .then((data) => this.props.client.setFreq(freqAddress, toImmutable(json.freq)))
+  //                          .then(() => this.props.client.getFreq(freqAddress))
+  //                          .then((data) => instrumentActions.update(freqAddress, 'freq', toImmutable(data)))
 
-                        .then(() => this.props.client.reloadInstrument(this.props.firstInstrumentAddress))
-                        ;
-                        
-                        // Hide modal and reset state variables
-                        this.setState({ import: null, name: null });
+                          .then(() => this.props.client.reloadInstrument(this.props.firstInstrumentAddress))
+                          .then(() => this.setState({ loading: false }))
+                          ;
+                        });
                       }
                       catch (e) {
                         this.setState({ import: "Could not load your JSON file! Please try again." });
@@ -307,10 +337,10 @@ export default class InstrumentControl extends Component {
             <ButtonToolbar>
               <ButtonGroup>
                 <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="prevcvtooltip">Previous control voice</Tooltip>)}>
-                  <Button onClick={() => this.props.handleSetInstrument(prevCV)} bsStyle="primary" disabled={firstCV}><Glyphicon glyph="chevron-left"/></Button>
+                  <Button onClick={() => this._setInstrument(prevCV)} bsStyle="primary" disabled={firstCV}><Glyphicon glyph="chevron-left"/></Button>
                 </OverlayTrigger>
                 <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="nextcvtooltip">Next control voice</Tooltip>)}>
-                  <Button onClick={() => this.props.handleSetInstrument(nextCV)} bsStyle="primary" disabled={lastCV}><Glyphicon glyph="chevron-right"/></Button>
+                  <Button onClick={() => this._setInstrument(nextCV)} bsStyle="primary" disabled={lastCV}><Glyphicon glyph="chevron-right"/></Button>
                 </OverlayTrigger>
                 <Button bsStyle="link" style={{ width: '11ch' }}>CV {firstInstrumentId} ({firstInstrumentAddress})</Button>
                 <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="importcvtooltip">Import control voice</Tooltip>)}>
@@ -322,10 +352,10 @@ export default class InstrumentControl extends Component {
               </ButtonGroup>
               <ButtonGroup>
                 <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="prevtooltip">Previous layer</Tooltip>)}>
-                  <Button onClick={() => this.props.handlePrevInstrument()} bsStyle="info" disabled={firstInstrument}><Glyphicon glyph="chevron-left"/></Button>
+                  <Button onClick={() => this._prevInstrument()} bsStyle="info" disabled={firstInstrument}><Glyphicon glyph="chevron-left"/></Button>
                 </OverlayTrigger>
                 <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="nexttooltip">Next layer</Tooltip>)}>
-                  <Button onClick={() => this.props.handleNextInstrument(icb.get('nextInstrumentAddress'))} bsStyle="info" disabled={!nextInstrument}><Glyphicon glyph="chevron-right"/></Button>
+                  <Button onClick={() => this._nextInstrument(icb.get('nextInstrumentAddress'))} bsStyle="info" disabled={!nextInstrument}><Glyphicon glyph="chevron-right"/></Button>
                 </OverlayTrigger>
                 <Button bsStyle="link" style={{ width: '11ch' }}>Layer {currentInstrumentLayer + 1} ({this.props.instrumentAddress})</Button>
                 <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="importtooltip">Import this layer</Tooltip>)}>
@@ -443,7 +473,7 @@ export default class InstrumentControl extends Component {
     );
     
     return (
-      <div>
+      <Loader show={this.state.loading} message={(<p>Downloading...</p>)} contentBlur={2}>
         {modal}
         <Panel header={header} collapsible defaultExpanded>
           <ButtonToolbar className="pull-right">
@@ -451,7 +481,7 @@ export default class InstrumentControl extends Component {
           </ButtonToolbar>
           {form}
         </Panel>
-      </div>
+      </Loader>
     );
   }
 }

@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import update from 'react/lib/update';
-import { Overlay, OverlayTrigger, Tooltip, Well, Panel, Button, ButtonToolbar, Checkbox, Modal, Col, Form, FormGroup, InputGroup, FormControl, ControlLabel } from 'react-bootstrap';
+import { Glyphicon, Overlay, OverlayTrigger, Tooltip, Well, Panel, Button, ButtonToolbar, Checkbox, Modal, Col, Form, FormGroup, InputGroup, FormControl, ControlLabel } from 'react-bootstrap';
+import Loader from 'react-loader-advanced';
 
 import reactMixin from 'react-mixin';
 import reactor from 'modules/flux';

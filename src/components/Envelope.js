@@ -383,8 +383,8 @@ class Envelope extends Component {
               {this.state.error}
             </div>
             <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">Send</Button>
-            <Button onClick={this._handleToggleValues.bind(this)} className="pull-right">Show {this.state.showValues ? "sliders" : "values"}</Button>
-            <Button onClick={this._handleAdd.bind(this)} className="pull-right">Add</Button>
+            <Button onClick={this._handleToggleValues.bind(this)} className="pull-right">{this.state.showValues ? (<Glyphicon glyph="tasks"/>) : (<Glyphicon glyph="pencil"/>)}</Button>
+            <Button onClick={this._handleAdd.bind(this)} className="pull-right"><Glyphicon glyph="plus"/></Button>
           </ButtonToolbar>
           <Well bsSize="small">
           <div style={{

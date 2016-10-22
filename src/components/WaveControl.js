@@ -18,14 +18,12 @@ export default class WaveControl extends Component {
   
   _watch(id, type) {
     const getter = instrumentGetters.byId(id, type);
-    console.log('WATCHING ' + id);
     
     // Unwatch if possible
     this._unwatch();
     
     // Add observer
     this._unwatchFn = reactor.observe(getter, (v) => {
-      console.log('CHANGED');
       this.setState((state) => {
         state[type] = v;
         return state;

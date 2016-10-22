@@ -107,6 +107,20 @@ export default class Instrument extends Component {
     });
   }
   
+  _handleSetInstrument(instrumentAddress) {
+    // Populate new instrument
+    this.populate(instrumentAddress, () => {
+      // Push given instrument
+      this.setState((state) => {
+        return {
+          instrumentAddresses: toImmutable([ instrumentAddress ])
+        };
+      }, () => {
+        this._watch(instrumentAddress, 'icb');
+      });
+    });
+  }
+  
   _showError(error) {
     this.setState({ error: error });
   }
@@ -143,6 +157,7 @@ export default class Instrument extends Component {
         instrumentAddress={instrumentAddress}
         handleNextInstrument={this._handleNextInstrument.bind(this)}
         handlePrevInstrument={this._handlePrevInstrument.bind(this)}
+        handleSetInstrument={this._handleSetInstrument.bind(this)}
         showError={this._showError.bind(this)}
         client={this.props.client}
       />);

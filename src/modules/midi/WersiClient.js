@@ -44,16 +44,19 @@ export default class WersiClient extends Client {
    * RAM address range: [86:127] (42).
    */
   static ADDRESS = {
+    // Maximum number of CVs
+    maxCVs: 20,
+    
     // Unique ICB address (range [0:19], includes BANK 2) and voice layer id (range [0:2])
     CV(id, voiceLayer) {
-      const address = (!voiceLayer) ? (66 + id) : (87 + id + (voiceLayer - 1) * 20);
-      return (id >= 0 && id < 20 && address >= 64 && address < 128) ? address : null;
+      const address = (!voiceLayer) ? (66 + id) : (87 + id + (voiceLayer - 1) * WersiClient.ADDRESS.maxCVs);
+      return (id >= 0 && id < WersiClient.ADDRESS.maxCVs && address >= 64 && address < 128) ? address : null;
     },
     
     // Unique RAM address for VCF/AMPL/FREQ/FIXWAVE (range [0:19], includes BANK 2) and voice layer id (range [0:2])
     RAM(id, voiceLayer) {
-      const address = (voiceLayer == 0) ? (65 + id) : (86 + id + (voiceLayer - 1) * 20);
-      return (id >= 0 && id < 20 && address >= 64 && address < 128) ? address : null;
+      const address = (voiceLayer == 0) ? (65 + id) : (86 + id + (voiceLayer - 1) * WersiClient.ADDRESS.maxCVs);
+      return (id >= 0 && id < WersiClient.ADDRESS.maxCVs && address >= 64 && address < 128) ? address : null;
     },
     
     // Reverse ICB to CV id mapping
@@ -63,7 +66,7 @@ export default class WersiClient extends Client {
     
     // Reverse ICB to layer id mapping
     layer(icbAddress) {
-      return (icbAddress >= 66 && icbAddress < 87) ? 0 : ((icbAddress - 87) / 20) + 1;
+      return (icbAddress >= 66 && icbAddress < 87) ? 0 : ((icbAddress - 87) / WersiClient.ADDRESS.maxCVs) + 1;
     }
   };
   
@@ -79,7 +82,7 @@ export default class WersiClient extends Client {
   static ENVELOPE = {
     TIMESTEP: 5,            // single instruction time step (5 ms)
     TIMESTEP7: 5 * 127,     // max time step for 7-bit values
-    TIMESTEP12: 5 * 20475,  // max time step for 12-bit values
+    TIMESTEP12: 5 * 4095,  // max time step for 12-bit values
     
     delay: function(v, f) {
       return [

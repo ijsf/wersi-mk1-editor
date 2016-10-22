@@ -171,6 +171,19 @@ export default class InstrumentControl extends Component {
       <h3>Instrument control ({this.props.instrumentAddress})</h3>
     );
 
+    // Determine variables related to layering and CVs, use default 1-to-1 Wersi mapping for any next instrument addresses
+    const firstInstrumentAddress = this.props.instrumentAddresses.first();
+    const firstInstrument = firstInstrumentAddress == this.props.instrumentAddress;
+    const firstInstrumentId = WersiClient.ADDRESS.id(firstInstrumentAddress);
+    const currentInstrumentLayer = WersiClient.ADDRESS.layer(this.props.instrumentAddress);
+    const nextInstrument = icb.get('nextInstrumentAddress') !== 0;
+    const nextNewInstrumentAddress = WersiClient.ADDRESS.CV(firstInstrumentId, currentInstrumentLayer + 1);
+
+    const firstCV = firstInstrumentId === 0;
+    const lastCV = firstInstrumentId === WersiClient.ADDRESS.maxCVs;
+    const prevCV = firstInstrumentAddress - 1;
+    const nextCV = firstInstrumentAddress + 1;
+    
     // Button toggle handler
     let handleButtonToggle = (type) => {
       instrumentActions.update(
@@ -288,6 +301,51 @@ export default class InstrumentControl extends Component {
     
     let form = (
       <Form horizontal>
+        <FormGroup>
+          <Col sm={2} componentClass={ControlLabel}>Voice selection</Col>
+          <Col sm={8}>
+            <ButtonToolbar>
+              <ButtonGroup>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="prevcvtooltip">Previous control voice</Tooltip>)}>
+                  <Button onClick={() => this.props.handleSetInstrument(prevCV)} bsStyle="primary" disabled={firstCV}><Glyphicon glyph="chevron-left"/></Button>
+                </OverlayTrigger>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="nextcvtooltip">Next control voice</Tooltip>)}>
+                  <Button onClick={() => this.props.handleSetInstrument(nextCV)} bsStyle="primary" disabled={lastCV}><Glyphicon glyph="chevron-right"/></Button>
+                </OverlayTrigger>
+                <Button bsStyle="link" style={{ width: '11ch' }}>CV {firstInstrumentId} ({firstInstrumentAddress})</Button>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="importcvtooltip">Import control voice</Tooltip>)}>
+                  <Button onClick={this._handleImport.bind(this)} bsStyle="primary"><Glyphicon glyph="import"/></Button>
+                </OverlayTrigger>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="exportcvtooltip">Export control voice</Tooltip>)}>
+                  <Button onClick={this._handleExport.bind(this)} bsStyle="primary"><Glyphicon glyph="export"/></Button>
+                </OverlayTrigger>
+              </ButtonGroup>
+              <ButtonGroup>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="prevtooltip">Previous layer</Tooltip>)}>
+                  <Button onClick={() => this.props.handlePrevInstrument()} bsStyle="info" disabled={firstInstrument}><Glyphicon glyph="chevron-left"/></Button>
+                </OverlayTrigger>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="nexttooltip">Next layer</Tooltip>)}>
+                  <Button onClick={() => this.props.handleNextInstrument(icb.get('nextInstrumentAddress'))} bsStyle="info" disabled={!nextInstrument}><Glyphicon glyph="chevron-right"/></Button>
+                </OverlayTrigger>
+                <Button bsStyle="link" style={{ width: '11ch' }}>Layer {currentInstrumentLayer + 1} ({this.props.instrumentAddress})</Button>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="importtooltip">Import this layer</Tooltip>)}>
+                  <Button onClick={this._handleImport.bind(this)} bsStyle="info"><Glyphicon glyph="import"/></Button>
+                </OverlayTrigger>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="exporttooltip">Export this layer</Tooltip>)}>
+                  <Button onClick={this._handleExport.bind(this)} bsStyle="info"><Glyphicon glyph="export"/></Button>
+                </OverlayTrigger>
+              </ButtonGroup>
+              <ButtonGroup>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="nextlayertooltip">Add next layer</Tooltip>)}>
+                  <Button onClick={() => this._handleNewInstrument(nextNewInstrumentAddress)} bsStyle="info" disabled={nextInstrument}><Glyphicon glyph="file"/></Button>
+                </OverlayTrigger>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="removenextlayerstooltip">Remove next layers</Tooltip>)}>
+                  <Button onClick={() => this._handleRemoveInstruments()} bsStyle="info" disabled={!nextInstrument}><Glyphicon glyph="remove"/></Button>
+                </OverlayTrigger>
+              </ButtonGroup>
+            </ButtonToolbar>
+          </Col>
+        </FormGroup>
         <FormGroup controlId="name">
           <Col sm={2} componentClass={ControlLabel}>Name</Col>
           <Col sm={3}>
@@ -384,42 +442,14 @@ export default class InstrumentControl extends Component {
       </Form>
     );
     
-    // Determine variables related to layering, use default 1-to-1 Wersi mapping for any next instrument addresses
-    const firstInstrument = this.props.instrumentAddresses.first() == this.props.instrumentAddress;
-    const firstInstrumentId = WersiClient.ADDRESS.id(this.props.instrumentAddresses.first());
-    const currentInstrumentLayer = WersiClient.ADDRESS.layer(this.props.instrumentAddress);
-    const nextInstrument = icb.get('nextInstrumentAddress') !== 0;
-    const nextNewInstrumentAddress = WersiClient.ADDRESS.CV(firstInstrumentId, currentInstrumentLayer + 1);
-    
     return (
       <div>
         {modal}
         <Panel header={header} collapsible defaultExpanded>
-          <ButtonToolbar>
-            <ButtonToolbar className="pull-right">
-              <ButtonGroup>
-                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="prevtooltip">Previous voice layer</Tooltip>)}>
-                  <Button onClick={() => this.props.handlePrevInstrument()} bsStyle="info" disabled={firstInstrument}><Glyphicon glyph="chevron-left"/></Button>
-                </OverlayTrigger>
-                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="nexttooltip">Next voice layer</Tooltip>)}>
-                  <Button onClick={() => this.props.handleNextInstrument(icb.get('nextInstrumentAddress'))} bsStyle="info" disabled={!nextInstrument}><Glyphicon glyph="chevron-right"/></Button>
-                </OverlayTrigger>
-                <Button bsStyle="link" style={{ width: '11ch' }}>Voice {currentInstrumentLayer + 1} ({this.props.instrumentAddress})</Button>
-                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="nextlayertooltip">Add next layer</Tooltip>)}>
-                  <Button onClick={() => this._handleNewInstrument(nextNewInstrumentAddress)} bsStyle="info" disabled={nextInstrument}><Glyphicon glyph="file"/></Button>
-                </OverlayTrigger>
-                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="removenextlayerstooltip">Remove next layers</Tooltip>)}>
-                  <Button onClick={() => this._handleRemoveInstruments()} bsStyle="info" disabled={!nextInstrument}><Glyphicon glyph="remove"/></Button>
-                </OverlayTrigger>
-              </ButtonGroup>
-              <ButtonGroup>
-                <Button onClick={this._handleImport.bind(this)} bsStyle="primary">Import</Button>
-                <Button onClick={this._handleExport.bind(this)} bsStyle="primary">Export</Button>
-              </ButtonGroup>
-              <Button onClick={this._handleSave.bind(this)} bsStyle="primary">Send</Button>
-            </ButtonToolbar>
+          <ButtonToolbar className="pull-right">
+            <Button onClick={this._handleSave.bind(this)} bsStyle="primary">Send</Button>
           </ButtonToolbar>
-        {form}
+          {form}
         </Panel>
       </div>
     );

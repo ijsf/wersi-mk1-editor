@@ -260,7 +260,7 @@ class FilterControl extends Component {
     return (
       <Panel header={header} collapsible defaultExpanded>
         <ButtonToolbar>
-          <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">Save</Button>
+          <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">Send</Button>
         </ButtonToolbar>
         {form}
       </Panel>

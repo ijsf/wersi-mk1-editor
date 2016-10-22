@@ -190,8 +190,16 @@ export default class Instrument extends Component {
         <Grid>
           <Row>
             <Col xsHidden={true} smHidden={true} mdHidden={true} lg={2}>
+              <hr/>
               <p>
-                Description
+                Control Voices (CV) are composed of at least one voice (layer),
+                each containing their own wavetables and envelopes.
+              </p>
+              <p>
+                Velocity dynamics, tuning and output routing can also be configured for each voice.
+              </p>
+              <p>
+                Finally, each voice with WersiVoice output is summed into a single WersiVoice effects modulator.
               </p>
             </Col>
             <Col lg={10}>
@@ -200,8 +208,20 @@ export default class Instrument extends Component {
           </Row>
           <Row>
             <Col xsHidden={true} smHidden={true} mdHidden={true} lg={2}>
+              <hr/>
               <p>
-                Description
+                A single Voltage Controlled Filter (VCF) is available for low-pass or band-pass filtering,
+                noise and distortion effects.
+              </p>
+              <p>
+                Each voice with VCF output is summed and fed into the VCF.
+              </p>
+              <p>
+                Tracking allows the VCF to adjust its frequency based on the pitch of every played note.
+              </p>
+              <p>
+                The VCF frequency is optionally modulated with a two-phase envelope,
+                which can also be retriggered on each note.
               </p>
             </Col>
             <Col lg={10}>
@@ -210,11 +230,12 @@ export default class Instrument extends Component {
           </Row>
           <Row>
             <Col xsHidden={true} smHidden={true} mdHidden={true} lg={2}>
+              <hr/>
               <p>
-                Sound is defined by periodic waveforms, or wavetables that represent one period of the sound wave.
+                The sound of each voice layer is defined by a wavetable, or periodic waveform that represents one period of the sound wave.
               </p>
               <p>
-                A voice layer contains four wavetables for four different octave ranges, all shown to the right: bass (lowest), tenor, alto, soprano (highest).
+                Four wavetables are used, corresponding to four different octave ranges from bass (lowest), tenor, alto to soprano (highest).
               </p>
               <p>
                 Wavetables can be changed by dragging the points up or down.

@@ -15,7 +15,8 @@ const bgStyle = {
   paddingTop: 16, paddingLeft: 24,
   fontSize: 48, textAlign: 'left', letterSpacing: '0.2em',
   fontFamily: 'Raleway',
-  opacity: 0.08
+  opacity: 0.08,
+  fontWeight: 300
 };
 
 export default class Wave extends Component {

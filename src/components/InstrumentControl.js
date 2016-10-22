@@ -355,7 +355,7 @@ export default class InstrumentControl extends Component {
       <Form horizontal>
         <FormGroup>
           <Col sm={2} componentClass={ControlLabel}>Voice selection</Col>
-          <Col sm={8}>
+          <Col sm={9}>
             <ButtonToolbar>
               <ButtonGroup>
                 <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="prevcvtooltip">Previous control voice</Tooltip>)}>
@@ -364,7 +364,7 @@ export default class InstrumentControl extends Component {
                 <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="nextcvtooltip">Next control voice</Tooltip>)}>
                   <Button onClick={() => this._setInstrument(nextCV)} bsStyle="primary" disabled={lastCV}><Glyphicon glyph="chevron-right"/></Button>
                 </OverlayTrigger>
-                <Button bsStyle="link" style={{ width: '13ch' }}>CV {firstInstrumentId} ({firstInstrumentAddress})</Button>
+                <Button bsStyle="link" style={{ width: '12ch' }}>CV {firstInstrumentId} ({firstInstrumentAddress})</Button>
                 <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="importcvtooltip">Import control voice</Tooltip>)}>
                   <Button onClick={this._handleImport.bind(this)} bsStyle="primary"><Glyphicon glyph="import"/></Button>
                 </OverlayTrigger>
@@ -379,7 +379,7 @@ export default class InstrumentControl extends Component {
                 <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="nexttooltip">Next layer</Tooltip>)}>
                   <Button onClick={() => this._nextInstrument(icb.get('nextInstrumentAddress'))} bsStyle="info" disabled={!nextInstrument}><Glyphicon glyph="chevron-right"/></Button>
                 </OverlayTrigger>
-                <Button bsStyle="link" style={{ width: '13ch' }}>Layer {currentInstrumentLayer + 1} ({this.props.instrumentAddress})</Button>
+                <Button bsStyle="link" style={{ width: '12ch' }}>Layer {currentInstrumentLayer + 1} ({this.props.instrumentAddress})</Button>
                 <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="importtooltip">Import this layer</Tooltip>)}>
                   <Button onClick={this._handleImport.bind(this)} bsStyle="info"><Glyphicon glyph="import"/></Button>
                 </OverlayTrigger>

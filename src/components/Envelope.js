@@ -71,7 +71,9 @@ class Envelope extends Component {
       showValues: false,
       modules: null,
       dropCount: 0,
-      releasePhaseStart: 3
+      releasePhaseStart: 3,
+      
+      loading: false
     };
     
     this._unwatchFn = null;
@@ -82,10 +84,7 @@ class Envelope extends Component {
     // Use global modules variable to allow simple communication between modules
     window.envelopeModules = [];
   }
-  
-  componentDidUpdate() {
-  }
-  
+    
   shouldComponentUpdate(nextProps, nextState) {
     // Check if we just dropped a module
     if (this.state.dropCount !== nextState.dropCount) {
@@ -177,19 +176,22 @@ class Envelope extends Component {
     this.state.data[1] = releaseOffset;
     
     // Send to SysEx
-    this.props.client.setAmpl(this.props.envAddress, this.state.data)
-    .then(() => {
-      // Refresh data in case the Wersi has made any changes
-      return this.props.client.getAmpl(this.props.envAddress);
-    })
-    .then((data) => {
-      // Update store
-      instrumentActions.update(this.props.envAddress, 'ampl', toImmutable(data));
+    this.setState({ loading: true }, () => {
+      this.props.client.setAmpl(this.props.envAddress, this.state.data)
+      .then(() => {
+        // Refresh data in case the Wersi has made any changes
+        return this.props.client.getAmpl(this.props.envAddress);
+      })
+      .then((data) => {
+        // Update store
+        instrumentActions.update(this.props.envAddress, 'ampl', toImmutable(data));
+        this.setState({ loading: false });
       
-      // Reload instrument
-      return this.props.client.reloadInstrument(this.props.firstInstrumentAddress);
-    })
-    ;
+        // Reload instrument
+        return this.props.client.reloadInstrument(this.props.firstInstrumentAddress);
+      })
+      ;
+    });
   }
   
   _handleSaveRelease() {
@@ -369,36 +371,38 @@ class Envelope extends Component {
     
     return connectDropTarget(
       <div>
-        <Panel header={header} collapsible defaultExpanded>
-          <EnvelopeDialog 
-          show={this.state.showAdd}
-          moduleWidth={moduleWidth}
-          moduleHeight={moduleHeight}
-          moduleMargin={moduleMargin}
-          cancel={() => {this.setState({ showAdd: false })}}
-          addedModule={this._handleAddedModule.bind(this)}
-          save={this._handleSaveModule.bind(this, 6)}   // always add in the 6th slot
-          />
-          <ButtonToolbar style={{ paddingBottom: 10 }}>
-            <div className="pull-left" style={{ height: 18, padding: 8, verticalAlign: 'middle' }}>
-              {this.state.error}
+        <Loader show={this.state.loading} message={(<h5>« Downloading... »</h5>)} contentBlur={2}>
+          <Panel header={header} collapsible defaultExpanded>
+            <EnvelopeDialog 
+            show={this.state.showAdd}
+            moduleWidth={moduleWidth}
+            moduleHeight={moduleHeight}
+            moduleMargin={moduleMargin}
+            cancel={() => {this.setState({ showAdd: false })}}
+            addedModule={this._handleAddedModule.bind(this)}
+            save={this._handleSaveModule.bind(this, 6)}   // always add in the 6th slot
+            />
+            <ButtonToolbar style={{ paddingBottom: 10 }}>
+              <div className="pull-left" style={{ height: 18, padding: 8, verticalAlign: 'middle' }}>
+                {this.state.error}
+              </div>
+              <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">Send</Button>
+              <Button onClick={this._handleToggleValues.bind(this)} className="pull-right">{this.state.showValues ? (<Glyphicon glyph="tasks"/>) : (<Glyphicon glyph="pencil"/>)}</Button>
+              <Button onClick={this._handleAdd.bind(this)} className="pull-right"><Glyphicon glyph="plus"/></Button>
+            </ButtonToolbar>
+            <Well bsSize="small">
+            <div style={{
+              width: width,
+              paddingLeft: moduleMargin,
+              paddingTop: moduleMargin,
+              paddingBottom: moduleMargin
+            }}>
+              {modules ? this._createModules(modules) : "No modules available."}
+              {releaseSlider}
             </div>
-            <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">Send</Button>
-            <Button onClick={this._handleToggleValues.bind(this)} className="pull-right">{this.state.showValues ? (<Glyphicon glyph="tasks"/>) : (<Glyphicon glyph="pencil"/>)}</Button>
-            <Button onClick={this._handleAdd.bind(this)} className="pull-right"><Glyphicon glyph="plus"/></Button>
-          </ButtonToolbar>
-          <Well bsSize="small">
-          <div style={{
-            width: width,
-            paddingLeft: moduleMargin,
-            paddingTop: moduleMargin,
-            paddingBottom: moduleMargin
-          }}>
-            {modules ? this._createModules(modules) : "No modules available."}
-            {releaseSlider}
-          </div>
-          </Well>
-        </Panel>
+            </Well>
+          </Panel>
+        </Loader>
       </div>
     );
   }

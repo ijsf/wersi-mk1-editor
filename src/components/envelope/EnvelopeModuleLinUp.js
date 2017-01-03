@@ -36,6 +36,9 @@ export default class EnvelopeModuleLinUp extends EnvelopeModule {
     aMax: 4094
   };
   
+  // Generate LUT based on n = 4094 and tMax = n * 5 = 20470 ms (using 5 ms envelope clock rate)
+  static timeLUT = EnvelopeModule.timeLUTGenerator(4094, 4094 * 5);
+  
   _decode(data) {
     const A = ((~data[1]) & 0xFF) << 4 | ((~data[0] >> 4) & 0xF);
     const B = (data[4] & 0xFF) << 4 | ((data[3] >> 4) & 0xF);
@@ -65,8 +68,6 @@ export default class EnvelopeModuleLinUp extends EnvelopeModule {
     const { TIMESTEP, TIMESTEP7, TIMESTEP12 } = WersiClient.ENVELOPE;
 		/*
 		* A (time duration)
-		* 0: 5ms
-		* 4094: 20500ms
 		* 4095: infinite
 		*
 		* B (end amplitude)
@@ -77,8 +78,8 @@ export default class EnvelopeModuleLinUp extends EnvelopeModule {
 		return {
 			error: (amplBefore > b) ? 'Start amplitude is bigger than end amplitude. Use linear-down instead' : null,
 			data: [
-				{ x: timeBefore, y: amplBefore },
-				{ x: timeBefore+EnvelopeModule.timeLUT[a]/1000, y: (amplBefore > b) ? amplBefore : b }
+				{ x: 0, y: amplBefore },
+				{ x: EnvelopeModuleLinUp.timeLUT[a]/1000, y: (amplBefore > b) ? amplBefore : b }
 			]
 		};
   }

@@ -32,9 +32,13 @@ export default class EnvelopeModuleExpUp extends EnvelopeModule {
     sustainEnable: true,
     
     aMin: 0,
+    aMinSlider: 2000,
     aMax: 4079
   };
   
+  // Generate LUT based on n = 4094 and tMax = n * 5 = 20470 ms (using 5 ms envelope clock rate)
+  static timeLUT = EnvelopeModule.timeLUTGenerator(4094, 4094 * 5);
+
   _decode(data) {
     let A = (((~data[1]) & 0xFF) << 4) | ((~data[0] >> 4) & 0xF);
     let B = (((data[4]) & 0xFF) << 4) | ((data[3] >> 4) & 0xF);
@@ -68,8 +72,6 @@ export default class EnvelopeModuleExpUp extends EnvelopeModule {
     const { TIMESTEP, TIMESTEP7, TIMESTEP12 } = WersiClient.ENVELOPE;
 		/*
 		* A (time duration)
-		* 0: 60ms
-		* 4079: 7500ms
 		* >=4080: infinite
 		*
 		* B (end amplitude)
@@ -81,7 +83,7 @@ export default class EnvelopeModuleExpUp extends EnvelopeModule {
 		for(i = 0; i < n; i++) {
 			data.push(
 				{
-					x: timeBefore+((this._expScale(a, 4080, 60, 7500) / n) * i)/1000,
+					x: timeBefore+((EnvelopeModuleExpUp.timeLUT[a] / n) * i)/1000,
 					y: amplBefore + (Math.exp(1 - (1 / Math.pow(i / n, 2))) * Math.max(0, b - amplBefore))
 				}
 			);

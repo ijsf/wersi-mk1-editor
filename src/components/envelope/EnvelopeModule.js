@@ -214,7 +214,7 @@ export default class EnvelopeModule extends Component {
      let LUT = Array(n), i = n;
      LUT[i--] = startTime;
      do {
-       LUT[i] = Math.round(LUT[i+1] * ((n - i)/(n - i + 1)));
+       LUT[i] = (LUT[i+1] * ((n - i)/(n - i + 1)));
      } while(i-- > 0);
      return LUT;
    })();

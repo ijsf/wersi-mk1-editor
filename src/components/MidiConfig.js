@@ -16,7 +16,8 @@ export default class MidiConfig extends Component {
       portsQueried: null,
       portIn: localStorage.getItem('portIn') || 0,
       portOut: localStorage.getItem('portOut') || 0,
-      showConfig: true
+      showConfig: true,
+      wersiConnecting: false
     };
   }
   
@@ -24,7 +25,7 @@ export default class MidiConfig extends Component {
     if (!this.props.client.isConnected()) {
       this.props.client.open(this.props.url, this.props.token)
       .then(() => {
-        this.setState({ status: "connected" });
+        this.setState({ status: "sysexConnected" });
       })
       .catch(() => {
         this.setState({ status: "error", error: "Could not connect to sysexd at " + this.props.url });
@@ -33,7 +34,7 @@ export default class MidiConfig extends Component {
   }
   
   componentDidUpdate() {
-    if (this.state.status == "connected") {
+    if (this.state.status == "sysexConnected") {
       if (!this.state.portsQueried) {
         // Query ports
         this.props.client.query()
@@ -63,7 +64,26 @@ export default class MidiConfig extends Component {
       }
     });
     
-    this.setState({ showConfig: false });
+    // Set wersi connecting state
+    this.setState({ wersiConnecting: true });
+    
+    // Try to send a SysEx message to see if the synthesizer is responsive
+    this.props.client.getICB(this.props.instrumentAddress)
+    .then(() => {
+      // Everything checks out, so hide this dialog
+      this.setState({ showConfig: false });
+    })
+    .catch((error) => {
+      // An error has occurred, so try to find out what happened
+      if(!this.props.client.isFirmwarePatched()) {
+        // Unpatched firmware
+        this.setState({ status: "unpatched" });
+      }
+      else {
+        this.setState({ status: "error" });
+      }
+    })
+    ;
   }
   
   render() {
@@ -76,7 +96,7 @@ export default class MidiConfig extends Component {
         </Modal.Body>
       );
     }
-    else if(this.state.status == "connected") {
+    else if(this.state.status == "sysexConnected") {
       if (!this.state.portsQueried) {
         // Still querying ports
         modalContents = (
@@ -111,7 +131,16 @@ export default class MidiConfig extends Component {
           <Form horizontal onSubmit={this._handleSubmit.bind(this)}>
             <Modal.Body>
               <p>
-                Please configure your MIDI input and output ports.
+                Before you continue, please make sure SysEx functionality is enabled on your synthesizer:
+              </p>
+              <ol>
+                <li>Press H followed by F to enter the MIDI settings.</li>
+                <li>Press C. Ensure 8 (SysEx) is lit, then ensure 1 (Stop) is not lit, and press 1 twice.</li>
+                <li>Press B. Ensure 8 (SysEx) is lit, then ensure 1 (Stop) is not lit, and press 1 twice.</li>
+                <li>Press H to exit the MIDI settings.</li>
+              </ol>
+              <p>
+                Select the MIDI input and output ports that connect to your synthesizer.
               </p>
               <FormGroup>
                 <Col componentClass={ControlLabel} sm={3}>
@@ -139,16 +168,34 @@ export default class MidiConfig extends Component {
               </FormGroup>
             </Modal.Body>
             <Modal.Footer>
-              <Button bsStyle="primary" type="submit">Save changes</Button>
+              <Button bsStyle="primary" type="submit" disabled={this.state.wersiConnecting}>
+                {this.state.wersiConnecting ? "Connecting..." : "Connect"}
+              </Button>
             </Modal.Footer>
           </Form>
         );
       }
     }
+    else if(this.state.status == "unpatched") {
+      modalContents = (
+        <Modal.Body>
+          <p>
+            It appears that your device is running the original operating system firmware ROM.
+            This firmware contains a number of unfortunate bugs that prevent this editor from working properly.
+          </p>
+          <p>
+            In order to use this editor, it is therefore necessary to update the firmware to a newer patched version.
+          </p>
+          <p>
+            Please refer to the firmware section at <a href="http://wer.si">wer.si</a> for more information.
+          </p>
+        </Modal.Body>
+      );
+    }
     else if(this.state.status == "error") {
       modalContents = (
         <Modal.Body>
-          {this.props.error}
+          {this.props.error || "An error occurred while trying to communicate with your device."}
         </Modal.Body>
       );
     }

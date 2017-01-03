@@ -107,7 +107,7 @@ export default class WersiClient extends Client {
   constructor() {
     super();
     
-    // Determine block lengths (in bytes)
+    // Block lengths (in bytes)
     this.blockLength = {};
     this.blockLength[WersiClient.BLOCK_TYPE.ICB] = 16;
     this.blockLength[WersiClient.BLOCK_TYPE.VCF] = 10;
@@ -116,8 +116,14 @@ export default class WersiClient extends Client {
     this.blockLength[WersiClient.BLOCK_TYPE.FIXWAVE] = 212;
     this.blockLength[WersiClient.BLOCK_TYPE.RELWAVE] = 177;
     
-    // Determine device id (Wersi MK1/EX20)
+    // Device id (Wersi MK1/EX20) with unpatched firmware
     this.deviceId = 0x01;
+
+    // Device id (Wersi MK1/EX20) with patched firmware
+    this.deviceIdPatched = 0x7F;
+    
+    // Boolean indicator for patched firmware
+    this.firmwarePatched = false;
   }
   
   // u8 to hex string (debug)
@@ -148,7 +154,12 @@ export default class WersiClient extends Client {
   
   // Validate SysEx header
   _isSysExHeaderValid(sysex) {
-    return (sysex[0] == 0xF0 && sysex[1] == 0x25 && sysex[2] == this.deviceId);
+    return (sysex[0] == 0xF0 && sysex[1] == 0x25 && (sysex[2] == this.deviceId || sysex[2] == this.deviceIdPatched));
+  }
+  
+  // Check whether the firmware is patched, based on the SysEx header
+  _isFirmwarePatched(sysex) {
+    return (sysex[2] == this.deviceIdPatched);
   }
   
   // Message object to binary SysEx message
@@ -192,6 +203,12 @@ export default class WersiClient extends Client {
       throw "Invalid SysEx message: " + this._utohex(sysex);
     }
     
+    // Check whether firmware has been patched
+    this.firmwarePatched = this._isFirmwarePatched(sysex);
+    if (!this.firmwarePatched) {
+      throw "Unpatched firmware";
+    }
+    
     // Parse Wersi specific content
     let i = 3;
     message.type = this._ntou(3, sysex[i++], sysex[i++]);
@@ -230,6 +247,11 @@ export default class WersiClient extends Client {
       .then((data) => {
         return this._fromSysEx(data);
       });
+  }
+  
+  // Returns whether the firmware is patched
+  isFirmwarePatched(sysex) {
+    return this.firmwarePatched;
   }
   
   // Returns whether the received SysEx message is valid and should be further processed

@@ -154,6 +154,15 @@ export default class EnvelopeModule extends Component {
     cMax: 4095,
     cStep: 1,
     
+    // Slider min values for convenience
+    //
+    // Some values scale so poorly (non-linear) in their range, the lower values don't even matter any more.
+    // However since the slider is linear, this seriously hampers its functionality.
+    // As a workaround, we just cut off the slider values from a certain point by specifying the minimum slider value.
+    aMinSlider: 0,
+    bMinSlider: 0,
+    cMinSlider: 0,
+    
     // Type of value
     aType: 'range',
     bType: 'range',
@@ -516,6 +525,7 @@ export default class EnvelopeModule extends Component {
     // Create HTML5 sliders (don't show if we're showcasing)
     const sliders = showCase ? null : Array.from(['a', 'b', 'c']).map((key) => {
       const value = this.state[key];
+      const valueMinSlider = this.props[key + "MinSlider"];
       const valueMin = this.props[key + "Min"];
       const valueMax = this.props[key + "Max"];
       const valueStep = this.props[key + "Step"];
@@ -584,7 +594,7 @@ export default class EnvelopeModule extends Component {
         sliderContent = (
           <input type="range" style={{...styleSlider, width: width * 0.5 + 5 }}
           defaultValue={value}
-          min={valueMin}
+          min={valueMinSlider}
           max={valueMax}
           step={valueStep}
           key={keyName + "_slider"}

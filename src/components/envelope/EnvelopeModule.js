@@ -403,21 +403,26 @@ export default class EnvelopeModule extends Component {
     if (!this.props.showValues && nextProps.showValues) {
       nextState['_text_'] = {};
     }
-
-    const graphData = this._graphFunction(nextState);
     
-    // If we are dragging, don't re-render, this will also skip componentWillUpdate and reloading of data
-    if (this.state._a !== nextState._a
-    || this.state._b !== nextState._b
-    || this.state._c !== nextState._c
-    || this.state._sustain !== nextState._sustain) {
-      // Copy drag values into real values
+    // Check if we are dragging
+    const dragging = this.state._a !== nextState._a
+      || this.state._b !== nextState._b
+      || this.state._c !== nextState._c
+      || this.state._sustain !== nextState._sustain;
+
+    // If we are dragging, copy drag values into real values
+    if (dragging) {
       nextState.a = nextState._a !== null ? nextState._a : this.state.a;
       nextState.b = nextState._b !== null ? nextState._b : this.state.b;
       nextState.c = nextState._c !== null ? nextState._c : this.state.c;
       nextState.sustain = (nextState._sustain !== null) ? nextState._sustain : this.state.sustain;
+    }
     
-      // Just update the graph
+    // Calculate graph values
+    const graphData = this._graphFunction(nextState);
+    
+    // If we are dragging, don't re-render, this will also skip componentWillUpdate and reloading of data
+    if (dragging) {
       if (nextProps.type === 'graph') {
         graph.series[0].data = graphData.data;
         graph._sustain = nextState.sustain;  // _sustain is quite the hack

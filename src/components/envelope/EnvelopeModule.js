@@ -215,7 +215,29 @@ export default class EnvelopeModule extends Component {
     this._graph = null;
     this._dragging = false;
   }
-  
+
+   /**
+    * A number of envelopes use the following time function:
+    *
+    * n = 4094 (since 4095 is infinite)
+    * 0 <= x < n
+    * f(n) = n * 5 = 20470 ms = ~20 seconds (using 5 ms envelope clock rate)
+    * f(x) = f(x + 1) * ((n - x)/(n - x + 1))
+    *
+    * Here, we calculate a lookup table for these values.
+    */
+   static timeLUT = (function() {
+     const startTime = 4094 * 5;
+     const n = 4094;
+   
+     let LUT = Array(n), i = n;
+     LUT[i--] = startTime;
+     do {
+       LUT[i] = Math.round(LUT[i+1] * ((n - i)/(n - i + 1)));
+     } while(i-- > 0);
+     return LUT;
+   })();
+ 
   static moduleSource = {
     canDrag(props) {
       // Only allow drag if the required properties are actually specified

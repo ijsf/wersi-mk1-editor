@@ -76,37 +76,18 @@ const RickshawCustomAxisRenderer = function(args) {
 	this.elements = [];
 	this.ticksTreatment = args.ticksTreatment || 'plain';
 
-	var time = args.timeFixture || new Rickshaw.Fixtures.Time();
-
-	this.appropriateTimeUnit = function() {
-
-		var unit;
-		var units = time.units;
-
-		var domain = this.graph.x.domain();
-		var rangeSeconds = domain[1] - domain[0];
-
-		units.forEach( function(u) {
-			if (Math.floor(rangeSeconds / u.seconds) >= 2) {
-				unit = unit || u;
-			}
-		} );
-
-		return (unit || time.units[time.units.length - 1]);
-	};
-
 	this.render = function() {
 
 		this.elements.forEach( function(e) {
 			e.parentNode.removeChild(e);
 		} );
+    
+    // Time formatter
+    let formatTime = (t) => value > 1 ? value.toPrecision(4) + "s" : Math.round(value * 1000) + "ms";
 
 		this.elements = [];
-
-		var unit = this.appropriateTimeUnit();
-
 		{
-			var value = this.graph.x.domain()[0];
+			var value = Number(this.graph.x.domain()[0]);
 			var element = document.createElement('div');
 			element.style.left = '5px';
       element.style.cssFloat = 'left';
@@ -115,14 +96,14 @@ const RickshawCustomAxisRenderer = function(args) {
 
 			var title = document.createElement('div');
 			title.classList.add('title');
-			title.innerHTML = unit.formatter(new Date(value * 1000));
+			title.innerHTML = formatTime(value);
 			element.appendChild(title);
 
 			self.graph.element.appendChild(element);
 			self.elements.push(element);
 		}
 		{
-			var value = this.graph.x.domain()[1];
+			var value = Number(this.graph.x.domain()[1]);
 			var element = document.createElement('div');
 			element.style.right = '5px';
 			element.style.cssFloat = 'right';
@@ -132,7 +113,7 @@ const RickshawCustomAxisRenderer = function(args) {
 			var title = document.createElement('div');
 			title.classList.add('title');
       // _sustain is quite the hack
-			title.innerHTML = self.graph._sustain ? "∞" : unit.formatter(new Date(value * 1000));
+			title.innerHTML = self.graph._sustain ? "∞" : formatTime(value);
 			element.appendChild(title);
 
 			self.graph.element.appendChild(element);

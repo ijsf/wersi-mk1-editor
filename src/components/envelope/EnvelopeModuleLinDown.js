@@ -32,6 +32,7 @@ export default class EnvelopeModuleLinDown extends EnvelopeModule {
     sustainEnable: true,
 
     aMin: 0,
+    aMinSlider: 3400,
     aMax: 4094
   };
   
@@ -77,7 +78,7 @@ export default class EnvelopeModuleLinDown extends EnvelopeModule {
 			error: (amplBefore < b) ? 'Start amplitude is smaller than end amplitude. Use linear-up instead' : null,
 			data: [
 				{ x: timeBefore, y: amplBefore },
-				{ x: timeBefore+this._expScale(a, 4095, TIMESTEP, TIMESTEP12)/1000, y: (amplBefore < b) ? amplBefore : b }
+        { x: timeBefore+EnvelopeModule.timeLUT[a]/1000, y: (amplBefore < b) ? amplBefore : b }
 			]
 		};
   }

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Panel, Button, ButtonGroup, ButtonToolbar, Checkbox, Modal, Col, Row, Form, FormGroup, InputGroup, FormControl, ControlLabel, Tooltip, OverlayTrigger } from 'react-bootstrap';
+import { Glyphicon, Panel, Button, ButtonGroup, ButtonToolbar, Checkbox, Modal, Col, Row, Form, FormGroup, InputGroup, FormControl, ControlLabel, Tooltip, OverlayTrigger } from 'react-bootstrap';
 import Loader from 'react-loader-advanced';
 
 import reactor from 'modules/flux';
@@ -311,7 +311,7 @@ export default class FilterControl extends Component {
       <Loader show={this.state.loading} message={(<h5>« Downloading... »</h5>)} contentBlur={2}>
         <Panel header={header} collapsible defaultExpanded>
           <ButtonToolbar>
-            <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">Send</Button>
+            <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary"><Glyphicon glyph="save"/></Button>
           </ButtonToolbar>
           {form}
         </Panel>

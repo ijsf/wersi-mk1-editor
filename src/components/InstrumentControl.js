@@ -504,7 +504,7 @@ export default class InstrumentControl extends Component {
           {modal}
           <Panel header={header} collapsible defaultExpanded>
             <ButtonToolbar className="pull-right">
-              <Button onClick={this._handleSave.bind(this)} bsStyle="primary">Send</Button>
+              <Button onClick={this._handleSave.bind(this)} bsStyle="primary"><Glyphicon glyph="save"/></Button>
             </ButtonToolbar>
             {form}
           </Panel>

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Overlay, OverlayTrigger, Tooltip, Panel, Button, Checkbox, Modal, Col, Form, FormGroup, InputGroup, FormControl, ControlLabel } from 'react-bootstrap';
+import { Glyphicon, Overlay, OverlayTrigger, Tooltip, Panel, Button, Checkbox, Modal, Col, Form, FormGroup, InputGroup, FormControl, ControlLabel } from 'react-bootstrap';
 import Loader from 'react-loader-advanced';
 
 import reactor from 'modules/flux';
@@ -95,7 +95,7 @@ export default class WaveControl extends Component {
         <Panel header={header} collapsible defaultExpanded>
           <div className="clearfix">
             <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="savetooltip">Save wavetables (hotkey W)</Tooltip>)}>
-              <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">Send</Button>
+              <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary"><Glyphicon glyph="save"/></Button>
             </OverlayTrigger>
           </div>
           <Wave client={this.props.client} waveSet='bassData' waveAddress={waveAddress} />

@@ -4,7 +4,10 @@ import WersiApp from 'components/WersiApp';
 export default class App extends Component {
   render() {
     return (
-      <WersiApp />
+      <WersiApp
+        // Defines the version
+        version="0.5"
+      />
     );
   }
 }

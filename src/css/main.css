@@ -72,6 +72,15 @@
           filter: none;
 }
 
+/* page header */
+.page-header h1 {
+  padding-left: 15px;
+}
+
+.page-header sub {
+  font-size: 50%;
+}
+
 /* react-bootstrap tooltip colors */
 .tooltip { pointer-events: none; }
 .info.top .tooltip-arrow { border-top-color: #ccc !important; }

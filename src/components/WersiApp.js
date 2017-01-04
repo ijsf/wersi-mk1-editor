@@ -35,7 +35,8 @@ export default class WersiApp extends Component {
     return (
       <div>
         <PageHeader>
-          Wersi MK1/EX20 editor
+          Wersi MK1 editor
+          <sub>{this.props.version}</sub>
         </PageHeader>
         {midiConfig}
         <Instrument

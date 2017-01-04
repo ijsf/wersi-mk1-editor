@@ -575,6 +575,30 @@ export default class WersiClient extends Client {
       });
   }
   
+  /*
+   * Key identifiers:
+   *
+   * [0:7]	 	-> [A:H] Function Control Matrix
+   * [8:15] 	-> [1:8] Function Control Matrix
+   * [16:17]	->
+   * [18:37]	-> [1:20] ROM voices
+   * [38:47]  -> [1:10] RAM voices
+   */
+  switchKey(keyId) {
+    return this.send(
+      this._toSysEx({
+        type: WersiClient.BLOCK_TYPE.SWITCH.charCodeAt(0), address: 0, length: 1, data: new Uint8Array([keyId])
+      }), true);
+  }
+  
+  stopSound() {
+    // Stopping the sound is possible by switching to amplitude envelope editing mode
+    this.switchKey(7);   // H, E (Synthesis page)
+    this.switchKey(4);
+    this.switchKey(14);  // 7 (Amplitude Envelope)
+    this.switchKey(7);   // H (Default page)
+  }
+  
   reloadInstrument(address) {
     // Check if address actually refers to a RAM voice
     address -= 66;

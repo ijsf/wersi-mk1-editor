@@ -433,7 +433,10 @@ class Envelope extends Component {
               <div className="pull-left" style={{ height: 18, padding: 8, verticalAlign: 'middle' }}>
                 {this.state.error}
               </div>
-                <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">Send</Button>
+              <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">Send</Button>
+              <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="stopsoundtooltip">Stop all (hanging) sounds</Tooltip>)}>
+                <Button onClick={() => { this.props.client.stopSound(); }} className="pull-right" bsStyle="primary"><Glyphicon glyph="off"/></Button>
+              </OverlayTrigger>
               <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="showvaluessliderstooltip">Show values or sliders</Tooltip>)}>
                 <Button onClick={this._handleToggleValues.bind(this)} className="pull-right">{this.state.showValues ? (<Glyphicon glyph="tasks"/>) : (<Glyphicon glyph="pencil"/>)}</Button>
               </OverlayTrigger>

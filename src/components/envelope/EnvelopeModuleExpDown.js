@@ -82,7 +82,7 @@ export default class EnvelopeModuleExpDown extends EnvelopeModule {
 		for(i = 0; i < n; i++) {
 			data.push(
 				{
-					x: timeBefore+((EnvelopeModuleExpUp.timeLUT[a] / n) * i)/1000,
+					x: timeBefore+((EnvelopeModuleExpDown.timeLUT[a] / n) * i)/1000,
 					y: amplBefore - (Math.exp(1 - (1 / Math.pow(i / n, 2))) * Math.max(0, amplBefore - b))
 				}
 			);

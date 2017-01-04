@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
-import { Panel, Button, Checkbox, Modal, Col, Form, FormGroup, InputGroup, FormControl, ControlLabel } from 'react-bootstrap';
+import { Overlay, OverlayTrigger, Tooltip, Panel, Button, Checkbox, Modal, Col, Form, FormGroup, InputGroup, FormControl, ControlLabel } from 'react-bootstrap';
 import Loader from 'react-loader-advanced';
 
 import reactor from 'modules/flux';
 import { toImmutable } from 'nuclear-js';
+
+import keydown from 'react-keydown';
 
 import Wave from 'components/Wave';
 
@@ -58,7 +60,9 @@ export default class WaveControl extends Component {
       this._watch(nextProps.waveAddress, 'wave');
     }
   }
-  
+
+  // W hotkey saves
+  @keydown('w')
   _handleSave() {
     // Send to SysEx
     this.setState({ loading: true }, () => {
@@ -90,9 +94,9 @@ export default class WaveControl extends Component {
       <Loader show={this.state.loading} message={(<h5>« Downloading... »</h5>)} contentBlur={2}>
         <Panel header={header} collapsible defaultExpanded>
           <div className="clearfix">
-            <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">
-              Send
-            </Button>
+            <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="savetooltip">Save wavetables (hotkey W)</Tooltip>)}>
+              <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">Send</Button>
+            </OverlayTrigger>
           </div>
           <Wave client={this.props.client} waveSet='bassData' waveAddress={waveAddress} />
           <Wave client={this.props.client} waveSet='tenorData' waveAddress={waveAddress} />

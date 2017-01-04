@@ -433,7 +433,9 @@ class Envelope extends Component {
               <div className="pull-left" style={{ height: 18, padding: 8, verticalAlign: 'middle' }}>
                 {this.state.error}
               </div>
-              <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">Send</Button>
+              <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="savetooltip">Save envelope (hotkey {this.props.hotKeySave})</Tooltip>)}>
+                <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary">Send</Button>
+              </OverlayTrigger>
               <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="stopsoundtooltip">Stop all (hanging) sounds</Tooltip>)}>
                 <Button onClick={() => { this.props.client.stopSound(); }} className="pull-right" bsStyle="primary"><Glyphicon glyph="off"/></Button>
               </OverlayTrigger>

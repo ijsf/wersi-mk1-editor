@@ -96,7 +96,7 @@ export default class WaveControl extends Component {
   
   _handleWaveUpdate(waveData) {
     if (this.state.parallel) {
-      // Decimation, borrowed from http://stackoverflow.com/posts/36295839/revisions
+      // Decimation (clamped), borrowed from http://stackoverflow.com/posts/36295839/revisions
       let scaleDown = function(y, N) {
         let res = [];
         let M = y.length;
@@ -110,14 +110,14 @@ export default class WaveControl extends Component {
           }
           carry = (m-(n+1)*M/N)*y[m-1]
           sum -= carry;
-          res[n] = sum*N/M;
+          res[n] = Math.min(Math.max(sum*N/M, 0), 255);
         }
         return res;
       }
-      // Interpolation
+      // Interpolation (clamped)
       let scaleUp = function(y, N) {
         let fn = Smooth(y);
-        return Array.from({length: N}, (v, i) => fn(i / (N/y.length)));
+        return Array.from({length: N}, (v, i) => Math.min(Math.max(fn(i / (N/y.length)), 0), 255));
       }
       
       let waveData64, waveData32, waveData16;

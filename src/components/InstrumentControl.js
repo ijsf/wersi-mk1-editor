@@ -162,7 +162,7 @@ export default class InstrumentControl extends Component {
     }
     else {
       // Invalid address
-      this.props.showError("No more RAM space for new voice layers!");
+      this.props.showError("No more RAM space for new layers!");
     }
   }
   
@@ -293,7 +293,7 @@ export default class InstrumentControl extends Component {
                           // Use global VCF address equal to VCF address of first address
                           // NOTE: we are assuming the first instrument ICB is actually stored in the store!
                           const firstVCFAddress = reactor.evaluate(instrumentGetters.byId(firstInstrumentAddress, 'icb')).get('vcfAddress');
-                          console.log('Using VCF address from first voice/layer: ' + firstVCFAddress);
+                          console.log('Using VCF address from first layer: ' + firstVCFAddress);
                           notification = "Ignored VCF settings. VCF importing only supported for first layer.";
                           json.icb.vcfAddress = firstVCFAddress;
                           useVCF = false;
@@ -354,7 +354,7 @@ export default class InstrumentControl extends Component {
     let form = (
       <Form horizontal>
         <FormGroup>
-          <Col sm={2} componentClass={ControlLabel}>Voice selection</Col>
+          <Col sm={2} componentClass={ControlLabel}>CV/Layer selection</Col>
           <Col sm={9}>
             <ButtonToolbar>
               <ButtonGroup>
@@ -373,25 +373,25 @@ export default class InstrumentControl extends Component {
                 </OverlayTrigger>
               </ButtonGroup>
               <ButtonGroup>
-                <OverlayTrigger placement="bottom" overlay={firstInstrument ? (<div/>) : (<Tooltip className="info" id="prevtooltip">Previous voice</Tooltip>)}>
+                <OverlayTrigger placement="bottom" overlay={firstInstrument ? (<div/>) : (<Tooltip className="info" id="prevtooltip">Previous layer</Tooltip>)}>
                   <Button onClick={() => this._prevInstrument()} bsStyle="info" disabled={firstInstrument}><Glyphicon glyph="chevron-left"/></Button>
                 </OverlayTrigger>
-                <OverlayTrigger placement="bottom" overlay={!nextInstrument ? (<div/>) : (<Tooltip className="info" id="nexttooltip">Next voice</Tooltip>)}>
+                <OverlayTrigger placement="bottom" overlay={!nextInstrument ? (<div/>) : (<Tooltip className="info" id="nexttooltip">Next layer</Tooltip>)}>
                   <Button onClick={() => this._nextInstrument(icb.get('nextInstrumentAddress'))} bsStyle="info" disabled={!nextInstrument}><Glyphicon glyph="chevron-right"/></Button>
                 </OverlayTrigger>
                 <Button bsStyle="link" style={{ width: '12ch' }}>Layer {currentInstrumentLayer + 1} ({this.props.instrumentAddress})</Button>
-                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="importtooltip">Import this voice</Tooltip>)}>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="importtooltip">Import into this layer</Tooltip>)}>
                   <Button onClick={this._handleImport.bind(this)} bsStyle="info"><Glyphicon glyph="import"/></Button>
                 </OverlayTrigger>
-                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="exporttooltip">Export this voice</Tooltip>)}>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="exporttooltip">Export this layer</Tooltip>)}>
                   <Button onClick={this._handleExport.bind(this)} bsStyle="info"><Glyphicon glyph="export"/></Button>
                 </OverlayTrigger>
               </ButtonGroup>
               <ButtonGroup>
-                <OverlayTrigger placement="bottom" overlay={nextInstrument ? (<div/>) : (<Tooltip className="info" id="nextlayertooltip">Append new voice</Tooltip>)}>
+                <OverlayTrigger placement="bottom" overlay={nextInstrument ? (<div/>) : (<Tooltip className="info" id="nextlayertooltip">Append new layer</Tooltip>)}>
                   <Button onClick={() => this._handleNewInstrument(nextNewInstrumentAddress)} bsStyle="info" disabled={nextInstrument}><Glyphicon glyph="file"/></Button>
                 </OverlayTrigger>
-                <OverlayTrigger placement="bottom" overlay={!nextInstrument ? (<div/>) : (<Tooltip className="info" id="removenextlayerstooltip">Eject all next voices</Tooltip>)}>
+                <OverlayTrigger placement="bottom" overlay={!nextInstrument ? (<div/>) : (<Tooltip className="info" id="removenextlayerstooltip">Eject all next layers</Tooltip>)}>
                   <Button onClick={() => this._handleRemoveInstruments()} bsStyle="info" disabled={!nextInstrument}><Glyphicon glyph="eject"/></Button>
                 </OverlayTrigger>
               </ButtonGroup>
@@ -401,7 +401,7 @@ export default class InstrumentControl extends Component {
         <FormGroup controlId="name">
           <Col sm={2} componentClass={ControlLabel}>Name</Col>
           <Col sm={3}>
-            <OverlayTrigger placement="bottom" overlay={firstInstrument ? (<div/>) : (<Tooltip className="info" id="nametooltip">Only the first voice name will affect the CV name</Tooltip>)}>
+            <OverlayTrigger placement="bottom" overlay={firstInstrument ? (<div/>) : (<Tooltip className="info" id="nametooltip">Only the first layer name will affect the CV name</Tooltip>)}>
               <FormControl value={name} type="text" maxLength="6" placeholder="Instrument name" maxLength={6}
                 onChange={(event) => this.setState({ name: event.target.value })}
                 onBlur={(event) => handleInputSet("name", event.target.value)}
@@ -485,7 +485,7 @@ export default class InstrumentControl extends Component {
           <Col sm={2} componentClass={ControlLabel}>Output</Col>
           <Col sm={8}>
             <ButtonToolbar>
-              <span className="btn btn-link">Voice</span>
+              <span className="btn btn-link">Layer</span>
               <span className="btn btn-link">⤑</span>
               <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="brighttooltip">80 Hz low-pass filter</Tooltip>)}>
                 <Button active={icb.get('routeBright')} onClick={() => handleButtonToggle('routeBright')}>Bright</Button>

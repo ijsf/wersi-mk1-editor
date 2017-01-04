@@ -279,7 +279,7 @@ class Envelope extends Component {
 
   _findFirstEmptyModule() {
     const { modules } = this.state;
-    for(let i = 0; i < 7; ++i) {
+    for(let i = 0; i < 6; ++i) {
       if(modules[i].type == "empty") {
         return i;
       }

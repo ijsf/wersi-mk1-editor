@@ -33,7 +33,7 @@ export default class EnvelopeDialog extends Component {
   componentWillMount() {
   }
   
-  _handleAdd(data, props) {
+  _handleAdd(index, data, props) {
     // Call save
     this.props.save(data, props);
     

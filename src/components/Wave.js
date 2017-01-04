@@ -74,14 +74,26 @@ export default class Wave extends Component {
     }
   }
   
-  _updateWave(index, value) {
-    let bassData = this.state.wave.get(this.props.waveSet).set(index, this._decodeValue(value));
+  updateWave(waveData) {
     let wave = this.state.wave.withMutations((state) => {
-      state.set(this.props.waveSet, bassData);
+      state.set(this.props.waveSet, waveData);
     });
-    
-    // Update store
     instrumentActions.update(this.props.waveAddress, 'wave', wave);
+  }
+  
+  _handleUpdateWave(index, value) {
+    let waveData = this.state.wave.get(this.props.waveSet).set(index, this._decodeValue(value));
+    
+    // Call update callback, if any (this may possibly already handle wave updating, hence shouldUpdate)
+    let shouldUpdate = true;
+    if (this.props.updateCallback) {
+      shouldUpdate = this.props.updateCallback(waveData);
+    }
+    
+    // Update store, if we should update it
+    if (shouldUpdate) {
+      this.updateWave(waveData);
+    }
   }
   
   // Converts from s8
@@ -172,7 +184,7 @@ export default class Wave extends Component {
               value = this.props.high - (value * (this.props.high - this.props.low));
               
               // Update wave data through store
-              this._updateWave(index, value);
+              this._handleUpdateWave(index, value);
 
               // Reset variables
               dragElement = null, dragStartX = null, dragStartY = null, dragY = null, dragMinY = Infinity, dragMaxY = -Infinity;

@@ -464,7 +464,10 @@ export default class InstrumentControl extends Component {
           <Col sm={3}>
             <InputGroup>
               <InputGroup.Addon>Mode</InputGroup.Addon>
-                <FormControl componentClass="select" value={icb.get('wvMode')} disabled={!firstInstrument}>
+                <FormControl componentClass="select"
+                value={icb.get('wvMode')}
+                onChange={(event) => handleInputSet('wvMode', event.target.value)}>
+                disabled={!firstInstrument}>
                 {Array.from(["Rotor Slow", "Rotor Fast", "Flanger", "Strings", "Chorus"], (v, k) => {
                   return (<option value={k} key={"mode-" + k}>{v}</option>);
                 })}

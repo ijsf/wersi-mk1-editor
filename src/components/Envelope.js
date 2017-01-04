@@ -166,7 +166,7 @@ class Envelope extends Component {
       return {
         showValues: !state.showValues
       };
-    }, () => { console.log(this.state.showValues); });
+    });
   }
   
   _handleSave() {

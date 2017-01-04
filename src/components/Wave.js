@@ -236,7 +236,7 @@ export default class Wave extends Component {
     }
     
     return (
-      <div style={{ position: 'relative', width: '100%', height: '100px' }}>
+      <div style={{ userSelect: 'none', cursor: 'default', position: 'relative', width: '100%', height: '100px' }}>
         <div style={{...bgStyle}}>
           {this.props.waveSet.substr(0, this.props.waveSet.length - 4)}
         </div>

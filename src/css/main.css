@@ -75,10 +75,23 @@
 /* page header */
 .page-header h1 {
   padding-left: 15px;
+  padding-right: 15px;
 }
-
 .page-header sub {
   font-size: 50%;
+}
+
+/* page footer */
+.page-footer {
+  border-top: 1px solid #000;
+  margin: 0 0 20px;
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-top: 9px;
+  text-align: right;
+}
+.page-footer p {
+  font-size: 90%;
 }
 
 /* react-bootstrap tooltip colors */

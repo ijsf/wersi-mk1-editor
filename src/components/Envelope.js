@@ -252,7 +252,7 @@ class Envelope extends Component {
       
       // Add epilogue if necessary
       if (props.epilogue) {
-        let dataId = 0xC4 + index * 6;
+        const dataId = 0xC4 + index * 6;
         buffer[moduleData.length] = dataId;
       }
     }
@@ -288,24 +288,20 @@ class Envelope extends Component {
   }
   
   _deleteModule(id) {
-    const data = this.state.data;
+    // Move and resave modules
+    for(let index = 0; index < 6; ++index) {
+      if (index != id) {
+        window.envelopeModules[index].ref.saveModule(index < id ? index : (index - 1));
+      }
+    }
     
-    const offset = 2 + id * 6, offsetNext = 2 + (id + 1) * 6, offsetEnd = 2 + 6 * 6;
-    const moduleData = data.slice(offset, offset + 6);
+    // Add empty module at the end
+    this._handleSaveModule(6);
     
-    // Get data from before and after module
-    const beforeData = (id > 0) ? data.slice(0, offset) : null;
-    const afterData = (id < 6) ? data.slice(offsetNext) : null;
-    
-    // Reconstruct data
-    data.set(beforeData, 0);
-    data.set(afterData, beforeData.length);
-    
-    // Null data at end
-    data.set([0,0,0,0,0,0], offsetEnd);
-    
-    // Save new data
-    this._handleSave();
+    // Move release slider if necessary
+    if (this.state.releasePhaseStart > id) {
+      this.setState({releasePhaseStart: this.state.releasePhaseStart - 1});
+    }
   }
 
   _findModule(id) {
@@ -346,7 +342,7 @@ class Envelope extends Component {
         moveModule: this._moveModule.bind(this),
         deleteModule: this._deleteModule.bind(this),
         findModule: this._findModule.bind(this),
-        save: this._handleSaveModule.bind(this, index),   // use linear index here
+        save: this._handleSaveModule.bind(this),
         data: module.data,
         color: release ? 'thistle' : 'lightsteelblue',
         release: release,

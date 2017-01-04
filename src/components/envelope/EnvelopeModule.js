@@ -345,7 +345,7 @@ export default class EnvelopeModule extends Component {
     
     // Move values into hacky global (time is typically a and amplitude is typically b)
     // If we don't have a graph, just set the previous amplitude to the middle to get a nice visual.
-    window.envelopeModules[index] = this.props.type === 'graph' ? { a: a, b: b, c: c } : { a: 0, b: 2048, c: 0 };
+    window.envelopeModules[index] = this.props.type === 'graph' ? { a: a, b: b, c: c, ref: this } : { a: 0, b: 2048, c: 0, ref: this };
     
     // Attempt to get timeBefore (a) and amplBefore (b) from hacky global
     //
@@ -393,8 +393,8 @@ export default class EnvelopeModule extends Component {
     Object.assign(nextState, this._getUpdatedData(nextProps));
   }
   
-  saveModule() {
-    this.props.save(this._handleSave(this.state), this.props);
+  saveModule(index) {
+    this.props.save(index == undefined ? this.props.index : index, this._handleSave(this.state), this.props);
   }
   
   _isNumeric(x) {

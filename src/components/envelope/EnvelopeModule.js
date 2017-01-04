@@ -503,11 +503,11 @@ export default class EnvelopeModule extends Component {
         <Glyphicon glyph="repeat"
         style={{
           fontSize: graphHeight * 0.5,
-          padding: 4,
           color: 'silver',
-          display: 'block',
-          height: graphHeight + 14,
-          paddingTop: graphHeight * 0.25
+          display: 'inline-block',
+          height: graphHeight,
+          paddingTop: graphHeight * 0.25,
+          marginBottom: 14
         }}
         />
       );

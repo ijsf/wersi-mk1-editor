@@ -52,6 +52,17 @@ const styleText = {
   height: 15
 };
 
+const styleCloseButton = {
+	display: 'inline-block',
+  paddingLeft: 4,
+  paddingRight: 4,
+  paddingTop: 0,
+  paddingBottom: 0,
+	marginTop: 2,
+  float: "right",
+  opacity: 0.8
+};
+
 const styleSliderButton = {
 	display: 'inline-block',
   paddingLeft: 4,
@@ -213,10 +224,12 @@ export default class EnvelopeModule extends Component {
     * f(n) = tMax
     * f(x) = f(x + 1) * ((n - x)/(n - x + 1))
     *
+    * n is expected to be 4095 or lower, all other values are initialized to a very large value.
+    *
     * Here, we calculate a lookup table for these values.
     */
   static timeLUTGenerator = function(n, tMax) {
-    let LUT = Array(n), i = n;
+    let LUT = new Array(4096).fill(1E6), i = n;
     LUT[i--] = tMax;
     do {
       LUT[i] = (LUT[i+1] * ((n - i)/(n - i + 1)));
@@ -639,9 +652,16 @@ export default class EnvelopeModule extends Component {
           style={{ ...style, opacity, width, height, marginRight, marginBottom, cursor, backgroundImage }}
           className={showCase ? "btn-default" : "module"}
         >
-          <div style={{ ...styleTitle }}>
-            <span style={{ opacity: styleTitle.opacity * 0.6}}>{wersiPhase === null ? null : wersiPhase + '.'} </span>
-            {this.props.title}
+          <div>
+            <div style={{ ...styleTitle }}>
+              <span style={{ opacity: styleTitle.opacity * 0.6}}>{wersiPhase === null ? null : wersiPhase + '.'} </span>
+              {this.props.title}
+            </div>
+            <Button
+              bsStyle="link"
+              onClick={() => this.props.deleteModule(this.props.id)}
+              style={{ ...styleCloseButton, width: 17 }}
+            >×</Button>
           </div>
           <div style={{ ...styleGraph }} ref={(c) => this._graph = c} />
           {iconContent}

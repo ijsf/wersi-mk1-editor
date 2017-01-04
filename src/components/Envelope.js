@@ -247,12 +247,14 @@ class Envelope extends Component {
     buffer.set([0,0,0,0,0,0], 0);
     
     // Set module data
-    buffer.set(moduleData, 0);
-    
-    // Add epilogue if necessary
-    if (props.epilogue) {
-      let dataId = 0xC4 + index * 6;
-      buffer[moduleData.length] = dataId;
+    if (moduleData) {
+      buffer.set(moduleData, 0);
+      
+      // Add epilogue if necessary
+      if (props.epilogue) {
+        let dataId = 0xC4 + index * 6;
+        buffer[moduleData.length] = dataId;
+      }
     }
     
     // Splice into existing data
@@ -273,6 +275,37 @@ class Envelope extends Component {
         ]
       }
     }));
+  }
+
+  _findFirstEmptyModule() {
+    const { modules } = this.state;
+    for(let i = 0; i < 7; ++i) {
+      if(modules[i].type == "empty") {
+        return i;
+      }
+    }
+    return -1;
+  }
+  
+  _deleteModule(id) {
+    const data = this.state.data;
+    
+    const offset = 2 + id * 6, offsetNext = 2 + (id + 1) * 6, offsetEnd = 2 + 6 * 6;
+    const moduleData = data.slice(offset, offset + 6);
+    
+    // Get data from before and after module
+    const beforeData = (id > 0) ? data.slice(0, offset) : null;
+    const afterData = (id < 6) ? data.slice(offsetNext) : null;
+    
+    // Reconstruct data
+    data.set(beforeData, 0);
+    data.set(afterData, beforeData.length);
+    
+    // Null data at end
+    data.set([0,0,0,0,0,0], offsetEnd);
+    
+    // Save new data
+    this._handleSave();
   }
 
   _findModule(id) {
@@ -311,6 +344,7 @@ class Envelope extends Component {
         height: moduleHeight,
         margin: moduleMargin,
         moveModule: this._moveModule.bind(this),
+        deleteModule: this._deleteModule.bind(this),
         findModule: this._findModule.bind(this),
         save: this._handleSaveModule.bind(this, index),   // use linear index here
         data: module.data,
@@ -369,6 +403,19 @@ class Envelope extends Component {
       </div>
       );
     
+    // Add function
+    let handleAddModule = (moduleData, props) => {
+      // Try to find the first empty module
+      const id = this._findFirstEmptyModule();
+      if(id != -1) {
+        // Add this particular module
+        this._handleSaveModule(id, moduleData, props);
+        
+        // Save modules
+        this._handleSave();
+      }
+    };
+    
     return connectDropTarget(
       <div>
         <Loader show={this.state.loading} message={(<h5>« Downloading... »</h5>)} contentBlur={2}>
@@ -380,7 +427,7 @@ class Envelope extends Component {
             moduleMargin={moduleMargin}
             cancel={() => {this.setState({ showAdd: false })}}
             addedModule={this._handleAddedModule.bind(this)}
-            save={this._handleSaveModule.bind(this, 6)}   // always add in the 6th slot
+            save={handleAddModule}
             />
             <ButtonToolbar style={{ paddingBottom: 10 }}>
               <div className="pull-left" style={{ height: 18, padding: 8, verticalAlign: 'middle' }}>

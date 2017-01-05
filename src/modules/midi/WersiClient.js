@@ -415,7 +415,7 @@ export default class WersiClient extends Client {
         wvFeedbackStereoFlat: (message.data[9] & 0x40) ? true : false,
         wvFeedbackDeep: (message.data[9] & 0x80) ? true : false,
       
-        name: new TextDecoder("utf-8").decode(message.data.slice(10, 17))
+        name: Array.from(message.data.slice(10, 17)).map((c) => (c != null) ? String.fromCharCode(c) : null).join('')
       };
     });
   }

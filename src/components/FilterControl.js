@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { Glyphicon, Panel, Button, ButtonGroup, ButtonToolbar, Checkbox, Modal, Col, Row, Form, FormGroup, InputGroup, FormControl, ControlLabel, Tooltip, OverlayTrigger } from 'react-bootstrap';
 import Loader from 'react-loader-advanced';
 
+import keydown from 'react-keydown';
+
 import reactor from 'modules/flux';
 import { toImmutable } from 'nuclear-js';
 
@@ -66,6 +68,8 @@ export default class FilterControl extends Component {
     }
   }
     
+  // V hotkey saves
+  @keydown('v')
   _handleSave() {
     // Send to SysEx
     this.setState({ loading: true }, () => {
@@ -311,7 +315,9 @@ export default class FilterControl extends Component {
       <Loader show={this.state.loading} message={(<h5>« Downloading... »</h5>)} contentBlur={2}>
         <Panel header={header} collapsible defaultExpanded>
           <ButtonToolbar>
-            <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary"><Glyphicon glyph="save"/></Button>
+            <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="savetooltip">Save VCF (hotkey V)</Tooltip>)}>
+              <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary"><Glyphicon glyph="save"/></Button>
+            </OverlayTrigger>
           </ButtonToolbar>
           {form}
         </Panel>

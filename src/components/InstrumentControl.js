@@ -4,6 +4,8 @@ import Dropzone from 'react-dropzone';
 import Loader from 'react-loader-advanced';
 import { Notification } from 'react-notification';
 
+import keydown from 'react-keydown';
+
 import reactor from 'modules/flux';
 import { toImmutable } from 'nuclear-js';
 
@@ -108,6 +110,8 @@ export default class InstrumentControl extends Component {
     this.setState({ export: url });
   }
   
+  // I hotkey saves
+  @keydown('i')
   _handleSave() {
     // Send to SysEx
     this.setState({ loading: true }, () => {
@@ -520,7 +524,7 @@ export default class InstrumentControl extends Component {
               <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="doubletooltip">Toggle double layer mode</Tooltip>)}>
                 <Button onClick={this._handleToggleDouble.bind(this)} active={this.state.double}><Glyphicon glyph="random"/></Button>
               </OverlayTrigger>
-              <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="savetooltip">Save instrument control</Tooltip>)}>
+              <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="savetooltip">Save instrument control (hotkey I)</Tooltip>)}>
                 <Button onClick={this._handleSave.bind(this)} bsStyle="primary"><Glyphicon glyph="save"/></Button>
               </OverlayTrigger>
             </ButtonToolbar>

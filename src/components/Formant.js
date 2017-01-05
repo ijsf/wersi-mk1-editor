@@ -8,28 +8,33 @@ import { toImmutable } from 'nuclear-js';
 import Chartist from 'chartist';
 import ChartistGraph from 'react-chartist';
 
+import Piano from 'components/Piano';
+
 import { actions as instrumentActions, getters as instrumentGetters } from 'modules/instrument';
 
 const bgStyle = {
   position: 'absolute', left: 0, top: 0, width: '100%',
-  paddingTop: 16, paddingLeft: 24,
-  fontSize: 48, textAlign: 'left', letterSpacing: '0.2em',
+  paddingLeft: 8,
+  fontSize: 18, textAlign: 'left', letterSpacing: '0.2em',
   fontFamily: 'Raleway',
-  opacity: 0.08,
+  opacity: 0.5,
   fontWeight: 300
 };
 
-export default class Wave extends Component {
+export default class Formant extends Component {
   static defaultProps = {
     low: 0,
-    high: 1
+    high: 1,
+    waveSet: 'formantData',
+    enabled: false
   };
   
   constructor() {
     super();
     
     this.state = {
-      wave: null
+      wave: null,
+      keyActive: null
     };
   }
   
@@ -76,14 +81,17 @@ export default class Wave extends Component {
   
   updateWave(waveData) {
     let wave = this.state.wave.withMutations((state) => {
-      state.set(this.props.waveSet, waveData);
+      state.set(this.props.waveSet, waveData.reverse());
     });
-    
     instrumentActions.update(this.props.waveAddress, 'wave', wave);
   }
   
   _handleUpdateWave(index, value) {
-    let waveData = this.state.wave.get(this.props.waveSet).set(index, this._decodeValue(value));
+    // If parallel is enabled, change the entire wavetable
+    let waveData = this.props.parallel
+      ? toImmutable(Array.from({length: this.state.wave.get(this.props.waveSet).size}).fill(this._decodeValue(value)))
+      : this.state.wave.get(this.props.waveSet).reverse().set(index, this._decodeValue(value))
+    ;
     
     // Call update callback, if any (this may possibly already handle wave updating, hence shouldUpdate)
     let shouldUpdate = true;
@@ -119,10 +127,10 @@ export default class Wave extends Component {
     
     // Check if we have any valid wave data
     if (wave) {
-      waveData = this._encodeWave(wave.get(this.props.waveSet));
+      waveData = this._encodeWave(wave.get(this.props.waveSet).reverse());
     }
 
-    let lineChartData = {
+    let chartData = {
       series: [
         waveData
         ? waveData.map((v, index) => {
@@ -131,12 +139,13 @@ export default class Wave extends Component {
         : []
       ]
     }
-    let lineChartOptions = {
+    let chartOptions = {
       low: this.props.low,
       high: this.props.high,
+      showPoint: true,
       chartPadding: 10,
       fullWidth: true,
-      height: '100px',
+      height: '110px',
       axisX: {
         showGrid: true,
         showLabel: false,
@@ -150,9 +159,36 @@ export default class Wave extends Component {
       plugins: [
         (chart) => {
           let dragElement = null, dragStartX = null, dragStartY = null, dragY = null, dragMinY = Infinity, dragMaxY = -Infinity;
-        
+          
+          // Draw points on bars
+          chart.on('draw', (data) => {
+            if(data.type === 'bar') {
+              data.element._node.style['stroke-width'] = '2px';
+              let point = new Chartist.Svg('line', {
+                x1: data.x2,
+                x2: data.x2,
+                y1: data.y2,
+                y2: data.y2,
+                'ct:meta': data.meta
+              }, 'ct-point');
+              data.group.append(point);
+              
+              // Bind mouse enter handlers to link to piano
+              let enterHandler = function(index) {
+                // Can't use setState here, as this will break moveHandler due to a rerender
+                // Use hacky piano state change instead
+                if (this._piano && this.props.enabled) {
+                  this._piano.setState({ keyActive: this.props.parallel ? Infinity : 1 + Number(index) });
+                }
+              }.bind(this, data.meta);
+              point._node.addEventListener('mouseover', enterHandler);
+              data.element._node.addEventListener('mouseover', enterHandler);
+            }
+          });
+
+          // Make points draggable
           let downHandler = (event) => {
-            if (event.target.classList.contains('ct-point')) {
+            if (event.target.classList.contains('ct-point') && this.props.enabled) {
               event.preventDefault();
             
               dragElement = event.target;
@@ -174,7 +210,7 @@ export default class Wave extends Component {
             }
           };
           let upHandler = (event) => {
-            if (dragElement) {
+            if (dragElement && this.props.enabled) {
               // Redraw chart
               let index = Number(dragElement.getAttribute('ct:meta'));
 
@@ -192,7 +228,7 @@ export default class Wave extends Component {
             }
           };
           let moveHandler = (event) => {
-            if (dragElement) {
+            if (dragElement && this.props.enabled) {
               event.preventDefault();
             
               let dY = event.clientY - dragStartY;
@@ -213,7 +249,16 @@ export default class Wave extends Component {
               dragStartY = event.clientY;
             }
           };
-        
+
+          // Bind mouse leave handler to link with piano
+          chart.container.addEventListener('mouseleave', () => {
+            // Can't use setState here, as this will break moveHandler due to a rerender
+            // Use hacky piano state change instead
+            if (this._piano) {
+              this._piano.setState({ keyActive: null });
+            }
+          });
+
           // Bind down on the chart
           chart.container.addEventListener('mousedown', downHandler);
           chart.container.addEventListener('touchstart', downHandler);
@@ -225,27 +270,24 @@ export default class Wave extends Component {
           // Bind move globally
           document.addEventListener('mousemove', moveHandler);
           document.addEventListener('touchmove', moveHandler);
-        
-          // Draw options
-          chart.on('draw', (data) => {
-            if (data.type == 'point') {
-              data.element._node.style['stroke-width'] = '10px';
-            }
-          });
         }
       ]
     }
     
     return (
-      <div style={{ userSelect: 'none', cursor: 'default', position: 'relative', width: '100%', height: '100px' }}>
+      <div style={{ userSelect: 'none', cursor: 'default', position: 'relative', width: '100%', height: '110px', opacity: this.props.enabled ? 0.9 : 0.3 }}>
         <div style={{...bgStyle}}>
-          {this.props.waveSet.substr(0, this.props.waveSet.length - 4)}
+          formant synthesis
         </div>
+        <Piano
+          ref={(ref) => this._piano = ref}
+          style={{ position: 'absolute', left: 30, top: 15, width: '50%', paddingLeft: 10, paddingTop: 20 }}
+        />
         <ChartistGraph
-          data={lineChartData}
-          options={lineChartOptions}
-          type={'Line'}
-          style={{ position: 'absolute', left: 0, top: 0, width: '100%' }}
+          data={chartData}
+          options={chartOptions}
+          type={'Bar'}
+          style={{ position: 'absolute', left: '50%', top: 0, width: '50%' }}
         />
       </div>
     );

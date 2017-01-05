@@ -517,7 +517,7 @@ export default class WersiClient extends Client {
         wave.level = (message.data[0] & 0x7F) | 0;
         
         // Whether the wave uses fixed formants
-        wave.fixedFormant = (message.data[0] & 0x80) ? true : false;
+        wave.formant = (message.data[0] & 0x80) ? true : false;
         
         // Split wave data
         wave.bassData =     Array.from({ length: 64 }).map(() => { return dv.getUint8(i++); });
@@ -525,8 +525,11 @@ export default class WersiClient extends Client {
         wave.altoData =     Array.from({ length: 32 }).map(() => { return dv.getUint8(i++); });
         wave.sopranoData =  Array.from({ length: 16 }).map(() => { return dv.getUint8(i++); });
         
+        // Unknown data
+        wave.unknown1 =     Array.from({ length: 6 }).map(() => { return dv.getUint8(i++); });
+        
         // Fixed formant data
-        wave.fixedFormantData = Array.from({ length: 35 }).map(() => { return dv.getUint8(i++); });
+        wave.formantData =  Array.from({ length: 29 }).map(() => { return dv.getUint8(i++); });
       }
       return wave;
     });
@@ -542,7 +545,7 @@ export default class WersiClient extends Client {
       
       data[0] = wave.level & 0x7F;
       
-      if (wave.fixedFormant) {
+      if (wave.formant) {
         data[0] |= 0x80;
       }
       
@@ -558,8 +561,11 @@ export default class WersiClient extends Client {
       for(let j = 0; j < 16; ++j) {
         dv.setUint8(i++, wave.sopranoData[j]);
       }
-      for(let j = 0; j < 35; ++j) {
-        dv.setUint8(i++, wave.fixedFormantData[j]);
+      for(let j = 0; j < 6; ++j) {
+        dv.setUint8(i++, wave.unknown1[j]);
+      }
+      for(let j = 0; j < 29; ++j) {
+        dv.setUint8(i++, wave.formantData[j]);
       }
     }
     

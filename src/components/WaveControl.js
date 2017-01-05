@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Glyphicon, Overlay, OverlayTrigger, Tooltip, Panel, Button, Checkbox, Modal, Col, Form, FormGroup, InputGroup, FormControl, ControlLabel } from 'react-bootstrap';
+import { ButtonToolbar, Glyphicon, Overlay, OverlayTrigger, Tooltip, Panel, Button, Checkbox, Modal, Col, Form, FormGroup, InputGroup, FormControl, ControlLabel } from 'react-bootstrap';
 import Loader from 'react-loader-advanced';
 
 import reactor from 'modules/flux';
@@ -8,10 +8,20 @@ import { toImmutable } from 'nuclear-js';
 import keydown from 'react-keydown';
 
 import Wave from 'components/Wave';
+import Formant from 'components/Formant';
 
 import { Smooth } from '../vendor/smooth';
 
 import { actions as instrumentActions, getters as instrumentGetters } from 'modules/instrument';
+
+const bgStyle = {
+  float: 'left',
+  paddingTop: 10, paddingLeft: 8,
+  fontSize: 18, textAlign: 'left', letterSpacing: '0.2em',
+  fontFamily: 'Raleway',
+  opacity: 0.5,
+  fontWeight: 300
+};
 
 export default class WaveControl extends Component {
   constructor() {
@@ -19,7 +29,8 @@ export default class WaveControl extends Component {
     
     this.state = {
       loading: false,
-      parallel: false
+      parallel: false,
+      parallelFormant: false
     };
   }
   
@@ -94,6 +105,19 @@ export default class WaveControl extends Component {
     });
   }
   
+  _handleToggleParallelFormant() {
+    this.setState((state) => {
+      return {
+        parallelFormant: !state.parallelFormant
+      };
+    });
+  }
+  
+  _handleToggleFormant() {
+    let wave = this.state.wave.set('formant', !this.state.wave.get('formant'));
+    instrumentActions.update(this.props.waveAddress, 'wave', wave);
+  }
+  
   _handleWaveUpdate(waveData) {
     if (this.state.parallel) {
       // Decimation (clamped), borrowed from http://stackoverflow.com/posts/36295839/revisions
@@ -161,26 +185,40 @@ export default class WaveControl extends Component {
 
   render() {
     const { waveAddress } = this.props;
+    const { parallel, parallelFormant } = this.state;
+    const formant = this.state.wave ? this.state.wave.get('formant') : false;
     
     let header = (
-      <h3>Wavetable control ({this.props.waveAddress})</h3>
+      <h3>Wave control ({this.props.waveAddress})</h3>
     );
     
     return (
       <Loader show={this.state.loading} message={(<h5>« Downloading... »</h5>)} contentBlur={2}>
         <Panel header={header} collapsible defaultExpanded>
           <div className="clearfix">
-            <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="savetooltip">Save wavetables (hotkey W)</Tooltip>)}>
-              <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary"><Glyphicon glyph="save"/></Button>
-            </OverlayTrigger>
-            <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="paralleltooltip">Change all wavetables simultaneously</Tooltip>)}>
-              <Button onClick={this._handleToggleParallel.bind(this)} className="pull-right" active={this.state.parallel}><Glyphicon glyph="align-justify"/></Button>
-            </OverlayTrigger>
+            <div style={{...bgStyle}}>
+              wavetable synthesis
+            </div>
+            <ButtonToolbar>
+              <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="savetooltip">Save wavetables (hotkey W)</Tooltip>)}>
+                <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary"><Glyphicon glyph="save"/></Button>
+              </OverlayTrigger>
+              <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="formanttooltip">Toggle formant synthesis</Tooltip>)}>
+                <Button onClick={this._handleToggleFormant.bind(this)} className="pull-right" active={formant}><Glyphicon glyph="equalizer"/></Button>
+              </OverlayTrigger>
+              <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="parallelformanttooltip">Change all formants simultaneously</Tooltip>)}>
+                <Button onClick={this._handleToggleParallelFormant.bind(this)} className="pull-right" active={parallelFormant} disabled={!formant}><Glyphicon glyph="option-horizontal"/></Button>
+              </OverlayTrigger>
+              <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="paralleltooltip">Change all wavetables simultaneously</Tooltip>)}>
+                <Button onClick={this._handleToggleParallel.bind(this)} className="pull-right" active={parallel}><Glyphicon glyph="align-justify"/></Button>
+              </OverlayTrigger>
+            </ButtonToolbar>
           </div>
           <Wave ref={(r) => this._waveBass = r} client={this.props.client} waveSet='bassData' waveAddress={waveAddress} updateCallback={this._handleWaveUpdate.bind(this)} />
           <Wave ref={(r) => this._waveTenor = r} client={this.props.client} waveSet='tenorData' waveAddress={waveAddress} updateCallback={this._handleWaveUpdate.bind(this)} />
           <Wave ref={(r) => this._waveAlto = r} client={this.props.client} waveSet='altoData' waveAddress={waveAddress} updateCallback={this._handleWaveUpdate.bind(this)} />
           <Wave ref={(r) => this._waveSoprano = r} client={this.props.client} waveSet='sopranoData' waveAddress={waveAddress} updateCallback={this._handleWaveUpdate.bind(this)} />
+          <Formant waveAddress={waveAddress} parallel={parallelFormant} enabled={formant}/>
         </Panel>
       </Loader>
     );

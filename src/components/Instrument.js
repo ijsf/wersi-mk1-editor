@@ -232,13 +232,19 @@ export default class Instrument extends Component {
             <Col xsHidden={true} smHidden={true} mdHidden={true} lg={2}>
               <hr/>
               <p>
-                The sound of each voice layer is defined by a wavetable, or periodic waveform that represents one period of the sound wave.
+                The sound of each voice layer is first defined by a wavetable, or periodic waveform that represents one period of the sound wave.
               </p>
               <p>
                 Four wavetables are used, corresponding to four different octave ranges from bass (lowest), tenor, alto to soprano (highest).
               </p>
               <p>
-                Wavetables can be changed by dragging the points up or down.
+                Wavetables can be (simultaneously) changed by dragging the points up or down.
+              </p>
+              <p>
+                Sound can be further defined by formant synthesis on a limited key range between A#2 and F-5.
+              </p>
+              <p>
+                When enabled, drag the formant sliders to shape the sound of each individual key or all keys at once.
               </p>
             </Col>
             <Col lg={10}>

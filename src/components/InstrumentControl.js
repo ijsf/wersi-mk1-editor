@@ -18,7 +18,8 @@ export default class InstrumentControl extends Component {
     this.state = {
       name: null,
       notification: null,
-      loading: false
+      loading: false,
+      double: true
     };
   }
   
@@ -61,6 +62,14 @@ export default class InstrumentControl extends Component {
     if (this.props.instrumentAddress !== nextProps.instrumentAddress) {
       this._watch(nextProps.instrumentAddress, 'icb');
     }
+  }
+  
+  _handleToggleDouble() {
+    this.setState((state) => {
+      return {
+        double: !state.double
+      };
+    });
   }
   
   _handleImport() {
@@ -213,13 +222,15 @@ export default class InstrumentControl extends Component {
     // Determine variables related to layering and CVs, use default 1-to-1 Wersi mapping for any next instrument addresses
     const firstInstrumentAddress = this.props.instrumentAddresses.first();
     const firstInstrument = firstInstrumentAddress == this.props.instrumentAddress;
-    const firstInstrumentId = WersiClient.ADDRESS.id(firstInstrumentAddress);
-    const currentInstrumentLayer = WersiClient.ADDRESS.layer(this.props.instrumentAddress);
+    const firstInstrumentId = WersiClient.ADDRESS.id(firstInstrumentAddress, this.state.double);
+    const currentInstrumentLayer = WersiClient.ADDRESS.layer(this.props.instrumentAddress, this.state.double);
+    const lastInstrumentLayer = WersiClient.ADDRESS.maxLayers(this.state.double);
     const nextInstrument = icb.get('nextInstrumentAddress') !== 0;
-    const nextNewInstrumentAddress = WersiClient.ADDRESS.CV(firstInstrumentId, currentInstrumentLayer + 1);
+    const nextNewInstrumentAddress = WersiClient.ADDRESS.CV(firstInstrumentId, currentInstrumentLayer + 1, this.state.double);
+    const lastInstrumentId = WersiClient.ADDRESS.maxCVs(this.state.double);
 
     const firstCV = firstInstrumentId === 0;
-    const lastCV = firstInstrumentId === WersiClient.ADDRESS.maxCVs;
+    const lastCV = firstInstrumentId === WersiClient.ADDRESS.maxCVs(this.state.double);
     const prevCV = firstInstrumentAddress - 1;
     const nextCV = firstInstrumentAddress + 1;
     
@@ -354,7 +365,6 @@ export default class InstrumentControl extends Component {
     let form = (
       <Form horizontal>
         <FormGroup>
-          <Col sm={2} componentClass={ControlLabel}>CV/Layer selection</Col>
           <Col sm={9}>
             <ButtonToolbar>
               <ButtonGroup>
@@ -364,7 +374,7 @@ export default class InstrumentControl extends Component {
                 <OverlayTrigger placement="bottom" overlay={lastCV ? (<div/>) : (<Tooltip className="info" id="nextcvtooltip">Next CV</Tooltip>)}>
                   <Button onClick={() => this._setInstrument(nextCV)} bsStyle="primary" disabled={lastCV}><Glyphicon glyph="chevron-right"/></Button>
                 </OverlayTrigger>
-                <Button bsStyle="link" style={{ width: '12ch' }}>CV {firstInstrumentId} ({firstInstrumentAddress})</Button>
+                <Button bsStyle="link" style={{ width: '12ch' }}>CV {firstInstrumentId}/{lastInstrumentId} ({firstInstrumentAddress})</Button>
                 <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="importcvtooltip">Import this CV</Tooltip>)}>
                   <Button onClick={this._handleImport.bind(this)} bsStyle="primary"><Glyphicon glyph="import"/></Button>
                 </OverlayTrigger>
@@ -507,9 +517,14 @@ export default class InstrumentControl extends Component {
           {modal}
           <Panel header={header} collapsible defaultExpanded>
             <ButtonToolbar className="pull-right">
-              <Button onClick={this._handleSave.bind(this)} bsStyle="primary"><Glyphicon glyph="save"/></Button>
+              <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="doubletooltip">Toggle double layer mode</Tooltip>)}>
+                <Button onClick={this._handleToggleDouble.bind(this)} active={this.state.double}><Glyphicon glyph="random"/></Button>
+              </OverlayTrigger>
+              <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="savetooltip">Save instrument control</Tooltip>)}>
+                <Button onClick={this._handleSave.bind(this)} bsStyle="primary"><Glyphicon glyph="save"/></Button>
+              </OverlayTrigger>
             </ButtonToolbar>
-            {form}
+          {form}
           </Panel>
         </Loader>
         <Notification

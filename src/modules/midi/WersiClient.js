@@ -42,31 +42,41 @@ export default class WersiClient extends Client {
    *
    * ICB address range: [66:85] (20).
    * RAM address range: [86:127] (42).
+   *
+   * Double layer mode shrinks the capacity down to 10 voices but uses the bank 2 (last 10 voices) for
+   * 2 additional layer slots for the first 10 voices.
    */
   static ADDRESS = {
     // Maximum number of CVs
-    maxCVs: 20,
+    maxCVs(double) {
+      return double ? 10 : 20;
+    },
+    
+    // Maximum (typical) number of layers
+    maxLayers(double) {
+      return double ? 4 : 2;
+    },
     
     // Unique ICB address (range [0:19], includes BANK 2) and voice layer id (range [0:2])
-    CV(id, voiceLayer) {
-      const address = (!voiceLayer) ? (66 + id) : (87 + id + (voiceLayer - 1) * WersiClient.ADDRESS.maxCVs);
-      return (id >= 0 && id < WersiClient.ADDRESS.maxCVs && address >= 64 && address < 128) ? address : null;
+    CV(id, voiceLayer, double) {
+      const address = (!voiceLayer) ? (66 + id) : (87 + id + (voiceLayer - 1) * WersiClient.ADDRESS.maxCVs(double));
+      return (id >= 0 && id < WersiClient.ADDRESS.maxCVs(double) && address >= 64 && address < 128) ? address : null;
     },
     
     // Unique RAM address for VCF/AMPL/FREQ/FIXWAVE (range [0:19], includes BANK 2) and voice layer id (range [0:2])
-    RAM(id, voiceLayer) {
-      const address = (voiceLayer == 0) ? (65 + id) : (86 + id + (voiceLayer - 1) * WersiClient.ADDRESS.maxCVs);
-      return (id >= 0 && id < WersiClient.ADDRESS.maxCVs && address >= 64 && address < 128) ? address : null;
+    RAM(id, voiceLayer, double) {
+      const address = (voiceLayer == 0) ? (65 + id) : (86 + id + (voiceLayer - 1) * WersiClient.ADDRESS.maxCVs(double));
+      return (id >= 0 && id < WersiClient.ADDRESS.maxCVs(double) && address >= 64 && address < 128) ? address : null;
     },
     
     // Reverse ICB to CV id mapping
-    id(icbAddress) {
+    id(icbAddress, double) {
       return icbAddress - 66;
     },
     
     // Reverse ICB to layer id mapping
-    layer(icbAddress) {
-      return (icbAddress >= 66 && icbAddress < 87) ? 0 : Math.floor((icbAddress - 87) / WersiClient.ADDRESS.maxCVs) + 1;
+    layer(icbAddress, double) {
+      return (icbAddress >= 66 && icbAddress < 87) ? 0 : Math.floor((icbAddress - 87) / WersiClient.ADDRESS.maxCVs(double)) + 1;
     }
   };
   

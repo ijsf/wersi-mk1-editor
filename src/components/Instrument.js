@@ -192,14 +192,15 @@ export default class Instrument extends Component {
             <Col xsHidden={true} smHidden={true} mdHidden={true} lg={2}>
               <hr/>
               <p>
-                Control Voices (CV) are composed of at least one voice (layer),
+                20 Control Voices (CV) are typically composed of up to 2 (voice) layers,
                 each containing their own wavetables and envelopes.
               </p>
               <p>
                 Velocity dynamics, tuning and output routing can also be configured for each voice.
               </p>
               <p>
-                Finally, each voice with WersiVoice output is summed into a single WersiVoice effects modulator.
+                In double layer mode (default), only the first 10 CVs are available,
+                but CVs can now contain up to 4 (voice) layers each.
               </p>
             </Col>
             <Col lg={10}>

@@ -479,12 +479,15 @@ export default class InstrumentControl extends Component {
             <InputGroup>
               <InputGroup.Addon>Mode</InputGroup.Addon>
                 <FormControl componentClass="select"
-                value={icb.get('wvMode')}
-                onChange={(event) => handleInputSet('wvMode', event.target.value)}>
-                disabled={!firstInstrument}>
-                {Array.from(["Rotor Slow", "Rotor Fast", "Flanger", "Strings", "Chorus"], (v, k) => {
-                  return (<option value={k} key={"mode-" + k}>{v}</option>);
-                })}
+                value={firstInstrument ? icb.get('wvMode') : 0}
+                onChange={(event) => firstInstrument ? handleInputSet('wvMode', event.target.value) : false}>
+                >
+                {firstInstrument
+                  ? Array.from(["Rotor Slow", "Rotor Fast", "Flanger", "Strings", "Chorus"], (v, k) => {
+                      return (<option value={k} key={"mode-" + k}>{v}</option>);
+                    })
+                    : (<option value={0}>First layer only</option>)
+                }
               </FormControl>
             </InputGroup>
           </Col>

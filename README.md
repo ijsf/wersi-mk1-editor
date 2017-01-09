@@ -53,6 +53,8 @@ Like a lot of vintage hardware, the Wersi MK1 / EX-20 synthesizers come with a b
 
 It is recommended to open up your synthesizer, identify this battery (typically a Varta 2.4 V, 60 mAH, Ni/Cu) and remove or replace it as soon as possible to prevent any damage to your synthesizer.
 
+The 2.4 V battery is used as a power supply to 3 (SRM2064) SRAM devices whenever the main power supply is cut off. The low voltage enables the data retention mode in these devices, requires at least 2.0V and up to 5.0V and will use ~1 mA of power per chip. It can therefore easily be replaced with a more conventional coin cell CR2032 battery holder and battery.
+
 ### Enabling MIDI SysEx
 
 Each time the synthesizer is powered up, it is recommended to check whether the MIDI SysEx receive and send functionality has been enabled, as this is necessary for the editor to function properly.

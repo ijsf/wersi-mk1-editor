@@ -82,69 +82,81 @@ export default class InstrumentControl extends Component {
     this.setState({ import: "Import your instrument below.", importCV });
   }
   
-  _importCV(json) {
+  async _importCV(json, firstInstrumentAddress) {
+    let instrumentAddress = firstInstrumentAddress; // Start with the first address of this CV
+    
+    const numLayers = json.layers.length;
+    for(let i = 0; i < numLayers; ++i) {
+      const lastEntry = (i == numLayers - 1);
+      const nextInstrumentAddress = lastEntry ? null : instrumentAddress + 1;  // No next address for last layer
+      const layer = json.layers[i];
+
+      await this._importLayer(layer.data, firstInstrumentAddress, instrumentAddress, nextInstrumentAddress);
+      ++instrumentAddress;
+    }
+    
+    // Always move to first instrument
+    this._setInstrument(firstInstrumentAddress);
   }
   
-  _importLayer(json, currentInstrumentLayer, nextInstrumentAddress) {
-    let notification = null, useVCF = true;
+  async _importLayer(json, firstInstrumentAddress, instrumentAddress, nextInstrumentAddress) {
+    let useVCF = true;
+    const currentInstrumentLayer = WersiClient.ADDRESS.layer(instrumentAddress, this.state.double);
+
+    console.log(`Loading layer at ${instrumentAddress} (next instrument ${nextInstrumentAddress})`);
 
     // Retrieve ICB addresses
     const vcfAddress = json.icb.vcfAddress;
     const waveAddress = json.icb.waveAddress;
     const amplAddress = json.icb.amplAddress;
     const freqAddress = json.icb.freqAddress;
-    console.log("Original ICB addresses: vcf " + vcfAddress + " wave " + waveAddress + " ampl " + amplAddress + " freq " + freqAddress);
     
-    // Make sure we keep the nextInstrumentAddress of our current ICB as not to destroy the CV chain
-    json.icb.nextInstrumentAddress = nextInstrumentAddress;
+    // Make sure we keep the nextInstrumentAddress of our current ICB as not to destroy the CV chain, if specified
+    if (nextInstrumentAddress !== null) {
+      json.icb.nextInstrumentAddress = nextInstrumentAddress;
+    }
     
     // Override these with 1-to-1 Wersi mapping
-    json.icb.waveAddress = this.props.instrumentAddress - 1;
-    json.icb.amplAddress = this.props.instrumentAddress - 1;
-    json.icb.freqAddress = this.props.instrumentAddress - 1;
+    json.icb.waveAddress = instrumentAddress - 1;
+    json.icb.amplAddress = instrumentAddress - 1;
+    json.icb.freqAddress = instrumentAddress - 1;
 
     // Check if we are importing the first layer
     if (currentInstrumentLayer === 0) {
       // Use a legit VCF address
-      json.icb.vcfAddress = this.props.instrumentAddress - 1;
+      json.icb.vcfAddress = instrumentAddress - 1;
     }
     else {
       // Use global VCF address equal to VCF address of first address
       // NOTE: we are assuming the first instrument ICB is actually stored in the store!
       const firstVCFAddress = reactor.evaluate(instrumentGetters.byId(firstInstrumentAddress, 'icb')).get('vcfAddress');
       console.log('Using VCF address from first layer: ' + firstVCFAddress);
-      notification = "Ignored VCF settings. VCF importing only supported for first layer.";
       json.icb.vcfAddress = firstVCFAddress;
       useVCF = false;
     }
     console.log("Remapped ICB addresses: vcf " + json.icb.vcfAddress + " wave " + json.icb.waveAddress + " ampl " + json.icb.amplAddress + " freq " + json.icb.freqAddress);
 
-    // Send to SysEx
-    this.setState({ loading: true, import: null, name: null, notification }, async () => {
-      // react-notification onDismiss failure workaround
-      setTimeout(() => this.setState({ notification: null }), 2000);
-      
-      await this.props.client.setICB(this.props.instrumentAddress, toImmutable(json.icb));
-      await instrumentActions.update(this.props.instrumentAddress, 'icb', toImmutable(json.icb));
+    await this._sendLayer(instrumentAddress, json.icb, json.wave, json.ampl, json.freq, useVCF ? json.vcf : null);
+    await this.props.client.reloadInstrument(firstInstrumentAddress);
+  }
 
-      await this.props.client.setFixWave(json.icb.waveAddress, json.wave);
-      await instrumentActions.update(json.icb.waveAddress, 'wave', toImmutable(json.wave));
+  async _sendLayer(instrumentAddress, icb, wave, ampl, freq, vcf) {
+    await this.props.client.setICB(instrumentAddress, toImmutable(icb));
+    await instrumentActions.update(instrumentAddress, 'icb', toImmutable(icb));
 
-      await this.props.client.setAmpl(json.icb.amplAddress, json.ampl);
-      await instrumentActions.update(json.icb.amplAddress, 'ampl', toImmutable(json.ampl));
-    
-      //.then((data) => this.props.client.setFreq(json.icb.freqAddress, toImmutable(json.freq)))
-      //.then(() => instrumentActions.update(json.icb.freqAddress, 'freq', toImmutable(data)))
-      ;
+    await this.props.client.setFixWave(icb.waveAddress, wave);
+    await instrumentActions.update(icb.waveAddress, 'wave', toImmutable(wave));
 
-      if (useVCF) {
-        await this.props.client.setVCF(json.icb.vcfAddress, toImmutable(json.vcf));
-        await instrumentActions.update(json.icb.vcfAddress, 'vcf', toImmutable(json.vcf));
-      }
+    await this.props.client.setAmpl(icb.amplAddress, ampl);
+    await instrumentActions.update(icb.amplAddress, 'ampl', toImmutable(ampl));
 
-      await this.props.client.reloadInstrument(this.props.firstInstrumentAddress);
-      this.setState({ loading: false });
-    });
+    //await this.props.client.setAmpl(icb.amplAddress, freq);
+    //await instrumentActions.update(icb.amplAddress, 'ampl', toImmutable(freq));
+  
+    if (vcf) {
+      await this.props.client.setVCF(icb.vcfAddress, toImmutable(vcf));
+      await instrumentActions.update(icb.vcfAddress, 'vcf', toImmutable(vcf));
+    }
   }
   
   _exportLayer(icb, vcf, wave, ampl, freq) {
@@ -184,15 +196,18 @@ export default class InstrumentControl extends Component {
       json = {
         type: 'cv',
         version: FILE_VERSION,
-        layers: {}
+        layers: []
       };
 
       // Iterate over all instrument layers using their next pointers
       let instrumentAddress = this.props.instrumentAddress;
       do {
         // Read current instrument from store to JSON
-        console.log(instrumentAddress);
-        json.layers[instrumentAddress] = this._exportLayer(icb, vcf, wave, ampl, freq);
+        console.log(`Exporting layer ${instrumentAddress}`);
+        json.layers.push({
+          instrumentAddress: instrumentAddress,
+          data: this._exportLayer(icb, vcf, wave, ampl, freq)
+        });
         
         // Try to get/fetch next instrument address
         const nextInstrumentAddress = icb.get('nextInstrumentAddress');
@@ -215,7 +230,7 @@ export default class InstrumentControl extends Component {
       // Store to state, show export modal
       let file = new Blob([JSON.stringify(json)], { type: "application/json" });
       let url = URL.createObjectURL(file);
-      this.setState({ export: url });
+      this.setState({ export: url, exportCV: exportCV });
     }
     else {
       // Error occurred trying to construct JSON
@@ -383,7 +398,7 @@ export default class InstrumentControl extends Component {
           {this.state.export
             ? (
               <p>
-                <a download={icb.get('name') + '.json'} href={this.state.export} onClick={() => this.setState({ export: null })}>
+                <a download={`${icb.get('name')}.${this.state.exportCV ? "cv" : "layer"}.json`} href={this.state.export} onClick={() => this.setState({ export: null })}>
                 Click here to download.
                 </a>
               </p>
@@ -404,21 +419,28 @@ export default class InstrumentControl extends Component {
                         
                         if (this.state.importCV) {
                           // Import a CV
-                          
-                          // Check for valid type
                           if (json.type !== 'cv') {
                             throw `Not a CV export.`
                           }
-                          this._importCV(json);
+                          this.setState({ loading: true, import: null, name: null }, async () => {
+                            await this._importCV(json, firstInstrumentAddress);
+                            this.setState({ loading: false });
+                          });
                         }
                         else {
                           // Import a single layer
-
-                          // Check for valid type
                           if (json.type !== 'layer') {
                             throw `Not a layer export.`
                           }
-                          this._importLayer(json, currentInstrumentLayer, nextInstrumentAddress);
+                          this.setState({ loading: true, import: null, name: null }, async () => {
+                            await this._importLayer(json, this.props.firstInstrumentAddress, this.props.instrumentAddress, currentInstrumentLayer, nextInstrumentAddress);
+                            this.setState({ loading: false });
+
+                            /*
+                            // react-notification onDismiss failure workaround
+                            setTimeout(() => this.setState({ notification: null }), 2000);
+                            */
+                          });
                         }
                       }
                       catch (e) {

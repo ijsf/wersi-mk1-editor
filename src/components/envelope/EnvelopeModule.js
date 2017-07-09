@@ -22,8 +22,8 @@ const styleTitle = {
 	marginTop: 5,
 	marginBottom: 5,
 	verticalAlign: 'middle',
-	fontSize: 11,
-  fontWeight: 'normal',
+	fontSize: 12,
+  fontWeight: 300,
   opacity: 0.8
 };
 

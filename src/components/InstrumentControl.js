@@ -382,7 +382,7 @@ export default class InstrumentControl extends Component {
                 <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="reloadcvtooltip">Reload CV</Tooltip>)}>
                   <Button onClick={() => this._setInstrument(currentCV)} bsStyle="primary"><Glyphicon glyph="refresh"/></Button>
                 </OverlayTrigger>
-                <Button bsStyle="link" style={{ width: '12ch' }}>CV {firstInstrumentId + 1}/{lastInstrumentId + 1} ({firstInstrumentAddress})</Button>
+                <Button bsStyle="link" style={{ width: '16ch' }}>CV {firstInstrumentId + 1} of {lastInstrumentId + 1} ({firstInstrumentAddress})</Button>
                 <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="importcvtooltip">Import into this CV</Tooltip>)}>
                   <Button onClick={this._handleImport.bind(this)} bsStyle="primary"><Glyphicon glyph="import"/></Button>
                 </OverlayTrigger>

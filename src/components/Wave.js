@@ -14,7 +14,7 @@ const bgStyle = {
   position: 'absolute', left: 0, top: 0, width: '100%',
   paddingTop: 16, paddingLeft: 24,
   fontSize: 48, textAlign: 'left', letterSpacing: '0.2em',
-  fontFamily: 'Raleway',
+  fontFamily: 'Lato',
   opacity: 0.08,
   fontWeight: 300
 };

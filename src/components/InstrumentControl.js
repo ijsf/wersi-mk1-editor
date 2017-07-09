@@ -412,8 +412,8 @@ export default class InstrumentControl extends Component {
                 <OverlayTrigger placement="bottom" overlay={nextInstrument ? (<div/>) : (<Tooltip className="info" id="nextlayertooltip">Append new layer</Tooltip>)}>
                   <Button onClick={() => this._handleNewInstrument(nextNewInstrumentAddress)} bsStyle="info" disabled={nextInstrument}><Glyphicon glyph="file"/></Button>
                 </OverlayTrigger>
-                <OverlayTrigger placement="bottom" overlay={!nextInstrument ? (<div/>) : (<Tooltip className="info" id="removenextlayerstooltip">Eject all next layers</Tooltip>)}>
-                  <Button onClick={() => this._handleRemoveInstruments()} bsStyle="info" disabled={!nextInstrument}><Glyphicon glyph="eject"/></Button>
+                <OverlayTrigger placement="bottom" overlay={!nextInstrument ? (<div/>) : (<Tooltip className="info" id="removenextlayerstooltip">Delete all following layers</Tooltip>)}>
+                  <Button onClick={() => this._handleRemoveInstruments()} bsStyle="info" disabled={!nextInstrument}><Glyphicon glyph="trash"/></Button>
                 </OverlayTrigger>
               </ButtonGroup>
             </ButtonToolbar>

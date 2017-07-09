@@ -222,8 +222,12 @@ class Envelope extends Component {
     const id23 = ((moduleData[2] & 0xFF) << 4) | (moduleData[3] & 0xF);
     if      (id1n === 0x3 && id23 === 0x68D)    { type = 'linup'; }
     else if (id1n === 0x3 && id23 === 0x889)    { type = 'lindown'; }
+    else if (id1n === 0xC && id23 === 0x68D)    { type = 'dynlinup'; }
+    else if (id1n === 0xC && id23 === 0x889)    { type = 'dynlindown'; }
     else if (id1n === 0x2 && id23 === 0xE0D)    { type = 'expup'; }
     else if (id1n === 0x2 && id23 === 0xF09)    { type = 'expdown'; }
+    else if (id1n === 0xC && id23 === 0xE4D)    { type = 'dynexpup'; }
+    else if (id1n === 0xC && id23 === 0xF49)    { type = 'dynexpdown'; }
     else if (id1n === 0x1 && id2 === 0x00)      { type = 'constabs'; }
     else if (id1n === 0x5 && id2 === 0x00)      { type = 'constrel'; }
     else if (id1n === 0x2 && id2 === 0x00)      { type = 'repeat'; }
@@ -354,17 +358,21 @@ class Envelope extends Component {
   
       // Create element
       let el;
-      if (module.type === "linup")          { el = (<EnvelopeModuleLinUp {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
-      else if (module.type === "lindown")   { el = (<EnvelopeModuleLinDown {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
-      else if (module.type === "expup")     { el = (<EnvelopeModuleExpUp {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
-      else if (module.type === "expdown")   { el = (<EnvelopeModuleExpDown {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
-      else if (module.type === "constabs")  { el = (<EnvelopeModuleConstAbs {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
-      else if (module.type === "constrel")  { el = (<EnvelopeModuleConstRel {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
-      else if (module.type === "stepabs")   { el = (<EnvelopeModuleStepAbs {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
-      else if (module.type === "steprel")   { el = (<EnvelopeModuleStepRel {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
-      else if (module.type === "repeat")    { el = (<EnvelopeModuleRepeat {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
-      else if (module.type === "empty")     { el = (<EnvelopeModuleEmpty {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
-      else                                  { el = (<EnvelopeModuleUnknown {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      if (module.type === "linup")            { el = (<EnvelopeModuleLinUp {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === "lindown")     { el = (<EnvelopeModuleLinDown {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === "dynlinup")    { el = (<EnvelopeModuleDynLinUp {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === "dynlindown")  { el = (<EnvelopeModuleDynLinDown {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === "expup")       { el = (<EnvelopeModuleExpUp {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === "expdown")     { el = (<EnvelopeModuleExpDown {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === "dynexpup")    { el = (<EnvelopeModuleDynExpUp {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === "dynexpdown")  { el = (<EnvelopeModuleDynExpDown {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === "constabs")    { el = (<EnvelopeModuleConstAbs {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === "constrel")    { el = (<EnvelopeModuleConstRel {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === "stepabs")     { el = (<EnvelopeModuleStepAbs {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === "steprel")     { el = (<EnvelopeModuleStepRel {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === "repeat")      { el = (<EnvelopeModuleRepeat {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === "empty")       { el = (<EnvelopeModuleEmpty {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else                                    { el = (<EnvelopeModuleUnknown {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
       return el;
     });
   }

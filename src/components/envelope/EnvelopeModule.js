@@ -22,7 +22,7 @@ const styleTitle = {
 	marginTop: 5,
 	marginBottom: 5,
 	verticalAlign: 'middle',
-	fontSize: 12,
+	fontSize: 11,
   fontWeight: 300,
   opacity: 0.8
 };

@@ -60,16 +60,24 @@ export default class EnvelopeDialog extends Component {
         <Modal.Body>
           <div>
             <EnvelopeModuleEmpty {...moduleProps}/>
+            <EnvelopeModuleVibrato1 {...moduleProps}/>
+            <EnvelopeModuleVibrato2 {...moduleProps}/>
+            <EnvelopeModuleRepeat {...moduleProps}/>
+
             <EnvelopeModuleLinUp {...moduleProps}/>
-            <EnvelopeModuleExpUp {...moduleProps}/>
             <EnvelopeModuleLinDown {...moduleProps}/>
+            <EnvelopeModuleDynLinUp {...moduleProps}/>
+            <EnvelopeModuleDynLinDown {...moduleProps}/>
+
+            <EnvelopeModuleExpUp {...moduleProps}/>
+            <EnvelopeModuleExpDown {...moduleProps}/>
+            <EnvelopeModuleDynExpUp {...moduleProps}/>
+            <EnvelopeModuleDynExpDown {...moduleProps}/>
+
             <EnvelopeModuleStepAbs {...moduleProps}/>
             <EnvelopeModuleStepRel {...moduleProps}/>
             <EnvelopeModuleConstAbs {...moduleProps}/>
             <EnvelopeModuleConstRel {...moduleProps}/>
-            <EnvelopeModuleVibrato1 {...moduleProps}/>
-            <EnvelopeModuleVibrato2 {...moduleProps}/>
-            <EnvelopeModuleRepeat {...moduleProps}/>
           </div>
         </Modal.Body>
         <Modal.Footer>

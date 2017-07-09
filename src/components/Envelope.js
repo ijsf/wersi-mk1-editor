@@ -305,7 +305,7 @@ class Envelope extends Component {
   
   _deleteModule(id) {
     // Move and resave modules
-    for(let index = 0; index < 6; ++index) {
+    for(let index = 0; index < 7; ++index) {
       if (index != id) {
         window.envelopeModules[index].ref.saveModule(index < id ? index : (index - 1));
       }

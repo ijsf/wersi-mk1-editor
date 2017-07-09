@@ -379,7 +379,7 @@ export default class InstrumentControl extends Component {
                   <Button onClick={() => this._setInstrument(nextCV)} bsStyle="primary" disabled={lastCV}><Glyphicon glyph="chevron-right"/></Button>
                 </OverlayTrigger>
                 <Button bsStyle="link" style={{ width: '12ch' }}>CV {firstInstrumentId}/{lastInstrumentId} ({firstInstrumentAddress})</Button>
-                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="importcvtooltip">Import this CV</Tooltip>)}>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="importcvtooltip">Import into this CV</Tooltip>)}>
                   <Button onClick={this._handleImport.bind(this)} bsStyle="primary"><Glyphicon glyph="import"/></Button>
                 </OverlayTrigger>
                 <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="exportcvtooltip">Export this CV</Tooltip>)}>

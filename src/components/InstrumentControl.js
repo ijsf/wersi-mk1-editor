@@ -383,10 +383,10 @@ export default class InstrumentControl extends Component {
                   <Button onClick={() => this._setInstrument(currentCV)} bsStyle="primary"><Glyphicon glyph="refresh"/></Button>
                 </OverlayTrigger>
                 <Button bsStyle="link" style={{ width: '16ch' }}>CV {firstInstrumentId + 1} of {lastInstrumentId + 1} ({firstInstrumentAddress})</Button>
-                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="importcvtooltip">Import into this CV</Tooltip>)}>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="importcvtooltip">Load CV from file</Tooltip>)}>
                   <Button onClick={this._handleImport.bind(this)} bsStyle="primary"><Glyphicon glyph="folder-open"/></Button>
                 </OverlayTrigger>
-                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="exportcvtooltip">Export this CV</Tooltip>)}>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="exportcvtooltip">Save CV to file</Tooltip>)}>
                   <Button onClick={this._handleExport.bind(this)} bsStyle="primary"><Glyphicon glyph="floppy-disk"/></Button>
                 </OverlayTrigger>
               </ButtonGroup>
@@ -401,10 +401,10 @@ export default class InstrumentControl extends Component {
                   <Button onClick={() => this._setInstrument(this.props.instrumentAddress)} bsStyle="info"><Glyphicon glyph="refresh"/></Button>
                 </OverlayTrigger>
                 <Button bsStyle="link" style={{ width: '16ch' }}>Layer {currentInstrumentLayer + 1} ({this.props.instrumentAddress})</Button>
-                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="importtooltip">Import into this layer</Tooltip>)}>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="importtooltip">Load layer from file</Tooltip>)}>
                   <Button onClick={this._handleImport.bind(this)} bsStyle="info"><Glyphicon glyph="folder-open"/></Button>
                 </OverlayTrigger>
-                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="exporttooltip">Export this layer</Tooltip>)}>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="exporttooltip">Save layer to file</Tooltip>)}>
                   <Button onClick={this._handleExport.bind(this)} bsStyle="info"><Glyphicon glyph="floppy-disk"/></Button>
                 </OverlayTrigger>
               </ButtonGroup>

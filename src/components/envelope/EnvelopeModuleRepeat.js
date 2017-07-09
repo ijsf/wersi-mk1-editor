@@ -28,7 +28,7 @@ export default class EnvelopeModuleRepeat extends EnvelopeModule {
     ...EnvelopeModule.defaultProps,
     title: 'Repeat',
     description: 'Repeat the last X modules',
-    icon: 'fa-repeat',
+    icon: 'repeat',
     epilogue: false,
     type: 'icon',
     

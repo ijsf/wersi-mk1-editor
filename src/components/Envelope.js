@@ -26,6 +26,7 @@ import EnvelopeModuleNoise from 'components/envelope/EnvelopeModuleNoise';
 import EnvelopeModuleRepeat from 'components/envelope/EnvelopeModuleRepeat';
 import EnvelopeModuleStepAbs from 'components/envelope/EnvelopeModuleStepAbs';
 import EnvelopeModuleStepRel from 'components/envelope/EnvelopeModuleStepRel';
+import EnvelopeModuleUnknown from 'components/envelope/EnvelopeModuleUnknown';
 import EnvelopeModuleVibrato1 from 'components/envelope/EnvelopeModuleVibrato1';
 import EnvelopeModuleVibrato2 from 'components/envelope/EnvelopeModuleVibrato2';
 
@@ -228,7 +229,8 @@ class Envelope extends Component {
     else if (id1n === 0x2 && id2 === 0x00)      { type = 'repeat'; }
     else if (id1n === 0x1 && id2n === 0x1)      { type = 'stepabs'; }
     else if (id1n === 0x5 && id2n === 0x5)      { type = 'steprel'; }
-    else                                       { type = 'empty'; }
+    else if (id1n === 0x0 && id2n === 0x00)     { type = 'empty'; }
+    else                                        { type = 'unknown'; }
 
     console.log(type + ': ' + (Array.from(moduleData).map(function (x) {return x.toString(16);})).join(";"));
     
@@ -361,7 +363,8 @@ class Envelope extends Component {
       else if (module.type === "stepabs")   { el = (<EnvelopeModuleStepAbs {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
       else if (module.type === "steprel")   { el = (<EnvelopeModuleStepRel {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
       else if (module.type === "repeat")    { el = (<EnvelopeModuleRepeat {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
-      else                                  { el = (<EnvelopeModuleEmpty {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === "empty")     { el = (<EnvelopeModuleEmpty {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else                                  { el = (<EnvelopeModuleUnknown {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
       return el;
     });
   }

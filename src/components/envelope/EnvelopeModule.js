@@ -500,7 +500,7 @@ export default class EnvelopeModule extends Component {
     }
     else if (type === 'icon') {
       iconContent = (
-        <Glyphicon glyph="repeat"
+        <Glyphicon glyph={ this.props.icon }
         style={{
           fontSize: graphHeight * 0.5,
           color: 'silver',
@@ -655,7 +655,7 @@ export default class EnvelopeModule extends Component {
           <div>
             <div style={{ ...styleTitle }}>
               <span style={{ opacity: styleTitle.opacity * 0.6}}>{wersiPhase === null ? null : wersiPhase + '.'} </span>
-              {this.props.title}
+              {this.props.title ? this.props.title : this.state.title}
             </div>
             <Button
               bsStyle="link"

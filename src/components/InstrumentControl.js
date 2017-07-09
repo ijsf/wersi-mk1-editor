@@ -13,6 +13,9 @@ import WersiClient from 'modules/midi/WersiClient';
 
 import { actions as instrumentActions, getters as instrumentGetters } from 'modules/instrument';
 
+// Export file version
+const FILE_VERSION = '1.0.0';
+
 export default class InstrumentControl extends Component {
   constructor() {
     super();
@@ -74,20 +77,79 @@ export default class InstrumentControl extends Component {
     });
   }
   
-  _handleImport() {
+  _handleImport(importCV) {
     // Show import modal
-    this.setState({ import: "Import your instrument below." });
+    this.setState({ import: "Import your instrument below.", importCV });
   }
   
-  _handleExport() {
-    // Export entire instrument store to JSON
-    let icb = this.state.icb;
-    const vcf = reactor.evaluate(instrumentGetters.byId(icb.get('vcfAddress'), 'vcf')).toJS();
-    const wave = reactor.evaluate(instrumentGetters.byId(icb.get('waveAddress'), 'wave')).toJS();
-    const ampl = Array.from(reactor.evaluate(instrumentGetters.byId(icb.get('amplAddress'), 'ampl')));
-    const freq = null; //Array.from(reactor.evaluate(instrumentGetters.byId(icb.get('freqAddress'), 'freq')));
+  _importCV(json) {
+  }
+  
+  _importLayer(json, currentInstrumentLayer, nextInstrumentAddress) {
+    let notification = null, useVCF = true;
+
+    // Retrieve ICB addresses
+    const vcfAddress = json.icb.vcfAddress;
+    const waveAddress = json.icb.waveAddress;
+    const amplAddress = json.icb.amplAddress;
+    const freqAddress = json.icb.freqAddress;
+    console.log("Original ICB addresses: vcf " + vcfAddress + " wave " + waveAddress + " ampl " + amplAddress + " freq " + freqAddress);
     
+    // Make sure we keep the nextInstrumentAddress of our current ICB as not to destroy the CV chain
+    json.icb.nextInstrumentAddress = nextInstrumentAddress;
+    
+    // Override these with 1-to-1 Wersi mapping
+    json.icb.waveAddress = this.props.instrumentAddress - 1;
+    json.icb.amplAddress = this.props.instrumentAddress - 1;
+    json.icb.freqAddress = this.props.instrumentAddress - 1;
+
+    // Check if we are importing the first layer
+    if (currentInstrumentLayer === 0) {
+      // Use a legit VCF address
+      json.icb.vcfAddress = this.props.instrumentAddress - 1;
+    }
+    else {
+      // Use global VCF address equal to VCF address of first address
+      // NOTE: we are assuming the first instrument ICB is actually stored in the store!
+      const firstVCFAddress = reactor.evaluate(instrumentGetters.byId(firstInstrumentAddress, 'icb')).get('vcfAddress');
+      console.log('Using VCF address from first layer: ' + firstVCFAddress);
+      notification = "Ignored VCF settings. VCF importing only supported for first layer.";
+      json.icb.vcfAddress = firstVCFAddress;
+      useVCF = false;
+    }
+    console.log("Remapped ICB addresses: vcf " + json.icb.vcfAddress + " wave " + json.icb.waveAddress + " ampl " + json.icb.amplAddress + " freq " + json.icb.freqAddress);
+
+    // Send to SysEx
+    this.setState({ loading: true, import: null, name: null, notification }, async () => {
+      // react-notification onDismiss failure workaround
+      setTimeout(() => this.setState({ notification: null }), 2000);
+      
+      await this.props.client.setICB(this.props.instrumentAddress, toImmutable(json.icb));
+      await instrumentActions.update(this.props.instrumentAddress, 'icb', toImmutable(json.icb));
+
+      await this.props.client.setFixWave(json.icb.waveAddress, json.wave);
+      await instrumentActions.update(json.icb.waveAddress, 'wave', toImmutable(json.wave));
+
+      await this.props.client.setAmpl(json.icb.amplAddress, json.ampl);
+      await instrumentActions.update(json.icb.amplAddress, 'ampl', toImmutable(json.ampl));
+    
+      //.then((data) => this.props.client.setFreq(json.icb.freqAddress, toImmutable(json.freq)))
+      //.then(() => instrumentActions.update(json.icb.freqAddress, 'freq', toImmutable(data)))
+      ;
+
+      if (useVCF) {
+        await this.props.client.setVCF(json.icb.vcfAddress, toImmutable(json.vcf));
+        await instrumentActions.update(json.icb.vcfAddress, 'vcf', toImmutable(json.vcf));
+      }
+
+      await this.props.client.reloadInstrument(this.props.firstInstrumentAddress);
+      this.setState({ loading: false });
+    });
+  }
+  
+  _exportLayer(icb, vcf, wave, ampl, freq) {
     // Strip addresses as we will regenerate them
+    console.log(icb.toJS());
     icb = icb
     .delete('nextInstrumentAddress')
     .delete('vcfAddress')
@@ -95,19 +157,69 @@ export default class InstrumentControl extends Component {
     .delete('amplAddress')
     .delete('freqAddress')
     ;
-    
-    const json = {
+    console.log(icb.toJS());
+  
+    return {
       icb: icb.toJS(),
       vcf: vcf,
       wave: wave,
       ampl: ampl,
       freq: freq
     };
+  }
+  
+  async _handleExport(exportCV) {
+    let json = null;
 
-    // Store to state, show export modal
-    let file = new Blob([JSON.stringify(json)], { type: "application/json" });
-    let url = URL.createObjectURL(file);
-    this.setState({ export: url });
+    // Read entire instrument store to JSON
+    let icb = this.state.icb;
+    let vcf = reactor.evaluate(instrumentGetters.byId(icb.get('vcfAddress'), 'vcf')).toJS();
+    let wave = reactor.evaluate(instrumentGetters.byId(icb.get('waveAddress'), 'wave')).toJS();
+    let ampl = Array.from(reactor.evaluate(instrumentGetters.byId(icb.get('amplAddress'), 'ampl')));
+    let freq = null; //Array.from(reactor.evaluate(instrumentGetters.byId(icb.get('freqAddress'), 'freq')));
+
+    if (exportCV) {
+      // Export all layers in this CV
+
+      json = {
+        type: 'cv',
+        version: FILE_VERSION,
+        layers: {}
+      };
+
+      // Iterate over all instrument layers using their next pointers
+      let instrumentAddress = this.props.instrumentAddress;
+      do {
+        // Read current instrument from store to JSON
+        console.log(instrumentAddress);
+        json.layers[instrumentAddress] = this._exportLayer(icb, vcf, wave, ampl, freq);
+        
+        // Try to get/fetch next instrument address
+        const nextInstrumentAddress = icb.get('nextInstrumentAddress');
+        icb = toImmutable(await this.props.client.getICB(nextInstrumentAddress));
+        vcf = toImmutable(await this.props.client.getVCF(icb.get('vcfAddress')));
+        wave = toImmutable(await this.props.client.getFixWave(icb.get('waveAddress')));
+        ampl = toImmutable(await Array.from(instrumentGetters.byId(icb.get('amplAddress'), 'ampl')));
+        freq = null; //toImmutable(await Array.from(instrumentGetters.byId(icb.get('amplAddress'), 'freq')));
+        instrumentAddress = nextInstrumentAddress;
+      } while(instrumentAddress != 0);
+    }
+    else {
+      // Export one layer
+
+      json = this._exportLayer(icb, vcf, wave, ampl, freq);
+      json.type = 'layer';
+      json.version = FILE_VERSION;
+    }
+    if (json) {
+      // Store to state, show export modal
+      let file = new Blob([JSON.stringify(json)], { type: "application/json" });
+      let url = URL.createObjectURL(file);
+      this.setState({ export: url });
+    }
+    else {
+      // Error occurred trying to construct JSON
+    }
   }
   
   // I hotkey saves
@@ -230,7 +342,8 @@ export default class InstrumentControl extends Component {
     const firstInstrumentId = WersiClient.ADDRESS.id(firstInstrumentAddress, this.state.double);
     const currentInstrumentLayer = WersiClient.ADDRESS.layer(this.props.instrumentAddress, this.state.double);
     const lastInstrumentLayer = WersiClient.ADDRESS.maxLayers(this.state.double);
-    const nextInstrument = icb.get('nextInstrumentAddress') !== 0;
+    const nextInstrumentAddress = icb.get('nextInstrumentAddress');
+    const nextInstrument = nextInstrumentAddress !== 0;
     const nextNewInstrumentAddress = WersiClient.ADDRESS.CV(firstInstrumentId, currentInstrumentLayer + 1, this.state.double);
     const lastInstrumentId = WersiClient.ADDRESS.maxCVs(this.state.double);
 
@@ -260,7 +373,7 @@ export default class InstrumentControl extends Component {
     let modal = (
       <Modal show={(this.state.export || this.state.import) ? true : false}>
         <Modal.Header>
-          <Modal.Title>{(this.state.export ? "Export" : "Import") + " instrument"}</Modal.Title>
+          <Modal.Title>{(this.state.export ? "Export" : "Import") + " " + (this.state.importCV ? "CV" : "layer")}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <p>
@@ -283,67 +396,30 @@ export default class InstrumentControl extends Component {
                     fr.onload = (e) => {
                       try {
                         const json = JSON.parse(e.target.result);
-                        let notification = null, useVCF = true;
                         
-                        // Retrieve ICB addresses
-                        const vcfAddress = json.icb.vcfAddress;
-                        const waveAddress = json.icb.waveAddress;
-                        const amplAddress = json.icb.amplAddress;
-                        const freqAddress = json.icb.freqAddress;
-                        console.log("Original ICB addresses: vcf " + vcfAddress + " wave " + waveAddress + " ampl " + amplAddress + " freq " + freqAddress);
+                        // Check if JSON is the right version
+                        if (json.version !== FILE_VERSION) {
+                          throw `Invalid version (expected ${FILE_VERSION})`;
+                        }
                         
-                        // Disable next instrument
-                        json.icb.nextInstrumentAddress = 0;
-                        
-                        // Override these with 1-to-1 Wersi mapping
-                        json.icb.waveAddress = this.props.instrumentAddress - 1;
-                        json.icb.amplAddress = this.props.instrumentAddress - 1;
-                        json.icb.freqAddress = this.props.instrumentAddress - 1;
-
-                        // Check if we are importing the first layer
-                        if (currentInstrumentLayer === 0) {
-                          // Use a legit VCF address
-                          json.icb.vcfAddress = this.props.instrumentAddress - 1;
+                        if (this.state.importCV) {
+                          // Import a CV
+                          
+                          // Check for valid type
+                          if (json.type !== 'cv') {
+                            throw `Not a CV export.`
+                          }
+                          this._importCV(json);
                         }
                         else {
-                          // Use global VCF address equal to VCF address of first address
-                          // NOTE: we are assuming the first instrument ICB is actually stored in the store!
-                          const firstVCFAddress = reactor.evaluate(instrumentGetters.byId(firstInstrumentAddress, 'icb')).get('vcfAddress');
-                          console.log('Using VCF address from first layer: ' + firstVCFAddress);
-                          notification = "Ignored VCF settings. VCF importing only supported for first layer.";
-                          json.icb.vcfAddress = firstVCFAddress;
-                          useVCF = false;
-                        }
-                        console.log("Remapped ICB addresses: vcf " + json.icb.vcfAddress + " wave " + json.icb.waveAddress + " ampl " + json.icb.amplAddress + " freq " + json.icb.freqAddress);
+                          // Import a single layer
 
-                        // Send to SysEx
-                        this.setState({ loading: true, import: null, name: null, notification }, () => {
-                          // react-notification onDismiss failure workaround
-                          setTimeout(() => this.setState({ notification: null }), 2000);
-                          
-                          let p = this.props.client.setICB(this.props.instrumentAddress, toImmutable(json.icb))
-                          .then(() => instrumentActions.update(this.props.instrumentAddress, 'icb', toImmutable(json.icb)))
-
-                          .then((data) => this.props.client.setFixWave(json.icb.waveAddress, json.wave))
-                          .then(() => instrumentActions.update(json.icb.waveAddress, 'wave', toImmutable(json.wave)))
-
-                          .then((data) => this.props.client.setAmpl(json.icb.amplAddress, json.ampl))
-                          .then(() => instrumentActions.update(json.icb.amplAddress, 'ampl', toImmutable(json.ampl)))
-                        
-                          //.then((data) => this.props.client.setFreq(json.icb.freqAddress, toImmutable(json.freq)))
-                          //.then(() => instrumentActions.update(json.icb.freqAddress, 'freq', toImmutable(data)))
-                          ;
-
-                          if (useVCF) {
-                            p = p.then((data) => this.props.client.setVCF(json.icb.vcfAddress, toImmutable(json.vcf)))
-                            .then(() => instrumentActions.update(json.icb.vcfAddress, 'vcf', toImmutable(json.vcf)))
-                            ;
+                          // Check for valid type
+                          if (json.type !== 'layer') {
+                            throw `Not a layer export.`
                           }
-
-                          p = p.then(() => this.props.client.reloadInstrument(this.props.firstInstrumentAddress))
-                          .then(() => this.setState({ loading: false }))
-                          ;
-                        });
+                          this._importLayer(json, currentInstrumentLayer, nextInstrumentAddress);
+                        }
                       }
                       catch (e) {
                         this.setState({ import: "Could not load your JSON file! Please try again." });
@@ -384,10 +460,10 @@ export default class InstrumentControl extends Component {
                 </OverlayTrigger>
                 <Button bsStyle="link" style={{ width: '16ch' }}>CV {firstInstrumentId + 1} of {lastInstrumentId + 1} ({firstInstrumentAddress})</Button>
                 <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="importcvtooltip">Load CV from file</Tooltip>)}>
-                  <Button onClick={this._handleImport.bind(this)} bsStyle="primary"><Glyphicon glyph="folder-open"/></Button>
+                  <Button onClick={() => this._handleImport(true)} bsStyle="primary"><Glyphicon glyph="folder-open"/></Button>
                 </OverlayTrigger>
                 <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="exportcvtooltip">Save CV to file</Tooltip>)}>
-                  <Button onClick={this._handleExport.bind(this)} bsStyle="primary"><Glyphicon glyph="floppy-disk"/></Button>
+                  <Button onClick={() => this._handleExport(true)} bsStyle="primary"><Glyphicon glyph="floppy-disk"/></Button>
                 </OverlayTrigger>
               </ButtonGroup>
               <ButtonGroup style={{ paddingLeft: '2em' }}>
@@ -402,10 +478,10 @@ export default class InstrumentControl extends Component {
                 </OverlayTrigger>
                 <Button bsStyle="link" style={{ width: '16ch' }}>Layer {currentInstrumentLayer + 1} ({this.props.instrumentAddress})</Button>
                 <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="importtooltip">Load layer from file</Tooltip>)}>
-                  <Button onClick={this._handleImport.bind(this)} bsStyle="info"><Glyphicon glyph="folder-open"/></Button>
+                  <Button onClick={() => this._handleImport(false)} bsStyle="info"><Glyphicon glyph="folder-open"/></Button>
                 </OverlayTrigger>
                 <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="exporttooltip">Save layer to file</Tooltip>)}>
-                  <Button onClick={this._handleExport.bind(this)} bsStyle="info"><Glyphicon glyph="floppy-disk"/></Button>
+                  <Button onClick={() => this._handleExport(false)} bsStyle="info"><Glyphicon glyph="floppy-disk"/></Button>
                 </OverlayTrigger>
               </ButtonGroup>
               <ButtonGroup>

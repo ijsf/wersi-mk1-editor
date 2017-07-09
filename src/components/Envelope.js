@@ -237,7 +237,7 @@ class Envelope extends Component {
     else if (id1n === 0x0 && id2n === 0x00)     { type = 'empty'; }
     else                                        { type = 'unknown'; }
 
-    console.log(type + ': ' + (Array.from(moduleData).map(function (x) {return x.toString(16);})).join(";"));
+    console.log(`[${id}] ${type}: ${(Array.from(moduleData).map(function (x) {return x.toString(16);})).join(";")}`);
     
     return {
       id: id,

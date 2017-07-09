@@ -78,6 +78,8 @@ export default class EnvelopeDialog extends Component {
             <EnvelopeModuleStepRel {...moduleProps}/>
             <EnvelopeModuleConstAbs {...moduleProps}/>
             <EnvelopeModuleConstRel {...moduleProps}/>
+
+            <EnvelopeModuleDynRemain {...moduleProps}/>
           </div>
         </Modal.Body>
         <Modal.Footer>

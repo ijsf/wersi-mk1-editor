@@ -228,6 +228,7 @@ class Envelope extends Component {
     else if (id1n === 0x2 && id23 === 0xF09)    { type = 'expdown'; }
     else if (id1n === 0xC && id23 === 0xE4D)    { type = 'dynexpup'; }
     else if (id1n === 0xC && id23 === 0xF49)    { type = 'dynexpdown'; }
+    else if (id1n === 0xC && id2 === 0x00)      { type = 'dynremain'; }
     else if (id1n === 0x1 && id2 === 0x00)      { type = 'constabs'; }
     else if (id1n === 0x5 && id2 === 0x00)      { type = 'constrel'; }
     else if (id1n === 0x2 && id2 === 0x00)      { type = 'repeat'; }
@@ -257,9 +258,12 @@ class Envelope extends Component {
       buffer.set(moduleData, 0);
       
       // Add epilogue if necessary
-      if (props.epilogue) {
+      if (props.epilogue === true) {
         const dataId = 0xC4 + index * 6;
         buffer[moduleData.length] = dataId;
+      } else if (typeof props.epilogue == 'number') {
+        // Custom epilogue
+        buffer[moduleData.length] = props.epilogue;
       }
     }
     
@@ -366,6 +370,7 @@ class Envelope extends Component {
       else if (module.type === "expdown")     { el = (<EnvelopeModuleExpDown {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
       else if (module.type === "dynexpup")    { el = (<EnvelopeModuleDynExpUp {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
       else if (module.type === "dynexpdown")  { el = (<EnvelopeModuleDynExpDown {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === "dynremain")   { el = (<EnvelopeModuleDynRemain {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
       else if (module.type === "constabs")    { el = (<EnvelopeModuleConstAbs {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
       else if (module.type === "constrel")    { el = (<EnvelopeModuleConstRel {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
       else if (module.type === "stepabs")     { el = (<EnvelopeModuleStepAbs {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }

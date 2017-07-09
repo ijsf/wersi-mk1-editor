@@ -15,10 +15,23 @@ For browser compatibility, we recommend the latest version of Chrome or Chromium
 In order to use the editor, the following prerequisites are required on the host on which the editor is to be run:
 
 * [sysexd](https://github.com/ijsf/sysexd), the SysEx daemon to communicate with the Wersi hardware - follow the instructions at https://github.com/ijsf/sysexd.
-* [NodeJS](https://nodejs.org/en/) v4 or higher, to compile the editor - install using `brew install nodejs`.
-* A recent Chrome (or Chromium based) browser.
+* [NodeJS](https://nodejs.org/en/) v8 or higher.
+* [yarn](https://yarnpkg.com/lang/en/docs/install/) or similar NodeJS package manager.
+* Chrome (or Chromium based) browser.
 
-Furthermore, the following hardware is also necessary:
+To install on OSX:
+
+Make sure [sysexd](https://github.com/ijsf/sysexd) and [Homebrew](https://brew.sh/) are installed. Then execute the following commands:
+
+```
+brew install nodejs
+brew install yarn
+yarn install
+```
+
+### Hardware
+
+The following hardware is required for the editor:
 
 * One fully functioning MIDI hardware interface.
 * One Wersi MK1 or EX-20 synthesizer, with the appropriate firmware installed (see below).

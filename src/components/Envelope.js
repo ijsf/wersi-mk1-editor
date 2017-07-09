@@ -296,6 +296,12 @@ class Envelope extends Component {
     }
     return -1;
   }
+
+  _deleteAllModules() {
+    for(let index = 0; index < 7; ++index) {
+      this._handleSaveModule(index);
+    }
+  }
   
   _deleteModule(id) {
     // Move and resave modules
@@ -447,6 +453,9 @@ class Envelope extends Component {
               </div>
               <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="savetooltip">Save envelope (hotkey {this.props.hotKeySave})</Tooltip>)}>
                 <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary"><Glyphicon glyph="save"/></Button>
+              </OverlayTrigger>
+              <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="cleartooltip">Clear envelope</Tooltip>)}>
+                <Button onClick={this._deleteAllModules.bind(this)} className="pull-right" bsStyle="primary"><Glyphicon glyph="trash"/></Button>
               </OverlayTrigger>
               <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="stopsoundtooltip">Stop all (hanging) sounds</Tooltip>)}>
                 <Button onClick={() => { this.props.client.stopSound(); }} className="pull-right" bsStyle="primary"><Glyphicon glyph="off"/></Button>

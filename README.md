@@ -14,9 +14,9 @@ For browser compatibility, we recommend the latest version of Chrome or Chromium
 
 In order to use the editor, the following prerequisites are required on the host on which the editor is to be run:
 
-* [sysexd](https://github.com/ijsf/sysexd), the SysEx daemon to communicate with the Wersi hardware.
-* [NodeJS](https://nodejs.org/en/) v4 or higher, to compile the editor.
-* Latest Chrome or Chromium-based browser.
+* [sysexd](https://github.com/ijsf/sysexd), the SysEx daemon to communicate with the Wersi hardware - follow the instructions at https://github.com/ijsf/sysexd.
+* [NodeJS](https://nodejs.org/en/) v4 or higher, to compile the editor - install using `brew install nodejs`.
+* A recent Chrome (or Chromium based) browser.
 
 Furthermore, the following hardware is also necessary:
 
@@ -68,15 +68,17 @@ To make sure SysEx functionality is enabled on your synthesizer:
 
 Pressing 1 twice is likely necessary, as it explicitly stops and restarts the MIDI logic. This seems to be a minor bug in the original firmware.
 
-## Running the editor
+## Launch the editor
 
-The NodeJS part will host the editor web contents on a server on localhost, which should be accessible from your browser. To start the server, type this in the editor repository directory:
+First, make sure sysexd is started. Open a new terminal. Go to the `sysexd` directory and type:
+
+    ./bin/sysexd
+
+To start the editor, open a new terminal, go to this directory and type:
 
     node server.js
 
-The editor in the browser needs to be able to communicate over MIDI. The `sysexd` server is a separate standalone piece of software that was specifically made for this purpose. Make sure you have a compiled version of `sysexd` on your system, and just start it and let it run in the background.
-
-At this point, both the editor server and sysexd should be running, and you should be able to access the editor at http://localhost:3000.
+Make sure you click Allow for any firewall questions on OSX. You should be able to access the editor at http://localhost:3000.
 
 ## Showcase
 

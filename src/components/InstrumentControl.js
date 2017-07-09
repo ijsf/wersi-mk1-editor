@@ -433,7 +433,7 @@ export default class InstrumentControl extends Component {
                             throw `Not a layer export.`
                           }
                           this.setState({ loading: true, import: null, name: null }, async () => {
-                            await this._importLayer(json, this.props.firstInstrumentAddress, this.props.instrumentAddress, currentInstrumentLayer, nextInstrumentAddress);
+                            await this._importLayer(json, this.props.firstInstrumentAddress, this.props.instrumentAddress, nextInstrumentAddress);
                             this.setState({ loading: false });
 
                             /*

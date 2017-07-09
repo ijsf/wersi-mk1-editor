@@ -225,6 +225,7 @@ export default class InstrumentControl extends Component {
 
     // Determine variables related to layering and CVs, use default 1-to-1 Wersi mapping for any next instrument addresses
     const firstInstrumentAddress = this.props.instrumentAddresses.first();
+    const currentCV = firstInstrumentAddress;
     const firstInstrument = firstInstrumentAddress == this.props.instrumentAddress;
     const firstInstrumentId = WersiClient.ADDRESS.id(firstInstrumentAddress, this.state.double);
     const currentInstrumentLayer = WersiClient.ADDRESS.layer(this.props.instrumentAddress, this.state.double);
@@ -235,8 +236,8 @@ export default class InstrumentControl extends Component {
 
     const firstCV = firstInstrumentId === 0;
     const lastCV = firstInstrumentId === WersiClient.ADDRESS.maxCVs(this.state.double);
-    const prevCV = firstInstrumentAddress - 1;
-    const nextCV = firstInstrumentAddress + 1;
+    const prevCV = currentCV - 1;
+    const nextCV = currentCV + 1;
     
     // Button toggle handler
     let handleButtonToggle = (type) => {
@@ -377,6 +378,9 @@ export default class InstrumentControl extends Component {
                 </OverlayTrigger>
                 <OverlayTrigger placement="bottom" overlay={lastCV ? (<div/>) : (<Tooltip className="info" id="nextcvtooltip">Next CV</Tooltip>)}>
                   <Button onClick={() => this._setInstrument(nextCV)} bsStyle="primary" disabled={lastCV}><Glyphicon glyph="chevron-right"/></Button>
+                </OverlayTrigger>
+                <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="reloadcvtooltip">Reload CV</Tooltip>)}>
+                  <Button onClick={() => this._setInstrument(currentCV)} bsStyle="primary"><Glyphicon glyph="refresh"/></Button>
                 </OverlayTrigger>
                 <Button bsStyle="link" style={{ width: '12ch' }}>CV {firstInstrumentId}/{lastInstrumentId} ({firstInstrumentAddress})</Button>
                 <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="importcvtooltip">Import into this CV</Tooltip>)}>

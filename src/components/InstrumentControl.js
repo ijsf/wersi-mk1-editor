@@ -84,15 +84,16 @@ export default class InstrumentControl extends Component {
   
   async _importCV(json, firstInstrumentAddress) {
     let instrumentAddress = firstInstrumentAddress; // Start with the first address of this CV
+    const firstInstrumentId = WersiClient.ADDRESS.id(firstInstrumentAddress, this.state.double);
     
     const numLayers = json.layers.length;
     for(let i = 0; i < numLayers; ++i) {
       const lastEntry = (i == numLayers - 1);
-      const nextInstrumentAddress = lastEntry ? null : instrumentAddress + 1;  // No next address for last layer
+      const nextInstrumentAddress = lastEntry ? null : WersiClient.ADDRESS.CV(firstInstrumentId, i + 1, this.state.double);  // No next address for last layer
       const layer = json.layers[i];
 
       await this._importLayer(layer.data, firstInstrumentAddress, instrumentAddress, nextInstrumentAddress);
-      ++instrumentAddress;
+      instrumentAddress = nextInstrumentAddress;
     }
     
     // Always move to first instrument

@@ -23,7 +23,7 @@ export default class WersiApp extends Component {
   render() {
     let midiConfig = (<MidiConfig
       client={this.client}
-      url={"ws://localhost:9002"}
+      url={"ws://sysexd.wer.si:9002"}
       token={"5UOfQAtnjnNIaZUWzpX2LLBkHNxrXALECEpj0ssklTM7ptYCuSOVQNn0qemO8Zat"}
       populateCallback={() => {
         if (this.instrument) {

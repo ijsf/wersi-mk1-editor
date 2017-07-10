@@ -5,10 +5,10 @@ import WersiClient from 'modules/midi/WersiClient';
 import EnvelopeModule from 'components/envelope/EnvelopeModule';
 import Rickshaw from 'rickshaw';
 
-@DropTarget("envelope", EnvelopeModule.moduleTarget, connect => ({
+@DropTarget('envelope', EnvelopeModule.moduleTarget, connect => ({
   connectDropTarget: connect.dropTarget()
 }))
-@DragSource("envelope", EnvelopeModule.moduleSource, (connect, monitor) => ({
+@DragSource('envelope', EnvelopeModule.moduleSource, (connect, monitor) => ({
   connectDragSource: connect.dragSource(),
   isDragging: monitor.isDragging()
 }))

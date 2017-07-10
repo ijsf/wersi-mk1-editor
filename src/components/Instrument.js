@@ -272,7 +272,7 @@ export default class Instrument extends Component {
         </Grid>
         <Notification
           isActive={error !== null}
-          message={(error !== null) ? error : ""}
+          message={(error !== null) ? error : ''}
           onDismiss={() => this.setState({ error: null })}
           barStyle={{ fontSize: 16, zIndex: 9999, backgroundColor: '#e9322d', borderColor: '#e82924', opacity: 0.9 }}
         />

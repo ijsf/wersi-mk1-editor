@@ -16,10 +16,10 @@ const style = {
  * Depends on the value of an earlier envelope. Appears to do (weight * time).
  */
 
-@DropTarget("envelope", EnvelopeModule.moduleTarget, connect => ({
+@DropTarget('envelope', EnvelopeModule.moduleTarget, connect => ({
   connectDropTarget: connect.dropTarget()
 }))
-@DragSource("envelope", EnvelopeModule.moduleSource, (connect, monitor) => ({
+@DragSource('envelope', EnvelopeModule.moduleSource, (connect, monitor) => ({
   connectDragSource: connect.dragSource(),
   isDragging: monitor.isDragging()
 }))

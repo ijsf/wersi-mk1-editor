@@ -16,10 +16,10 @@ const style = {
  * Does not appear to work correctly with all modules (e.g. linear up/down).
  */
 
-@DropTarget("envelope", EnvelopeModule.moduleTarget, connect => ({
+@DropTarget('envelope', EnvelopeModule.moduleTarget, connect => ({
   connectDropTarget: connect.dropTarget()
 }))
-@DragSource("envelope", EnvelopeModule.moduleSource, (connect, monitor) => ({
+@DragSource('envelope', EnvelopeModule.moduleSource, (connect, monitor) => ({
   connectDragSource: connect.dragSource(),
   isDragging: monitor.isDragging()
 }))

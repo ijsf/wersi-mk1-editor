@@ -32,7 +32,7 @@ export default class MidiConnector {
           this._onMessage(message);
         }
         catch (e) {
-          console.error("Websocket error: failed to decode message.");
+          console.error('Websocket error: failed to decode message.');
           console.error(e);
           console.error(event.data);
         }
@@ -54,7 +54,7 @@ export default class MidiConnector {
       this.ws.send(JSON.stringify(json));
     }
     else {
-      console.error("Websocket error: not connected while trying to send.");
+      console.error('Websocket error: not connected while trying to send.');
     }
   }
 }

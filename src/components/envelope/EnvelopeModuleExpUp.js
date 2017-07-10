@@ -10,10 +10,10 @@ const style = {
   display: 'inline-block'
 };
 
-@DropTarget("envelope", EnvelopeModule.moduleTarget, connect => ({
+@DropTarget('envelope', EnvelopeModule.moduleTarget, connect => ({
   connectDropTarget: connect.dropTarget()
 }))
-@DragSource("envelope", EnvelopeModule.moduleSource, (connect, monitor) => ({
+@DragSource('envelope', EnvelopeModule.moduleSource, (connect, monitor) => ({
   connectDragSource: connect.dragSource(),
   isDragging: monitor.isDragging()
 }))
@@ -89,10 +89,10 @@ export default class EnvelopeModuleExpUp extends EnvelopeModule {
 			);
 		};
     if (amplBefore < 16) {
-      error = "Previous amplitude must be higher than 16";
+      error = 'Previous amplitude must be higher than 16';
     }
     else if (amplBefore > b) {
-      error = "Start amplitude is bigger than end amplitude. Use exponential-down instead";
+      error = 'Start amplitude is bigger than end amplitude. Use exponential-down instead';
     }
 		return {
 			error: error,

@@ -3,10 +3,10 @@ import { DragSource, DropTarget } from 'react-dnd';
 
 import EnvelopeModule from 'components/envelope/EnvelopeModule';
 
-@DropTarget("envelope", EnvelopeModule.moduleTarget, connect => ({
+@DropTarget('envelope', EnvelopeModule.moduleTarget, connect => ({
   connectDropTarget: connect.dropTarget()
 }))
-@DragSource("envelope", EnvelopeModule.moduleSource, (connect, monitor) => ({
+@DragSource('envelope', EnvelopeModule.moduleSource, (connect, monitor) => ({
   connectDragSource: connect.dragSource(),
   isDragging: monitor.isDragging()
 }))

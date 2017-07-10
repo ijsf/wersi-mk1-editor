@@ -83,7 +83,7 @@ Licensed under MIT license (see "Smooth.js MIT license.txt")
         periodic: this.clipHelperPeriodic,
         mirror: this.clipHelperMirror
       }[config.clip])) {
-        throw "Invalid clip: " + config.clip;
+        throw 'Invalid clip: ' + config.clip;
       }
     }
 
@@ -278,7 +278,7 @@ Licensed under MIT license (see "Smooth.js MIT license.txt")
 
   normalizeScaleTo = function(s) {
     var invalidErr;
-    invalidErr = "scaleTo param must be number or array of two numbers";
+    invalidErr = 'scaleTo param must be number or array of two numbers';
     switch (getType(s)) {
       case 'Number':
         if (!isValidNumber(s)) throw invalidErr;
@@ -327,7 +327,7 @@ Licensed under MIT license (see "Smooth.js MIT license.txt")
       lanczos: SincFilterInterpolator,
       sinc: SincFilterInterpolator
     }[config.method])) {
-      throw "Invalid method: " + config.method;
+      throw 'Invalid method: ' + config.method;
     }
     if (config.method === 'lanczos') {
       config.sincWindow = makeLanczosWindow(config.sincFilterSize);
@@ -376,7 +376,7 @@ Licensed under MIT license (see "Smooth.js MIT license.txt")
             return _results;
           };
         default:
-          throw "Invalid element type: " + (getType(arr[0]));
+          throw 'Invalid element type: ' + (getType(arr[0]));
       }
     })();
     if (config.clip === 'periodic') {
@@ -406,7 +406,7 @@ Licensed under MIT license (see "Smooth.js MIT license.txt")
 
   Smooth.deepValidation = true;
 
-  (typeof exports !== "undefined" && exports !== null ? exports : window).Smooth = Smooth;
+  (typeof exports !== 'undefined' && exports !== null ? exports : window).Smooth = Smooth;
 
 }).call(this);
 

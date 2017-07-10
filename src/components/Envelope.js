@@ -47,7 +47,7 @@ const moduleTarget = {
 };
 
 @DragDropContext(HTML5Backend)
-@DropTarget("envelope", moduleTarget, connect => ({
+@DropTarget('envelope', moduleTarget, connect => ({
   connectDropTarget: connect.dropTarget()
 }))
 
@@ -237,7 +237,7 @@ class Envelope extends Component {
     else if (id1n === 0x0 && id2n === 0x00)     { type = 'empty'; }
     else                                        { type = 'unknown'; }
 
-    console.log(`[${id}] ${type}: ${(Array.from(moduleData).map(function (x) {return x.toString(16);})).join(";")}`);
+    console.log(`[${id}] ${type}: ${(Array.from(moduleData).map(function (x) {return x.toString(16);})).join(';')}`);
     
     return {
       id: id,
@@ -290,7 +290,7 @@ class Envelope extends Component {
   _findFirstEmptyModule() {
     const { modules } = this.state;
     for(let i = 0; i < 6; ++i) {
-      if(modules[i].type == "empty") {
+      if(modules[i].type == 'empty') {
         return i;
       }
     }
@@ -363,26 +363,26 @@ class Envelope extends Component {
         color: release ? 'thistle' : 'lightsteelblue',
         release: release,
         showValues: this.state.showValues,
-        showError: (message) => { this.setState({ error: "Error for module " + wersiPhase + ": " + message }) }
+        showError: (message) => { this.setState({ error: 'Error for module ' + wersiPhase + ': ' + message }) }
       };
   
       // Create element
       let el;
-      if (module.type === "linup")            { el = (<EnvelopeModuleLinUp {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
-      else if (module.type === "lindown")     { el = (<EnvelopeModuleLinDown {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
-      else if (module.type === "dynlinup")    { el = (<EnvelopeModuleDynLinUp {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
-      else if (module.type === "dynlindown")  { el = (<EnvelopeModuleDynLinDown {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
-      else if (module.type === "expup")       { el = (<EnvelopeModuleExpUp {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
-      else if (module.type === "expdown")     { el = (<EnvelopeModuleExpDown {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
-      else if (module.type === "dynexpup")    { el = (<EnvelopeModuleDynExpUp {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
-      else if (module.type === "dynexpdown")  { el = (<EnvelopeModuleDynExpDown {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
-      else if (module.type === "dynremain")   { el = (<EnvelopeModuleDynRemain {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
-      else if (module.type === "constabs")    { el = (<EnvelopeModuleConstAbs {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
-      else if (module.type === "constrel")    { el = (<EnvelopeModuleConstRel {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
-      else if (module.type === "stepabs")     { el = (<EnvelopeModuleStepAbs {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
-      else if (module.type === "steprel")     { el = (<EnvelopeModuleStepRel {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
-      else if (module.type === "repeat")      { el = (<EnvelopeModuleRepeat {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
-      else if (module.type === "empty")       { el = (<EnvelopeModuleEmpty {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      if (module.type === 'linup')            { el = (<EnvelopeModuleLinUp {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === 'lindown')     { el = (<EnvelopeModuleLinDown {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === 'dynlinup')    { el = (<EnvelopeModuleDynLinUp {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === 'dynlindown')  { el = (<EnvelopeModuleDynLinDown {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === 'expup')       { el = (<EnvelopeModuleExpUp {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === 'expdown')     { el = (<EnvelopeModuleExpDown {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === 'dynexpup')    { el = (<EnvelopeModuleDynExpUp {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === 'dynexpdown')  { el = (<EnvelopeModuleDynExpDown {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === 'dynremain')   { el = (<EnvelopeModuleDynRemain {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === 'constabs')    { el = (<EnvelopeModuleConstAbs {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === 'constrel')    { el = (<EnvelopeModuleConstRel {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === 'stepabs')     { el = (<EnvelopeModuleStepAbs {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === 'steprel')     { el = (<EnvelopeModuleStepRel {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === 'repeat')      { el = (<EnvelopeModuleRepeat {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
+      else if (module.type === 'empty')       { el = (<EnvelopeModuleEmpty {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
       else                                    { el = (<EnvelopeModuleUnknown {...moduleProps} ref={(c)=>{this._moduleEls[index]=c;}} />); }
       return el;
     });
@@ -403,10 +403,10 @@ class Envelope extends Component {
     let releaseSlider = (
       <div style={{ width: width, position: 'relative', left: moduleWidth * 0.5, marginTop: 10 }}>
         <OverlayTrigger
-        placement="bottom"
-        overlay={<Tooltip className="info" id="tooltipRelease">Start of release phase</Tooltip>}
+        placement='bottom'
+        overlay={<Tooltip className='info' id='tooltipRelease'>Start of release phase</Tooltip>}
         >
-          <input type="range"
+          <input type='range'
           style={{ width: width - moduleWidth }}
           value={ releasePhaseStart }
           min={0}
@@ -448,33 +448,33 @@ class Envelope extends Component {
             save={handleAddModule}
             />
             <ButtonToolbar style={{ paddingBottom: 10 }}>
-              <div className="pull-left" style={{ height: 18, padding: 8, verticalAlign: 'middle' }}>
+              <div className='pull-left' style={{ height: 18, padding: 8, verticalAlign: 'middle' }}>
                 {this.state.error}
               </div>
-              <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="savetooltip">Save envelope (hotkey {this.props.hotKeySave})</Tooltip>)}>
-                <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary"><Glyphicon glyph="save"/></Button>
+              <OverlayTrigger placement='bottom' overlay={(<Tooltip className='info' id='savetooltip'>Save envelope (hotkey {this.props.hotKeySave})</Tooltip>)}>
+                <Button onClick={this._handleSave.bind(this)} className='pull-right' bsStyle='primary'><Glyphicon glyph='save'/></Button>
               </OverlayTrigger>
-              <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="cleartooltip">Clear envelope</Tooltip>)}>
-                <Button onClick={this._deleteAllModules.bind(this)} className="pull-right" bsStyle="primary"><Glyphicon glyph="trash"/></Button>
+              <OverlayTrigger placement='bottom' overlay={(<Tooltip className='info' id='cleartooltip'>Clear envelope</Tooltip>)}>
+                <Button onClick={this._deleteAllModules.bind(this)} className='pull-right' bsStyle='primary'><Glyphicon glyph='trash'/></Button>
               </OverlayTrigger>
-              <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="stopsoundtooltip">Stop all (hanging) sounds</Tooltip>)}>
-                <Button onClick={() => { this.props.client.stopSound(); }} className="pull-right" bsStyle="primary"><Glyphicon glyph="off"/></Button>
+              <OverlayTrigger placement='bottom' overlay={(<Tooltip className='info' id='stopsoundtooltip'>Stop all (hanging) sounds</Tooltip>)}>
+                <Button onClick={() => { this.props.client.stopSound(); }} className='pull-right' bsStyle='primary'><Glyphicon glyph='off'/></Button>
               </OverlayTrigger>
-              <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="showvaluessliderstooltip">Show values or sliders</Tooltip>)}>
-                <Button onClick={this._handleToggleValues.bind(this)} className="pull-right">{this.state.showValues ? (<Glyphicon glyph="tasks"/>) : (<Glyphicon glyph="pencil"/>)}</Button>
+              <OverlayTrigger placement='bottom' overlay={(<Tooltip className='info' id='showvaluessliderstooltip'>Show values or sliders</Tooltip>)}>
+                <Button onClick={this._handleToggleValues.bind(this)} className='pull-right'>{this.state.showValues ? (<Glyphicon glyph='tasks'/>) : (<Glyphicon glyph='pencil'/>)}</Button>
               </OverlayTrigger>
-              <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="addmoduletooltip">Add module to end</Tooltip>)}>
-                <Button onClick={this._handleAdd.bind(this)} className="pull-right"><Glyphicon glyph="plus"/></Button>
+              <OverlayTrigger placement='bottom' overlay={(<Tooltip className='info' id='addmoduletooltip'>Add module to end</Tooltip>)}>
+                <Button onClick={this._handleAdd.bind(this)} className='pull-right'><Glyphicon glyph='plus'/></Button>
               </OverlayTrigger>
             </ButtonToolbar>
-            <Well bsSize="small">
+            <Well bsSize='small'>
             <div style={{
               width: width,
               paddingLeft: moduleMargin,
               paddingTop: moduleMargin,
               paddingBottom: moduleMargin
             }}>
-              {modules ? this._createModules(modules) : "No modules available."}
+              {modules ? this._createModules(modules) : 'No modules available.'}
               {releaseSlider}
             </div>
             </Well>

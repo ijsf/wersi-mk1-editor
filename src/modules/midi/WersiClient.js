@@ -141,7 +141,7 @@ export default class WersiClient extends Client {
     var h = '[';
     for (var i = 0; i < input.length; i++) {
       let c = input[i].toString(16);
-      h += "0x" + (c.length === 1 ? "0" : "") + c.toUpperCase() + ((i < input.length - 1) ? " " : "");
+      h += '0x' + (c.length === 1 ? '0' : '') + c.toUpperCase() + ((i < input.length - 1) ? ' ' : '');
     }
     return h + ']';
   }
@@ -157,7 +157,7 @@ export default class WersiClient extends Client {
   // SysEx nibble to u8
   _ntou(id, lo, hi) {
     if ((lo & 0xF0) != ((id << 5) | 0x10) || (hi & 0xF0) != (id << 5)) {
-      throw "Invalid data";
+      throw 'Invalid data';
     }
     return (lo & 0x0F) | ((hi & 0x0F) << 4);
   }
@@ -210,13 +210,13 @@ export default class WersiClient extends Client {
     
     // Validate MIDI SysEx header
     if (!this._isSysExHeaderValid(sysex)) {
-      throw "Invalid SysEx message: " + this._utohex(sysex);
+      throw 'Invalid SysEx message: ' + this._utohex(sysex);
     }
     
     // Check whether firmware has been patched
     this.firmwarePatched = this._isFirmwarePatched(sysex);
     if (!this.firmwarePatched) {
-      throw "Unpatched firmware";
+      throw 'Unpatched firmware';
     }
     
     // Parse Wersi specific content
@@ -228,9 +228,9 @@ export default class WersiClient extends Client {
     // Calculate expected (byte non-nibble) length
     const expectedLength = (sysex.length - i - 1) / 2;
     if (expectedLength != message.length) {
-      throw "Invalid SysEx length (type " + String.fromCharCode(message.type) +
-      ", address " + message.address +
-      ", length got " + message.length + ", expected " + expectedLength + "): " + this._utohex(sysex);
+      throw 'Invalid SysEx length (type ' + String.fromCharCode(message.type) +
+      ', address ' + message.address +
+      ', length got ' + message.length + ', expected ' + expectedLength + '): ' + this._utohex(sysex);
     }
     
     // Decode nibbles
@@ -268,7 +268,7 @@ export default class WersiClient extends Client {
   isValid(sysex) {
     // Validate MIDI SysEx header
     if (!this._isSysExHeaderValid(sysex)) {
-      throw "Invalid SysEx message: " + this._utohex(sysex);
+      throw 'Invalid SysEx message: ' + this._utohex(sysex);
     }
     
     // Parse Wersi specific content
@@ -286,7 +286,7 @@ export default class WersiClient extends Client {
       return true;
     }
     else {
-      console.log("Ignoring SysEx message with type " + messageType);
+      console.log('Ignoring SysEx message with type ' + messageType);
     }
     return false;
   }
@@ -294,11 +294,11 @@ export default class WersiClient extends Client {
   getVCF(address) {
     return this._requestBlock(WersiClient.BLOCK_TYPE.VCF, address)
     .then((message) => {
-      console.log("SysEx VCF receive: " + this._utohex(message.data));
+      console.log('SysEx VCF receive: ' + this._utohex(message.data));
 
       const blockLength = this._getBlockLength(WersiClient.BLOCK_TYPE.VCF);
       if (message.length != blockLength) {
-        throw "Invalid message length for VCF (got " + message.length + ", expected " + blockLength + ")";
+        throw 'Invalid message length for VCF (got ' + message.length + ', expected ' + blockLength + ')';
       }
       
       // Decode data
@@ -331,7 +331,7 @@ export default class WersiClient extends Client {
   }
   
   setVCF(address, data) {
-    console.log("SysEx VCF send (" + address +")");
+    console.log('SysEx VCF send (' + address +')');
     // Encode data
     let dataEncoded = new Uint8Array(this._getBlockLength(WersiClient.BLOCK_TYPE.VCF));
     let dv = new DataView(dataEncoded.buffer);
@@ -374,11 +374,11 @@ export default class WersiClient extends Client {
   getICB(address) {
     return this._requestBlock(WersiClient.BLOCK_TYPE.ICB, address)
     .then((message) => {
-      console.log("SysEx ICB receive: " + this._utohex(message.data));
+      console.log('SysEx ICB receive: ' + this._utohex(message.data));
 
       const blockLength = this._getBlockLength(WersiClient.BLOCK_TYPE.ICB);
       if (message.length != blockLength) {
-        throw "Invalid message length for ICB (got " + message.length + ", expected " + blockLength + ")";
+        throw 'Invalid message length for ICB (got ' + message.length + ', expected ' + blockLength + ')';
       }
       
       // Decode data
@@ -431,7 +431,7 @@ export default class WersiClient extends Client {
   }
   
   setICB(address, data) {
-    console.log("SysEx ICB send (" + address +")");
+    console.log('SysEx ICB send (' + address +')');
     // Encode data
     let dataEncoded = new Uint8Array(this._getBlockLength(WersiClient.BLOCK_TYPE.ICB));
     let dv = new DataView(dataEncoded.buffer);
@@ -463,7 +463,7 @@ export default class WersiClient extends Client {
       | (data.get('wvFeedbackStereoFlat') ? 0x40 : 0)
       | (data.get('wvFeedbackDeep') ? 0x80 : 0)
     );
-    dataEncoded.set(new TextEncoder("utf-8").encode(data.get('name')), 10);
+    dataEncoded.set(new TextEncoder('utf-8').encode(data.get('name')), 10);
     
     return this.send(
       this._toSysEx({
@@ -480,12 +480,12 @@ export default class WersiClient extends Client {
   getAmpl(address) {
     return this._requestBlock(WersiClient.BLOCK_TYPE.AMPL, address)
     .then((message) => {
-      console.log("SysEx AMPL receive: " + this._utohex(message.data));
+      console.log('SysEx AMPL receive: ' + this._utohex(message.data));
 
       // Verify AMPL length
       const blockLength = this._getBlockLength(WersiClient.BLOCK_TYPE.AMPL);
       if (message.length != blockLength) {
-        throw "Invalid message length for AMPL (got " + message.length + ", expected " + blockLength + ")";
+        throw 'Invalid message length for AMPL (got ' + message.length + ', expected ' + blockLength + ')';
       }
       
       return message.data;
@@ -493,7 +493,7 @@ export default class WersiClient extends Client {
   }
   
   setAmpl(address, data) {
-    console.log("SysEx AMPL send (" + address +")");
+    console.log('SysEx AMPL send (' + address +')');
     return this.send(
       this._toSysEx({
         type: WersiClient.BLOCK_TYPE.AMPL.charCodeAt(0),
@@ -509,12 +509,12 @@ export default class WersiClient extends Client {
   getFixWave(address) {
     return this._requestBlock(WersiClient.BLOCK_TYPE.FIXWAVE, address)
     .then((message) => {
-      console.log("SysEx FIXWAVE receive");
+      console.log('SysEx FIXWAVE receive');
 
       // Verify FIXWAVE length
       const blockLength = this._getBlockLength(WersiClient.BLOCK_TYPE.FIXWAVE);
       if (message.length != blockLength) {
-        throw "Invalid message length for FIXWAVE (got " + message.length + ", expected " + blockLength + ")";
+        throw 'Invalid message length for FIXWAVE (got ' + message.length + ', expected ' + blockLength + ')';
       }
       
       // Decode FIXWAVE
@@ -546,7 +546,7 @@ export default class WersiClient extends Client {
   }
   
   setFixWave(address, wave) {
-    console.log("SysEx FIXWAVE send (" + address +")");
+    console.log('SysEx FIXWAVE send (' + address +')');
     // Encode FIXWAVE
     let data = new Uint8Array(this._getBlockLength(WersiClient.BLOCK_TYPE.FIXWAVE));
     let dv = new DataView(data.buffer);
@@ -619,7 +619,7 @@ export default class WersiClient extends Client {
     // Check if address actually refers to a RAM voice
     address -= 66;
     if (address < 0 || address >= 20) {
-      throw "Address " + address + " not in RAM voice range.";
+      throw 'Address ' + address + ' not in RAM voice range.';
     }
     
     // Reload an instrument by forcing the instrument switch of that particular address to toggle

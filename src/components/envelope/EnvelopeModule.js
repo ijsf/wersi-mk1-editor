@@ -59,7 +59,7 @@ const styleCloseButton = {
   paddingTop: 0,
   paddingBottom: 0,
 	marginTop: 2,
-  float: "right",
+  float: 'right',
   opacity: 0.8
 };
 
@@ -94,7 +94,7 @@ const RickshawCustomAxisRenderer = function(args) {
 		} );
     
     // Time formatter
-    let formatTime = (t) => value > 1 ? value.toPrecision(4) + "s" : Math.round(value * 1000) + "ms";
+    let formatTime = (t) => value > 1 ? value.toPrecision(4) + 's' : Math.round(value * 1000) + 'ms';
 
 		this.elements = [];
 		{
@@ -124,7 +124,7 @@ const RickshawCustomAxisRenderer = function(args) {
 			var title = document.createElement('div');
 			title.classList.add('title');
       // _sustain is quite the hack
-			title.innerHTML = self.graph._sustain ? "∞" : formatTime(value);
+			title.innerHTML = self.graph._sustain ? '∞' : formatTime(value);
 			element.appendChild(title);
 
 			self.graph.element.appendChild(element);
@@ -316,11 +316,11 @@ export default class EnvelopeModule extends Component {
   }
   
   _graphFunction() {
-    throw "No graph function implemented."
+    throw 'No graph function implemented.'
   }
   
   _handleSave(state) {
-    throw "No _handleSave implemented."
+    throw 'No _handleSave implemented.'
   }
   
   componentWillUpdate(nextProps, nextState) {
@@ -519,7 +519,7 @@ export default class EnvelopeModule extends Component {
     : (<div style={{ height: 20 }}>
           <Button
           style={{ fontSize: 10, fontWeight: 'normal', width: '100%' }}
-          bsSize="xsmall"
+          bsSize='xsmall'
           active={sustain}
           onClick={() => {
             this.setState((state) => {
@@ -534,15 +534,15 @@ export default class EnvelopeModule extends Component {
     // Create HTML5 sliders (don't show if we're showcasing)
     const sliders = showCase ? null : Array.from(['a', 'b', 'c']).map((key) => {
       const value = this.state[key];
-      const valueMinSlider = this.props[key + "MinSlider"];
-      const valueMin = this.props[key + "Min"];
-      const valueMax = this.props[key + "Max"];
-      const valueStep = this.props[key + "Step"];
-      const valueType = this.props[key + "Type"];
-      const title = this.props[key + "Title"];
-      const keyName = "EnvelopeModule" + this.props.id + "_" + key;
+      const valueMinSlider = this.props[key + 'MinSlider'];
+      const valueMin = this.props[key + 'Min'];
+      const valueMax = this.props[key + 'Max'];
+      const valueStep = this.props[key + 'Step'];
+      const valueType = this.props[key + 'Type'];
+      const title = this.props[key + 'Title'];
+      const keyName = 'EnvelopeModule' + this.props.id + '_' + key;
 
-      let tooltip = (<Tooltip className="info" id={keyName + "_tooltip"} key={keyName + "_tooltip"}>{title}</Tooltip>);
+      let tooltip = (<Tooltip className='info' id={keyName + '_tooltip'} key={keyName + '_tooltip'}>{title}</Tooltip>);
       
       // Use temporary state values to allow for input text field changes
       const textInputValue = this.state['_text_'][key];
@@ -591,22 +591,22 @@ export default class EnvelopeModule extends Component {
       let sliderContent = null;
       if (valueType === 'text' || this.props.showValues) {
         sliderContent = (
-          <input type="text" style={{...styleText, width: width * 0.5 + 5 }}
+          <input type='text' style={{...styleText, width: width * 0.5 + 5 }}
           onChange={handleTextInputChange}
           onBlur={handleTextInputDone}
           value={this.state['_text_'][key] !== undefined ? this.state['_text_'][key] : value}
-          key={keyName + "_text"}
+          key={keyName + '_text'}
           />
         );
       }
-      else if (valueType === "range") {
+      else if (valueType === 'range') {
         sliderContent = (
-          <input type="range" style={{...styleSlider, width: width * 0.5 + 5 }}
+          <input type='range' style={{...styleSlider, width: width * 0.5 + 5 }}
           defaultValue={value}
           min={valueMinSlider}
           max={valueMax}
           step={valueStep}
-          key={keyName + "_slider"}
+          key={keyName + '_slider'}
           onMouseEnter={() => {
             // Disable drag
             this.setState({ disableDrag: true, changed: false });
@@ -627,7 +627,7 @@ export default class EnvelopeModule extends Component {
       }
       if (value != null) {
         return (
-          <OverlayTrigger placement="bottom" overlay={tooltip} key={keyName + "_overlay"}>
+          <OverlayTrigger placement='bottom' overlay={tooltip} key={keyName + '_overlay'}>
             <div style={{ display: 'block' }}>
               <Button onClick={ handleButtonDecrease } style={{...styleSliderButton, width: 17}}>-</Button>
               {sliderContent}
@@ -650,7 +650,7 @@ export default class EnvelopeModule extends Component {
       <div style={{ display: 'inline-block', position: 'relative' }} onClick={() => { if(showCase){ this.saveModule(); } }}>
         <div
           style={{ ...style, opacity, width, height, marginRight, marginBottom, cursor, backgroundImage }}
-          className={showCase ? "btn-default" : "module"}
+          className={showCase ? 'btn-default' : 'module'}
         >
           <div>
             <div style={{ ...styleTitle }}>
@@ -658,7 +658,7 @@ export default class EnvelopeModule extends Component {
               {this.props.title ? this.props.title : this.state.title}
             </div>
             <Button
-              bsStyle="link"
+              bsStyle='link'
               onClick={() => this.props.deleteModule(this.props.id)}
               style={{ ...styleCloseButton, width: 17 }}
             >×</Button>

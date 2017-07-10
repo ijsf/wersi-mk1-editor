@@ -79,7 +79,7 @@ export default class InstrumentControl extends Component {
   
   _handleImport(importCV) {
     // Show import modal
-    this.setState({ import: "Import your instrument below.", importCV });
+    this.setState({ import: 'Import your instrument below.', importCV });
   }
   
   async _importCV(json, firstInstrumentAddress) {
@@ -134,7 +134,7 @@ export default class InstrumentControl extends Component {
       json.icb.vcfAddress = firstVCFAddress;
       useVCF = false;
     }
-    console.log("Remapped ICB addresses: vcf " + json.icb.vcfAddress + " wave " + json.icb.waveAddress + " ampl " + json.icb.amplAddress + " freq " + json.icb.freqAddress);
+    console.log('Remapped ICB addresses: vcf ' + json.icb.vcfAddress + ' wave ' + json.icb.waveAddress + ' ampl ' + json.icb.amplAddress + ' freq ' + json.icb.freqAddress);
 
     await this._sendLayer(instrumentAddress, json.icb, json.wave, json.ampl, json.freq, useVCF ? json.vcf : null);
     await this.props.client.reloadInstrument(firstInstrumentAddress);
@@ -228,7 +228,7 @@ export default class InstrumentControl extends Component {
     }
     if (json) {
       // Store to state, show export modal
-      let file = new Blob([JSON.stringify(json)], { type: "application/json" });
+      let file = new Blob([JSON.stringify(json)], { type: 'application/json' });
       let url = URL.createObjectURL(file);
       this.setState({ export: url, exportCV: exportCV });
     }
@@ -302,7 +302,7 @@ export default class InstrumentControl extends Component {
     }
     else {
       // Invalid address
-      this.props.showError("No more RAM space for new layers!");
+      this.props.showError('No more RAM space for new layers!');
     }
   }
   
@@ -388,17 +388,17 @@ export default class InstrumentControl extends Component {
     let modal = (
       <Modal show={(this.state.export || this.state.import) ? true : false}>
         <Modal.Header>
-          <Modal.Title>{(this.state.export ? "Export" : "Import") + " " + (this.state.importCV ? "CV" : "layer")}</Modal.Title>
+          <Modal.Title>{(this.state.export ? 'Export' : 'Import') + ' ' + (this.state.importCV ? 'CV' : 'layer')}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <p>
-            {this.state.export ? "Your instrument has been exported to a JSON file." : null}
+            {this.state.export ? 'Your instrument has been exported to a JSON file.' : null}
             {this.state.import ? this.state.import : null}
           </p>
           {this.state.export
             ? (
               <p>
-                <a download={`${icb.get('name')}.${this.state.exportCV ? "cv" : "layer"}.json`} href={this.state.export} onClick={() => this.setState({ export: null })}>
+                <a download={`${icb.get('name')}.${this.state.exportCV ? 'cv' : 'layer'}.json`} href={this.state.export} onClick={() => this.setState({ export: null })}>
                 Click here to download.
                 </a>
               </p>
@@ -420,7 +420,7 @@ export default class InstrumentControl extends Component {
                         if (this.state.importCV) {
                           // Import a CV
                           if (json.type !== 'cv') {
-                            throw `Not a CV export.`
+                            throw 'Not a CV export.'
                           }
                           this.setState({ loading: true, import: null, name: null }, async () => {
                             await this._importCV(json, firstInstrumentAddress);
@@ -430,7 +430,7 @@ export default class InstrumentControl extends Component {
                         else {
                           // Import a single layer
                           if (json.type !== 'layer') {
-                            throw `Not a layer export.`
+                            throw 'Not a layer export.'
                           }
                           this.setState({ loading: true, import: null, name: null }, async () => {
                             await this._importLayer(json, this.props.firstInstrumentAddress, this.props.instrumentAddress, nextInstrumentAddress);
@@ -444,7 +444,7 @@ export default class InstrumentControl extends Component {
                         }
                       }
                       catch (e) {
-                        this.setState({ import: "Could not load your JSON file! Please try again." });
+                        this.setState({ import: 'Could not load your JSON file! Please try again.' });
                         console.error(e);
                       }
                     };
@@ -523,7 +523,7 @@ export default class InstrumentControl extends Component {
             <OverlayTrigger placement="bottom" overlay={firstInstrument ? (<div/>) : (<Tooltip className="info" id="nametooltip">Only the first layer name will affect the CV name</Tooltip>)}>
               <FormControl value={name} type="text" maxLength="6" placeholder="Instrument name" maxLength={6}
                 onChange={(event) => this.setState({ name: event.target.value })}
-                onBlur={(event) => handleInputSet("name", event.target.value)}
+                onBlur={(event) => handleInputSet('name', event.target.value)}
               />
             </OverlayTrigger>
           </Col>
@@ -537,7 +537,7 @@ export default class InstrumentControl extends Component {
                 value={icb.get('dynamics')}
                 onChange={(event) => handleInputSet('dynamics', event.target.value)}>
                 {Array.from(['None', 'Medium', 'Strong', 'Full'], (v, k) => {
-                  return (<option value={k} key={"dynamics-" + k}>{v}</option>);
+                  return (<option value={k} key={'dynamics-' + k}>{v}</option>);
                 })}
               </FormControl>
             </InputGroup>
@@ -559,7 +559,7 @@ export default class InstrumentControl extends Component {
                 onChange={(event) => handleInputSet('transpose', event.target.value)}>
                 {Array.from({length: 1 + 12 * transposeRange * 2}, (v, k) => {
                   const val = -12 * transposeRange + k;
-                  return (<option value={val} key={"transpose-" + k}>{val > 0 ? "+" : ""}{val}</option>);
+                  return (<option value={val} key={'transpose-' + k}>{val > 0 ? '+' : ''}{val}</option>);
                 })}
               </FormControl>
             </InputGroup>
@@ -572,7 +572,7 @@ export default class InstrumentControl extends Component {
                 onChange={(event) => handleInputSet('detune', event.target.value)}>
                 {Array.from({length: 1 + 12 * detuneRange * 2}, (v, k) => {
                   const val = -12 * detuneRange + k;
-                  return (<option value={val} key={"detune-" + k}>{val > 0 ? "+" : ""}{val}</option>);
+                  return (<option value={val} key={'detune-' + k}>{val > 0 ? '+' : ''}{val}</option>);
                 })}
               </FormControl>
             </InputGroup>
@@ -588,8 +588,8 @@ export default class InstrumentControl extends Component {
                 onChange={(event) => firstInstrument ? handleInputSet('wvMode', event.target.value) : false}>
                 >
                 {firstInstrument
-                  ? Array.from(["Rotor Slow", "Rotor Fast", "Flanger", "Strings", "Chorus"], (v, k) => {
-                      return (<option value={k} key={"mode-" + k}>{v}</option>);
+                  ? Array.from(['Rotor Slow', 'Rotor Fast', 'Flanger', 'Strings', 'Chorus'], (v, k) => {
+                      return (<option value={k} key={'mode-' + k}>{v}</option>);
                     })
                     : (<option value={0}>First layer only</option>)
                 }
@@ -641,7 +641,7 @@ export default class InstrumentControl extends Component {
         </Loader>
         <Notification
           isActive={this.state.notification !== null}
-          message={(this.state.notification !== null) ? this.state.notification : ""}
+          message={(this.state.notification !== null) ? this.state.notification : ''}
           barStyle={{ fontSize: 16, zIndex: 9999, opacity: 0.9 }}
         />
       </div>

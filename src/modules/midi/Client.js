@@ -69,7 +69,7 @@ export default class Client extends MidiConnector {
       this.deferred = null;
     }
     else {
-      console.error("Trying to resolve but no promise was deferred.");
+      console.error('Trying to resolve but no promise was deferred.');
     }
     // Handle next message in queue, if any
     this._processQueue();
@@ -77,20 +77,20 @@ export default class Client extends MidiConnector {
 
   _onMessage(object) {
     // Handle error types
-    if (object.type == "midierrorin") {
-      console.error("Midi in error: " + object.data);
+    if (object.type == 'midierrorin') {
+      console.error('Midi in error: ' + object.data);
       this._reject(object);
     }
-    else if (object.type == "midierrorout") {
-      console.error("Midi out error: " + object.data);
+    else if (object.type == 'midierrorout') {
+      console.error('Midi out error: ' + object.data);
       this._reject(object);
     }
-    else if (object.type == "send") {
+    else if (object.type == 'send') {
       if (this._shouldIgnoreAck()) {
         // Ignore acknowledgement unless failure, in which case we will reject our send promise
         // We assume that the actual data will come in later through midimessage.
         if (!object.data) {
-          this._reject({ type: "send" });
+          this._reject({ type: 'send' });
         }
       }
       else {
@@ -98,8 +98,8 @@ export default class Client extends MidiConnector {
         this._resolve(object.data);
       }
     }
-    else if (object.type == "midimessage") {
-      let u8 = new Uint8Array(atob(object.data).split("").map((c) => { return c.charCodeAt(0); }));
+    else if (object.type == 'midimessage') {
+      let u8 = new Uint8Array(atob(object.data).split('').map((c) => { return c.charCodeAt(0); }));
       if (this.isValid(u8)) {
         this._resolve(u8);
       }
@@ -115,8 +115,8 @@ export default class Client extends MidiConnector {
   }
   
   _onError() {
-    console.error("Websocket error");
-    this._reject({ type: "websocket" });
+    console.error('Websocket error');
+    this._reject({ type: 'websocket' });
   }
   
   setPorts(portIn, portOut) {
@@ -169,7 +169,7 @@ export default class Client extends MidiConnector {
         });
       }
       else {
-        reject("Invalid port.");
+        reject('Invalid port.');
       }
     });
   }
@@ -184,7 +184,7 @@ export default class Client extends MidiConnector {
         }));
       }
       else {
-        reject("Already connected");
+        reject('Already connected');
       }
     });
   }

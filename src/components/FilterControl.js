@@ -192,7 +192,7 @@ export default class FilterControl extends Component {
                 <InputGroup.Addon>Freq</InputGroup.Addon>
                 <FormControl type="text" value={frequency}
                 onChange={(event) => this.setState({ frequency: event.target.value })}
-                onBlur={(event) => handleTextDone(0, 255, "frequency", event)}
+                onBlur={(event) => handleTextDone(0, 255, 'frequency', event)}
                 />
               </InputGroup>
             </Col>
@@ -201,7 +201,7 @@ export default class FilterControl extends Component {
                 <InputGroup.Addon>Q</InputGroup.Addon>
                 <FormControl type="text" value={q}
                 onChange={(event) => this.setState({ q: event.target.value })}
-                onBlur={(event) => handleTextDone(0, 255, "q", event)}
+                onBlur={(event) => handleTextDone(0, 255, 'q', event)}
                 />
               </InputGroup>
             </Col>
@@ -211,8 +211,8 @@ export default class FilterControl extends Component {
                   <FormControl componentClass="select"
                     value={vcf.get('envType')}
                     onChange={(event) => handleInputSet('envType', event.target.value)}>
-                  {Array.from(["T1", "T1 → T2", "T1 → Rel → T2", "T1/T2 Rotor"], (v, k) => {
-                    return (<option value={k} key={"mode-" + k}>{v}</option>);
+                  {Array.from(['T1', 'T1 → T2', 'T1 → Rel → T2', 'T1/T2 Rotor'], (v, k) => {
+                    return (<option value={k} key={'mode-' + k}>{v}</option>);
                   })}
                 </FormControl>
               </InputGroup>
@@ -222,47 +222,47 @@ export default class FilterControl extends Component {
             <Col sm={2} componentClass={ControlLabel}>Envelope</Col>
             <Col sm={3}>
                 <InputGroup>
-                  <InputGroup.Addon style={{ width: "12ch" }}>T1 Time</InputGroup.Addon>
+                  <InputGroup.Addon style={{ width: '12ch' }}>T1 Time</InputGroup.Addon>
                   <FormControl type="text" value={t1Time}
                   onChange={(event) => this.setState({ t1Time: event.target.value })}
-                  onBlur={(event) => handleTextDone(0, 255, "t1Time", event)}
+                  onBlur={(event) => handleTextDone(0, 255, 't1Time', event)}
                   />
                 </InputGroup>
               <InputGroup>
-                <InputGroup.Addon style={{ width: "12ch" }}>T1 Freq 1</InputGroup.Addon>
+                <InputGroup.Addon style={{ width: '12ch' }}>T1 Freq 1</InputGroup.Addon>
                 <FormControl type="text" value={t1Offset}
                 onChange={(event) => this.setState({ t1Offset: event.target.value })}
-                onBlur={(event) => handleTextDone(0, 127, "t1Offset", event)}
+                onBlur={(event) => handleTextDone(0, 127, 't1Offset', event)}
                 />
               </InputGroup>
               <InputGroup>
-                <InputGroup.Addon style={{ width: "12ch" }}>T1 Freq 2</InputGroup.Addon>
+                <InputGroup.Addon style={{ width: '12ch' }}>T1 Freq 2</InputGroup.Addon>
                 <FormControl type="text" value={t1Intensity}
                 onChange={(event) => this.setState({ t1Intensity: event.target.value })}
-                onBlur={(event) => handleTextDone(0, 127, "t1Intensity", event, (v) => v - t1Offset)}
+                onBlur={(event) => handleTextDone(0, 127, 't1Intensity', event, (v) => v - t1Offset)}
                 />
               </InputGroup>
             </Col>
             <Col sm={3}>
               <InputGroup>
-                <InputGroup.Addon style={{ width: "12ch" }}>T2 Time</InputGroup.Addon>
+                <InputGroup.Addon style={{ width: '12ch' }}>T2 Time</InputGroup.Addon>
                 <FormControl type="text" value={t2Time}
                 onChange={(event) => this.setState({ t2Time: event.target.value })}
-                onBlur={(event) => handleTextDone(0, 255, "t2Time", event)}
+                onBlur={(event) => handleTextDone(0, 255, 't2Time', event)}
                 />
               </InputGroup>
               <InputGroup>
-                <InputGroup.Addon style={{ width: "12ch" }}>T2 Freq 1</InputGroup.Addon>
+                <InputGroup.Addon style={{ width: '12ch' }}>T2 Freq 1</InputGroup.Addon>
                 <FormControl type="text" value={t2Offset}
                 onChange={(event) => this.setState({ t2Offset: event.target.value })}
-                onBlur={(event) => handleTextDone(0, 127, "t2Offset", event)}
+                onBlur={(event) => handleTextDone(0, 127, 't2Offset', event)}
                 />
               </InputGroup>
               <InputGroup>
-                <InputGroup.Addon style={{ width: "12ch" }}>T2 Freq 2</InputGroup.Addon>
+                <InputGroup.Addon style={{ width: '12ch' }}>T2 Freq 2</InputGroup.Addon>
                 <FormControl type="text" value={t2Intensity}
                 onChange={(event) => this.setState({ t2Intensity: event.target.value })}
-                onBlur={(event) => handleTextDone(0, 127, "t2Intensity", event, (v) => v - t2Offset)}
+                onBlur={(event) => handleTextDone(0, 127, 't2Intensity', event, (v) => v - t2Offset)}
                 />
               </InputGroup>
             </Col>
@@ -281,8 +281,8 @@ export default class FilterControl extends Component {
                         this.state.vcf.set('noise', value > 0).set('noiseType', (value > 0) ? (value - 1) : 0)
                       );
                     }}>
-                  {Array.from(["None", "Wind", "Click", "Flute"], (v, k) => {
-                    return (<option value={k} key={"noise-" + k}>{v}</option>);
+                  {Array.from(['None', 'Wind', 'Click', 'Flute'], (v, k) => {
+                    return (<option value={k} key={'noise-' + k}>{v}</option>);
                   })}
                 </FormControl>
               </InputGroup>

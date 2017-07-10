@@ -11,7 +11,7 @@ export default class MidiConfig extends Component {
     super();
     
     this.state = {
-      status: "connecting",
+      status: 'connecting',
       error: null,
       portsQueried: null,
       portIn: localStorage.getItem('portIn') || 0,
@@ -25,16 +25,16 @@ export default class MidiConfig extends Component {
     if (!this.props.client.isConnected()) {
       this.props.client.open(this.props.url, this.props.token)
       .then(() => {
-        this.setState({ status: "sysexConnected" });
+        this.setState({ status: 'sysexConnected' });
       })
       .catch(() => {
-        this.setState({ status: "error", error: "Could not connect to sysexd at " + this.props.url });
+        this.setState({ status: 'error', error: 'Could not connect to sysexd at ' + this.props.url });
       });
     }
   }
   
   componentDidUpdate() {
-    if (this.state.status == "sysexConnected") {
+    if (this.state.status == 'sysexConnected') {
       if (!this.state.portsQueried) {
         // Query ports
         this.props.client.query()
@@ -44,7 +44,7 @@ export default class MidiConfig extends Component {
           });
         })
         .catch(() => {
-          this.setState({ status: "error", error: "Could not query MIDI ports" });
+          this.setState({ status: 'error', error: 'Could not query MIDI ports' });
         });
       }
     }
@@ -77,10 +77,10 @@ export default class MidiConfig extends Component {
       // An error has occurred, so try to find out what happened
       if(!this.props.client.isFirmwarePatched()) {
         // Unpatched firmware
-        this.setState({ status: "unpatched" });
+        this.setState({ status: 'unpatched' });
       }
       else {
-        this.setState({ status: "error" });
+        this.setState({ status: 'error' });
       }
     })
     ;
@@ -89,14 +89,14 @@ export default class MidiConfig extends Component {
   render() {
     let modalContents;
     
-    if (this.state.status == "connecting") {
+    if (this.state.status == 'connecting') {
       modalContents = (
         <Modal.Body>
           Connecting to sysexd at {this.props.url}.
         </Modal.Body>
       );
     }
-    else if(this.state.status == "sysexConnected") {
+    else if(this.state.status == 'sysexConnected') {
       if (!this.state.portsQueried) {
         // Still querying ports
         modalContents = (
@@ -112,9 +112,9 @@ export default class MidiConfig extends Component {
             <p>
               {!this.state.portsQueried.inports
                 ? !this.state.portsQueried.outports
-                  ? "No available MIDI input and output ports could be found."
-                  : "No available MIDI input ports could be found."
-                : "No available MIDI output ports could be found."
+                  ? 'No available MIDI input and output ports could be found.'
+                  : 'No available MIDI input ports could be found.'
+                : 'No available MIDI output ports could be found.'
               }
             </p>
             <p>
@@ -149,7 +149,7 @@ export default class MidiConfig extends Component {
                 <Col sm={9}>
                   <FormControl value={this.state.portIn} componentClass="select" onChange={(e) => { this.setState({ portIn: Number(e.target.value) }); } }>
                     {this.state.portsQueried.inports.map((port, index) => {
-                      return (<option value={index} key={"inport-" + index}>{port.name}</option>);
+                      return (<option value={index} key={'inport-' + index}>{port.name}</option>);
                     })}
                   </FormControl>
                 </Col>
@@ -161,7 +161,7 @@ export default class MidiConfig extends Component {
                 <Col sm={9}>
                   <FormControl value={this.state.portOut} componentClass="select" onChange={(e) => { this.setState({ portOut: Number(e.target.value) }); } }>
                     {this.state.portsQueried.outports.map((port, index) => {
-                      return (<option value={index} key={"outport-" + index}>{port.name}</option>);
+                      return (<option value={index} key={'outport-' + index}>{port.name}</option>);
                     })}
                   </FormControl>
                 </Col>
@@ -169,14 +169,14 @@ export default class MidiConfig extends Component {
             </Modal.Body>
             <Modal.Footer>
               <Button bsStyle="primary" type="submit" disabled={this.state.wersiConnecting}>
-                {this.state.wersiConnecting ? "Connecting..." : "Connect"}
+                {this.state.wersiConnecting ? 'Connecting...' : 'Connect'}
               </Button>
             </Modal.Footer>
           </Form>
         );
       }
     }
-    else if(this.state.status == "unpatched") {
+    else if(this.state.status == 'unpatched') {
       modalContents = (
         <Modal.Body>
           <p>
@@ -192,10 +192,10 @@ export default class MidiConfig extends Component {
         </Modal.Body>
       );
     }
-    else if(this.state.status == "error") {
+    else if(this.state.status == 'error') {
       modalContents = (
         <Modal.Body>
-          {this.props.error || "An error occurred while trying to communicate with your device."}
+          {this.props.error || 'An error occurred while trying to communicate with your device.'}
         </Modal.Body>
       );
     }

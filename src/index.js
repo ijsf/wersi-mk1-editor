@@ -10,8 +10,8 @@ import './css/lato-font.css';
 
 import './css/main.css';
 
-require("babel-core/register");
-require("babel-polyfill");
+require('babel-core/register');
+require('babel-polyfill');
 
 // App
 ReactDOM.render(<App />, document.getElementById('root'));

@@ -144,7 +144,7 @@ export default class Piano extends Component {
       startKey = 'C'; // continue next octave from C
     }
     return (
-      <div className={`piano-show-names`} style={{...this.props.style}}>
+      <div className={'piano-show-names'} style={{...this.props.style}}>
         <ul id="beautiful-piano" style={{display: 'inline-block'}}>
           {keyElementArray}
         </ul>

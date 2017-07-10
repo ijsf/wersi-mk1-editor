@@ -10,6 +10,10 @@ The editor itself has been built upon the React framework, using well structured
 
 For browser compatibility, we recommend the latest version of Chrome or Chromium-based browsers. Compatibility beyond these browsers has not been tested as of yet.
 
+## TL;DR
+
+Make sure [sysexd](https://github.com/ijsf/sysexd) is running on your computer, then head over to [edit.wer.si](http://edit.wer.si) to use the latest version of the editor!
+
 ## Prerequisites
 
 In order to use the editor, the following prerequisites are required on the host on which the editor is to be run:

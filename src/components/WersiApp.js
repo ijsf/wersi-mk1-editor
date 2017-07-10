@@ -36,11 +36,11 @@ export default class WersiApp extends Component {
       <div>
         <div className="page-header">
           <h1 style={{float: 'left'}}>
-            MK1 editor
-            <sub>{this.props.version}</sub>
+            edit.wer.si
+            <sub style={{ opacity: 0.5 }}>{this.props.version}</sub>
           </h1>
-          <h1 style={{float: 'right'}}>
-            wer.si
+          <h1 style={{float: 'right', opacity: 0.5, fontWeight: 300 }}>
+            MK1/EX20
           </h1>
           <hr style={{border: 0, clear: 'both'}}/>
         </div>

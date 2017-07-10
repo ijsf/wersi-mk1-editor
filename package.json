@@ -1,6 +1,6 @@
 {
   "name": "wersi-mk1-editor",
-  "version": "1.0.0",
+  "version": "0.7.0",
   "description": "Editor frontend for the Wersi MK1 / EX-20 synthesizers",
   "scripts": {
     "start": "node server.js",

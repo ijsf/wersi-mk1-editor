@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node server.js",
     "lint": "eslint src",
-    "build": "node ./node_modules/webpack/bin/webpack.js --config webpack.config.dist.js --progress -p && cp -f index.html dist/"
+    "build": "node ./node_modules/webpack/bin/webpack.js --config webpack.config.dist.js --progress && cp -f index.html dist/"
   },
   "repository": {
     "type": "git",
@@ -55,6 +55,6 @@
     "react-notification": "^6.3.0",
     "react-toggle-button": "^2.1.0",
     "react-tooltip": "^3.2.1",
-    "rickshaw": "^1.6.0-rc.0"
+    "rickshaw": "^1.6.0"
   }
 }

@@ -11,15 +11,15 @@ module.exports = {
     filename: 'bundle.js',
     publicPath: '/'
   },
-  devtool: 'cheap-module-source-map',
+  devtool: 'source-map',
   plugins: [
-    new webpack.LoaderOptionsPlugin({
-      minimize: true,
-      debug: false
-    }),
     new webpack.optimize.UglifyJsPlugin({
-      sourceMap: 'cheap-module-source-map',
-      comments: false
+      sourceMap: true,
+      comments: false,
+      mangle: {
+        // Fix for rickshaw: https://github.com/shutterstock/rickshaw/issues/368
+        except: ['$super', '$', 'exports', 'require']
+      }
     })
   ],
   module: {

@@ -2,26 +2,31 @@ const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
-  devtool: 'eval',
   entry: [
-    'webpack-dev-server/client?http://localhost:3000',
-    'webpack/hot/only-dev-server',
     'babel-polyfill',
     './src/index'
   ],
   output: {
-    path: path.join(__dirname, 'dist-dev'),
+    path: path.join(__dirname, 'dist'),
     filename: 'bundle.js',
     publicPath: '/'
   },
+  devtool: 'cheap-module-source-map',
   plugins: [
-    new webpack.HotModuleReplacementPlugin()
+    new webpack.LoaderOptionsPlugin({
+      minimize: true,
+      debug: false
+    }),
+    new webpack.optimize.UglifyJsPlugin({
+      sourceMap: 'cheap-module-source-map',
+      comments: false
+    })
   ],
   module: {
     loaders: [
       {
         test: /\.js$/,
-        loaders: ['react-hot-loader', 'babel-loader'],
+        loaders: ['babel-loader'],
         include: path.join(__dirname, 'src')
       },
       {

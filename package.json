@@ -6,7 +6,7 @@
     "start": "node server.js",
     "lint": "eslint src",
     "build": "node ./node_modules/webpack/bin/webpack.js --config webpack.config.dist.js --progress && cp -f index.html dist/",
-    "upload": "git subtree push --prefix dist origin gh-pages"
+    "upload": "git push origin `git subtree split --prefix dist master`:gh-pages --force"
   },
   "repository": {
     "type": "git",

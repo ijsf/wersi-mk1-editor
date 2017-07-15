@@ -65,12 +65,14 @@ export default class WaveControl extends Component {
   }
   
   componentWillMount() {
-    this._watch(this.props.waveAddress, 'wave');
+    if (this.props.waveAddress) {
+      this._watch(this.props.waveAddress, 'wave');
+    }
   }
   
   componentWillUpdate(nextProps, nextState) {
     // Check if instrument has changed
-    if (this.props.waveAddress !== nextProps.waveAddress) {
+    if (nextProps.waveAddress && this.props.waveAddress !== nextProps.waveAddress) {
       this._watch(nextProps.waveAddress, 'wave');
     }
   }
@@ -188,13 +190,12 @@ export default class WaveControl extends Component {
     const { parallel, parallelFormant } = this.state;
     const formant = this.state.wave ? this.state.wave.get('formant') : false;
     
-    let header = (
-      <h3>Wave control ({this.props.waveAddress})</h3>
-    );
-    
     return (
       <Loader show={this.state.loading} message={(<h5>« Downloading... »</h5>)} contentBlur={2}>
-        <Panel header={header} collapsible defaultExpanded>
+        <Panel
+          header={(<h3>Wavetable <sup>{`${this.props.waveAddress || ''}`}</sup></h3>)}
+          collapsible defaultExpanded
+          >
           <div className="clearfix">
             <div style={{...bgStyle}}>
               wavetable synthesis

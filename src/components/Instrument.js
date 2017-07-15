@@ -143,45 +143,10 @@ export default class Instrument extends Component {
     const { icb, instrumentAddresses, error } = this.state;
 
     // Get instrument address
-    const instrumentAddress = instrumentAddresses.last();
-    const firstInstrumentAddress = instrumentAddresses.first();
+    const instrumentAddress = icb ? instrumentAddresses.last() : null;
+    const firstInstrumentAddress = icb ? instrumentAddresses.first() : null;
     
-    // Only construct everything once we have the ICB
-    // (these components have data bindings dependent on properties set here, which cannot be changed after mounting)
-    let instrumentControl = null, filterControl = null, waveControl = null, envelopeControl = null;
     if (icb) {
-      instrumentControl = (<InstrumentControl
-        instrumentAddresses={instrumentAddresses}
-        firstInstrumentAddress={firstInstrumentAddress}
-        instrumentAddress={instrumentAddress}
-        handleNextInstrument={this._handleNextInstrument.bind(this)}
-        handlePrevInstrument={this._handlePrevInstrument.bind(this)}
-        handleSetInstrument={this._handleSetInstrument.bind(this)}
-        showError={this._showError.bind(this)}
-        client={this.props.client}
-      />);
-      filterControl = (<FilterControl
-        instrumentAddress={instrumentAddress}
-        firstInstrumentAddress={firstInstrumentAddress}
-        vcfAddress={icb ? icb.get('vcfAddress') : 0}
-        showError={this._showError.bind(this)}
-        client={this.props.client}
-      />);
-      waveControl = (<WaveControl
-        instrumentAddress={instrumentAddress}
-        firstInstrumentAddress={firstInstrumentAddress}
-        waveAddress={icb ? icb.get('waveAddress') : 0}
-        showError={this._showError.bind(this)}
-        client={this.props.client}
-      />);
-      envelopeControl = (<EnvelopeControl
-        instrumentAddress={instrumentAddress}
-        firstInstrumentAddress={firstInstrumentAddress}
-        amplAddress={icb ? icb.get('amplAddress') : 0}
-        freqAddress={icb ? icb.get('freqAddress') : 0}
-        showError={this._showError.bind(this)}
-        client={this.props.client}
-      />);
       console.log('ICB ' + JSON.stringify(icb.toJS()));
     }
     
@@ -204,7 +169,16 @@ export default class Instrument extends Component {
               </p>
             </Col>
             <Col lg={10}>
-              {instrumentControl}
+              <InstrumentControl
+                instrumentAddresses={instrumentAddresses}
+                firstInstrumentAddress={firstInstrumentAddress}
+                instrumentAddress={instrumentAddress}
+                handleNextInstrument={this._handleNextInstrument.bind(this)}
+                handlePrevInstrument={this._handlePrevInstrument.bind(this)}
+                handleSetInstrument={this._handleSetInstrument.bind(this)}
+                showError={this._showError.bind(this)}
+                client={this.props.client}
+              />
             </Col>
           </Row>
           <Row>
@@ -226,7 +200,13 @@ export default class Instrument extends Component {
               </p>
             </Col>
             <Col lg={10}>
-              {filterControl}
+              <FilterControl
+                instrumentAddress={instrumentAddress}
+                firstInstrumentAddress={firstInstrumentAddress}
+                vcfAddress={icb ? icb.get('vcfAddress') : 0}
+                showError={this._showError.bind(this)}
+                client={this.props.client}
+              />
             </Col>
           </Row>
           <Row>
@@ -249,7 +229,13 @@ export default class Instrument extends Component {
               </p>
             </Col>
             <Col lg={10}>
-              {waveControl}
+              <WaveControl
+                instrumentAddress={instrumentAddress}
+                firstInstrumentAddress={firstInstrumentAddress}
+                waveAddress={icb ? icb.get('waveAddress') : 0}
+                showError={this._showError.bind(this)}
+                client={this.props.client}
+              />
             </Col>
           </Row>
           <Row>
@@ -266,7 +252,14 @@ export default class Instrument extends Component {
               </p>
             </Col>
             <Col lg={10}>
-              {envelopeControl}
+              <EnvelopeControl
+                instrumentAddress={instrumentAddress}
+                firstInstrumentAddress={firstInstrumentAddress}
+                amplAddress={icb ? icb.get('amplAddress') : 0}
+                freqAddress={icb ? icb.get('freqAddress') : 0}
+                showError={this._showError.bind(this)}
+                client={this.props.client}
+              />
             </Col>
           </Row>
         </Grid>

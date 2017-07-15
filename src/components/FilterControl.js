@@ -58,12 +58,14 @@ export default class FilterControl extends Component {
   }
   
   componentWillMount() {
-    this._watch(this.props.vcfAddress, 'vcf');
+    if (this.props.vcfAddress) {
+      this._watch(this.props.vcfAddress, 'vcf');
+    }
   }
   
   componentWillUpdate(nextProps, nextState) {
     // Check if instrument has changed
-    if (this.props.vcfAddress !== nextProps.vcfAddress) {
+    if (nextProps.vcfAddress && this.props.vcfAddress !== nextProps.vcfAddress) {
       this._watch(nextProps.vcfAddress, 'vcf');
     }
   }
@@ -92,10 +94,6 @@ export default class FilterControl extends Component {
   
   render() {
     const { vcf } = this.state;
-    
-    let header = (
-      <h3>Filter control ({this.props.vcfAddress}/global)</h3>
-    );
     
     let form = null;
     if (vcf) {
@@ -313,7 +311,10 @@ export default class FilterControl extends Component {
     
     return (
       <Loader show={this.state.loading} message={(<h5>« Downloading... »</h5>)} contentBlur={2}>
-        <Panel header={header} collapsible defaultExpanded>
+        <Panel
+          header={(<h3>Filter <sup>{`${this.props.vcfAddress || ''}`}</sup></h3>)}
+          collapsible defaultExpanded
+          >
           <ButtonToolbar>
             <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="savetooltip">Save VCF (hotkey V)</Tooltip>)}>
               <Button onClick={this._handleSave.bind(this)} className="pull-right" bsStyle="primary"><Glyphicon glyph="save"/></Button>

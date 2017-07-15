@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node server.js",
     "lint": "eslint src",
-    "build": "node ./node_modules/webpack/bin/webpack.js --config webpack.config.dist.js --progress && cp -f index.html dist/"
+    "build": "node ./node_modules/webpack/bin/webpack.js --config webpack.config.dist.js --progress && cp -f index.html dist/",
+    "upload": "git subtree push --prefix dist origin gh-pages"
   },
   "repository": {
     "type": "git",

@@ -59,12 +59,14 @@ export default class InstrumentControl extends Component {
   }
   
   componentWillMount() {
-    this._watch(this.props.instrumentAddress, 'icb');
+    if (this.props.instrumentAddress) {
+      this._watch(this.props.instrumentAddress, 'icb');
+    }
   }
   
   componentWillUpdate(nextProps, nextState) {
     // Check if instrument has changed
-    if (this.props.instrumentAddress !== nextProps.instrumentAddress) {
+    if (nextProps.instrumentAddress && this.props.instrumentAddress !== nextProps.instrumentAddress) {
       this._watch(nextProps.instrumentAddress, 'icb');
     }
   }
@@ -344,29 +346,32 @@ export default class InstrumentControl extends Component {
   
   render() {
     const { icb } = this.state;
-    
-    const name = (this.state.name !== null) ? this.state.name : icb.get('name');
 
-    let header = (
-      <h3>Instrument control ({this.props.instrumentAddress})</h3>
-    );
+    // Determine name
+    let name = "";
+    if (this.state.name !== null) {
+      name = this.state.name;
+    }
+    else if (icb) {
+      name = icb.get('name');
+    }
 
     // Determine variables related to layering and CVs, use default 1-to-1 Wersi mapping for any next instrument addresses
-    const firstInstrumentAddress = this.props.instrumentAddresses.first();
-    const currentCV = firstInstrumentAddress;
-    const firstInstrument = firstInstrumentAddress == this.props.instrumentAddress;
-    const firstInstrumentId = WersiClient.ADDRESS.id(firstInstrumentAddress, this.state.double);
-    const currentInstrumentLayer = WersiClient.ADDRESS.layer(this.props.instrumentAddress, this.state.double);
-    const lastInstrumentLayer = WersiClient.ADDRESS.maxLayers(this.state.double);
-    const nextInstrumentAddress = icb.get('nextInstrumentAddress');
-    const nextInstrument = nextInstrumentAddress !== 0;
-    const nextNewInstrumentAddress = WersiClient.ADDRESS.CV(firstInstrumentId, currentInstrumentLayer + 1, this.state.double);
-    const lastInstrumentId = WersiClient.ADDRESS.maxCVs(this.state.double);
+    const firstInstrumentAddress = icb ? this.props.instrumentAddresses.first() : -1;
+    const currentCV = icb ? firstInstrumentAddress : -1;
+    const firstInstrument = icb ? firstInstrumentAddress == this.props.instrumentAddress : -1;
+    const firstInstrumentId = icb ? WersiClient.ADDRESS.id(firstInstrumentAddress, this.state.double) : -1;
+    const currentInstrumentLayer = icb ? WersiClient.ADDRESS.layer(this.props.instrumentAddress, this.state.double) : -1;
+    const lastInstrumentLayer = icb ? WersiClient.ADDRESS.maxLayers(this.state.double) : -1;
+    const nextInstrumentAddress = icb ? icb.get('nextInstrumentAddress') : -1;
+    const nextInstrument = icb ? nextInstrumentAddress !== 0 : -1;
+    const nextNewInstrumentAddress = icb ? WersiClient.ADDRESS.CV(firstInstrumentId, currentInstrumentLayer + 1, this.state.double) : -1;
+    const lastInstrumentId = icb ? WersiClient.ADDRESS.maxCVs(this.state.double) : -1;
 
-    const firstCV = firstInstrumentId === 0;
-    const lastCV = firstInstrumentId === WersiClient.ADDRESS.maxCVs(this.state.double);
-    const prevCV = currentCV - 1;
-    const nextCV = currentCV + 1;
+    const firstCV = icb ? firstInstrumentId === 0 : -1;
+    const lastCV = icb ? firstInstrumentId === WersiClient.ADDRESS.maxCVs(this.state.double) : -1;
+    const prevCV = icb ? currentCV - 1 : -1;
+    const nextCV = icb ? currentCV + 1 : -1;
     
     // Button toggle handler
     let handleButtonToggle = (type) => {
@@ -386,7 +391,7 @@ export default class InstrumentControl extends Component {
     const transposeRange = 2, detuneRange = 2;  // times 12 (octave)
     
     // Import/export modal
-    let modal = (
+    let modal = icb ? (
       <Modal show={(this.state.export || this.state.import) ? true : false}>
         <Modal.Header>
           <Modal.Title>{(this.state.export ? 'Export' : 'Import') + ' ' + (this.state.importCV ? 'CV' : 'layer')}</Modal.Title>
@@ -464,7 +469,7 @@ export default class InstrumentControl extends Component {
           <Button bsStyle="primary" onClick={() => this.setState({ export: null, import: null })}>Cancel</Button>
         </Modal.Footer>
       </Modal>
-    );
+    ) : null;
     
     let form = (
       <Form horizontal>
@@ -473,46 +478,46 @@ export default class InstrumentControl extends Component {
             <ButtonToolbar>
               <ButtonGroup>
                 <OverlayTrigger placement="bottom" overlay={firstCV ? (<div/>) : (<Tooltip className="info" id="prevcvtooltip">Previous CV</Tooltip>)}>
-                  <Button onClick={() => this._setInstrument(prevCV)} bsStyle="primary" disabled={firstCV}><Glyphicon glyph="chevron-left"/></Button>
+                  <Button onClick={() => this._setInstrument(prevCV)} bsStyle="primary" disabled={!icb || firstCV}><Glyphicon glyph="chevron-left"/></Button>
                 </OverlayTrigger>
                 <OverlayTrigger placement="bottom" overlay={lastCV ? (<div/>) : (<Tooltip className="info" id="nextcvtooltip">Next CV</Tooltip>)}>
-                  <Button onClick={() => this._setInstrument(nextCV)} bsStyle="primary" disabled={lastCV}><Glyphicon glyph="chevron-right"/></Button>
+                  <Button onClick={() => this._setInstrument(nextCV)} bsStyle="primary" disabled={!icb || lastCV}><Glyphicon glyph="chevron-right"/></Button>
                 </OverlayTrigger>
                 <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="reloadcvtooltip">Reload CV</Tooltip>)}>
-                  <Button onClick={() => this._setInstrument(currentCV)} bsStyle="primary"><Glyphicon glyph="refresh"/></Button>
+                  <Button onClick={() => this._setInstrument(currentCV)} bsStyle="primary" disabled={!icb}><Glyphicon glyph="refresh"/></Button>
                 </OverlayTrigger>
                 <Button bsStyle="link" style={{ width: '16ch' }}>CV {firstInstrumentId + 1} of {lastInstrumentId + 1} ({firstInstrumentAddress})</Button>
                 <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="importcvtooltip">Load CV from file</Tooltip>)}>
-                  <Button onClick={() => this._handleImport(true)} bsStyle="primary"><Glyphicon glyph="folder-open"/></Button>
+                  <Button onClick={() => this._handleImport(true)} bsStyle="primary" disabled={!icb}><Glyphicon glyph="folder-open"/></Button>
                 </OverlayTrigger>
                 <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="exportcvtooltip">Save CV to file</Tooltip>)}>
-                  <Button onClick={() => this._handleExport(true)} bsStyle="primary"><Glyphicon glyph="floppy-disk"/></Button>
+                  <Button onClick={() => this._handleExport(true)} bsStyle="primary" disabled={!icb}><Glyphicon glyph="floppy-disk"/></Button>
                 </OverlayTrigger>
               </ButtonGroup>
               <ButtonGroup style={{ paddingLeft: '2em' }}>
                 <OverlayTrigger placement="bottom" overlay={firstInstrument ? (<div/>) : (<Tooltip className="info" id="prevtooltip">Previous layer</Tooltip>)}>
-                  <Button onClick={() => this._prevInstrument()} bsStyle="info" disabled={firstInstrument}><Glyphicon glyph="chevron-left"/></Button>
+                  <Button onClick={() => this._prevInstrument()} bsStyle="info" disabled={!icb || firstInstrument}><Glyphicon glyph="chevron-left"/></Button>
                 </OverlayTrigger>
                 <OverlayTrigger placement="bottom" overlay={!nextInstrument ? (<div/>) : (<Tooltip className="info" id="nexttooltip">Next layer</Tooltip>)}>
-                  <Button onClick={() => this._nextInstrument(icb.get('nextInstrumentAddress'))} bsStyle="info" disabled={!nextInstrument}><Glyphicon glyph="chevron-right"/></Button>
+                  <Button onClick={() => this._nextInstrument(icb.get('nextInstrumentAddress'))} bsStyle="info" disabled={!icb || !nextInstrument}><Glyphicon glyph="chevron-right"/></Button>
                 </OverlayTrigger>
                 <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="reloadlyaertooltip">Reload layer</Tooltip>)}>
-                  <Button onClick={() => this._setInstrument(this.props.instrumentAddress)} bsStyle="info"><Glyphicon glyph="refresh"/></Button>
+                  <Button onClick={() => this._setInstrument(this.props.instrumentAddress)} bsStyle="info" disabled={!icb}><Glyphicon glyph="refresh"/></Button>
                 </OverlayTrigger>
                 <Button bsStyle="link" style={{ width: '16ch' }}>Layer {currentInstrumentLayer + 1} ({this.props.instrumentAddress})</Button>
                 <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="importtooltip">Load layer from file</Tooltip>)}>
-                  <Button onClick={() => this._handleImport(false)} bsStyle="info"><Glyphicon glyph="folder-open"/></Button>
+                  <Button onClick={() => this._handleImport(false)} bsStyle="info" disabled={!icb}><Glyphicon glyph="folder-open"/></Button>
                 </OverlayTrigger>
                 <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="exporttooltip">Save layer to file</Tooltip>)}>
-                  <Button onClick={() => this._handleExport(false)} bsStyle="info"><Glyphicon glyph="floppy-disk"/></Button>
+                  <Button onClick={() => this._handleExport(false)} bsStyle="info" disabled={!icb}><Glyphicon glyph="floppy-disk"/></Button>
                 </OverlayTrigger>
               </ButtonGroup>
               <ButtonGroup>
                 <OverlayTrigger placement="bottom" overlay={nextInstrument ? (<div/>) : (<Tooltip className="info" id="nextlayertooltip">Append new layer</Tooltip>)}>
-                  <Button onClick={() => this._handleNewInstrument(nextNewInstrumentAddress)} bsStyle="info" disabled={nextInstrument}><Glyphicon glyph="file"/></Button>
+                  <Button onClick={() => this._handleNewInstrument(nextNewInstrumentAddress)} bsStyle="info" disabled={!icb || nextInstrument}><Glyphicon glyph="file"/></Button>
                 </OverlayTrigger>
                 <OverlayTrigger placement="bottom" overlay={!nextInstrument ? (<div/>) : (<Tooltip className="info" id="removenextlayerstooltip">Delete all following layers</Tooltip>)}>
-                  <Button onClick={() => this._handleRemoveInstruments()} bsStyle="info" disabled={!nextInstrument}><Glyphicon glyph="trash"/></Button>
+                  <Button onClick={() => this._handleRemoveInstruments()} bsStyle="info" disabled={!icb || !nextInstrument}><Glyphicon glyph="trash"/></Button>
                 </OverlayTrigger>
               </ButtonGroup>
             </ButtonToolbar>
@@ -523,8 +528,8 @@ export default class InstrumentControl extends Component {
           <Col sm={3}>
             <OverlayTrigger placement="bottom" overlay={firstInstrument ? (<div/>) : (<Tooltip className="info" id="nametooltip">Only the first layer name will affect the CV name</Tooltip>)}>
               <FormControl value={name} type="text" maxLength="6" placeholder="Instrument name" maxLength={6}
-                onChange={(event) => this.setState({ name: event.target.value })}
-                onBlur={(event) => handleInputSet('name', event.target.value)}
+                onChange={icb ? ((event) => this.setState({ name: event.target.value })) : null}
+                onBlur={icb ? ((event) => handleInputSet('name', event.target.value)) : null}
               />
             </OverlayTrigger>
           </Col>
@@ -535,8 +540,8 @@ export default class InstrumentControl extends Component {
             <InputGroup>
               <InputGroup.Addon>Level</InputGroup.Addon>
               <FormControl componentClass="select"
-                value={icb.get('dynamics')}
-                onChange={(event) => handleInputSet('dynamics', event.target.value)}>
+                value={icb ? icb.get('dynamics') : null}
+                onChange={icb ? ((event) => handleInputSet('dynamics', event.target.value)) : null}>
                 {Array.from(['None', 'Medium', 'Strong', 'Full'], (v, k) => {
                   return (<option value={k} key={'dynamics-' + k}>{v}</option>);
                 })}
@@ -545,8 +550,8 @@ export default class InstrumentControl extends Component {
           </Col>
           <Col sm={3}>
             <ButtonToolbar>
-              <Button active={icb.get('voiceSelectLower')} onClick={() => handleButtonToggle('voiceSelectLower')}>Lower</Button>
-              <Button active={icb.get('voiceSelectUpper')} onClick={() => handleButtonToggle('voiceSelectUpper')}>Upper</Button>
+              <Button disabled={!icb} active={icb ? icb.get('voiceSelectLower') : false} onClick={() => handleButtonToggle('voiceSelectLower')}>Lower</Button>
+              <Button disabled={!icb} active={icb ? icb.get('voiceSelectUpper') : false} onClick={() => handleButtonToggle('voiceSelectUpper')}>Upper</Button>
             </ButtonToolbar>
           </Col>
         </FormGroup>
@@ -556,8 +561,8 @@ export default class InstrumentControl extends Component {
             <InputGroup>
               <InputGroup.Addon>Transpose</InputGroup.Addon>
               <FormControl componentClass="select"
-                value={icb.get('transpose')}
-                onChange={(event) => handleInputSet('transpose', event.target.value)}>
+                value={icb ? icb.get('transpose') : null}
+                onChange={icb ? ((event) => handleInputSet('transpose', event.target.value)) : null}>
                 {Array.from({length: 1 + 12 * transposeRange * 2}, (v, k) => {
                   const val = -12 * transposeRange + k;
                   return (<option value={val} key={'transpose-' + k}>{val > 0 ? '+' : ''}{val}</option>);
@@ -569,8 +574,8 @@ export default class InstrumentControl extends Component {
             <InputGroup>
               <InputGroup.Addon>Detune</InputGroup.Addon>
               <FormControl componentClass="select"
-                value={icb.get('detune')}
-                onChange={(event) => handleInputSet('detune', event.target.value)}>
+                value={icb ? icb.get('detune') : null}
+                onChange={icb ? ((event) => handleInputSet('detune', event.target.value)) : null}>
                 {Array.from({length: 1 + 12 * detuneRange * 2}, (v, k) => {
                   const val = -12 * detuneRange + k;
                   return (<option value={val} key={'detune-' + k}>{val > 0 ? '+' : ''}{val}</option>);
@@ -585,10 +590,10 @@ export default class InstrumentControl extends Component {
             <InputGroup>
               <InputGroup.Addon>Mode</InputGroup.Addon>
                 <FormControl componentClass="select"
-                value={firstInstrument ? icb.get('wvMode') : 0}
-                onChange={(event) => firstInstrument ? handleInputSet('wvMode', event.target.value) : false}>
+                value={icb && firstInstrument ? icb.get('wvMode') : 0}
+                onChange={icb ? ((event) => firstInstrument ? handleInputSet('wvMode', event.target.value) : false) : null}>
                 >
-                {firstInstrument
+                {!icb || firstInstrument
                   ? Array.from(['Rotor Slow', 'Rotor Fast', 'Flanger', 'Strings', 'Chorus'], (v, k) => {
                       return (<option value={k} key={'mode-' + k}>{v}</option>);
                     })
@@ -599,8 +604,8 @@ export default class InstrumentControl extends Component {
           </Col>
           <Col sm={5}>
             <ButtonToolbar>
-              <Button active={icb.get('wvFeedbackStereoFlat')} disabled={!firstInstrument} onClick={() => handleButtonToggle('wvFeedbackStereoFlat')}>Flat</Button>
-              <Button active={icb.get('wvFeedbackDeep')} disabled={!firstInstrument} onClick={() => handleButtonToggle('wvFeedbackDeep')}>Deep</Button>
+              <Button active={icb ? icb.get('wvFeedbackStereoFlat') : false} disabled={!icb || !firstInstrument} onClick={() => handleButtonToggle('wvFeedbackStereoFlat')}>Flat</Button>
+              <Button active={icb ? icb.get('wvFeedbackDeep') : false} disabled={!icb || !firstInstrument} onClick={() => handleButtonToggle('wvFeedbackDeep')}>Deep</Button>
             </ButtonToolbar>
           </Col>
         </FormGroup>
@@ -611,13 +616,13 @@ export default class InstrumentControl extends Component {
               <span className="btn btn-link">Layer</span>
               <span className="btn btn-link">⤑</span>
               <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="brighttooltip">80 Hz low-pass filter</Tooltip>)}>
-                <Button active={icb.get('routeBright')} onClick={() => handleButtonToggle('routeBright')}>Bright</Button>
+                <Button disabled={!icb} active={icb ? icb.get('routeBright') : false} onClick={() => handleButtonToggle('routeBright')}>Bright</Button>
               </OverlayTrigger>
               <span className="btn btn-link">⤑</span>
-              <Button active={icb.get('routeLeft')} onClick={() => handleButtonToggle('routeLeft')}>Left</Button>
-              <Button active={icb.get('routeRight')} onClick={() => handleButtonToggle('routeRight')}>Right</Button>
-              <Button active={icb.get('routeWV')} onClick={() => handleButtonToggle('routeWV')}>WersiVoice</Button>
-              <Button active={icb.get('routeVCF')} onClick={() => handleButtonToggle('routeVCF')}>VCF</Button>
+              <Button disabled={!icb} active={icb ? icb.get('routeLeft') : false} onClick={() => handleButtonToggle('routeLeft')}>Left</Button>
+              <Button disabled={!icb} active={icb ? icb.get('routeRight') : false} onClick={() => handleButtonToggle('routeRight')}>Right</Button>
+              <Button disabled={!icb} active={icb ? icb.get('routeWV') : false} onClick={() => handleButtonToggle('routeWV')}>WersiVoice</Button>
+              <Button disabled={!icb} active={icb ? icb.get('routeVCF') : false} onClick={() => handleButtonToggle('routeVCF')}>VCF</Button>
             </ButtonToolbar>
           </Col>
         </FormGroup>
@@ -628,7 +633,11 @@ export default class InstrumentControl extends Component {
       <div>
         <Loader show={this.state.loading} message={(<h5>« Downloading... »</h5>)} contentBlur={2}>
           {modal}
-          <Panel header={header} collapsible defaultExpanded>
+          <Panel
+            header={(<h3>Instrument control <sup>{`${this.props.instrumentAddress || ''}`}</sup></h3>)}
+            collapsible
+            defaultExpanded
+            >
             <ButtonToolbar className="pull-right">
               <OverlayTrigger placement="bottom" overlay={(<Tooltip className="info" id="doubletooltip">Toggle double layer mode</Tooltip>)}>
                 <Button onClick={this._handleToggleDouble.bind(this)} active={this.state.double}><Glyphicon glyph="random"/></Button>

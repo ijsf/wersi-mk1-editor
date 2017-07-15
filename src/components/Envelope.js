@@ -149,12 +149,14 @@ class Envelope extends Component {
   }
   
   componentWillMount() {
-    this._watch(this.props.envAddress, this.props.type);
+    if (this.props.envAddress) {
+      this._watch(this.props.envAddress, this.props.type);
+    }
   }
   
   componentWillUpdate(nextProps, nextState) {
     // Check if instrument has changed
-    if (this.props.envAddress !== nextProps.envAddress) {
+    if (nextProps.envAddress && this.props.envAddress !== nextProps.envAddress) {
       this._watch(nextProps.envAddress, nextProps.type);
     }
   }
@@ -395,10 +397,6 @@ class Envelope extends Component {
     const width = moduleMargin + moduleSlots * (moduleMargin + moduleWidth);
     const padding = moduleMargin;
     
-    let header = (
-      <h3>{title} ({this.props.envAddress})</h3>
-    );
-    
     // Release slider
     let releaseSlider = (
       <div style={{ width: width, position: 'relative', left: moduleWidth * 0.5, marginTop: 10 }}>
@@ -437,7 +435,11 @@ class Envelope extends Component {
     return connectDropTarget(
       <div>
         <Loader show={this.state.loading} message={(<h5>« Downloading... »</h5>)} contentBlur={2}>
-          <Panel header={header} collapsible defaultExpanded>
+          <Panel
+            header={(<h3>{title} <sup>{`${this.props.envAddress || ''}`}</sup></h3>)}
+            collapsible
+            defaultExpanded
+            >
             <EnvelopeDialog 
             show={this.state.showAdd}
             moduleWidth={moduleWidth}

@@ -37,7 +37,6 @@ export default class EnvelopeControl extends Component {
         <Envelope
           title="Amplitude envelope"
           type="ampl"
-          icon="volume-up"
           firstInstrumentAddress={this.props.firstInstrumentAddress}
           instrumentAddress={this.props.instrumentAddress}
           envAddress={this.props.amplAddress}
@@ -48,7 +47,6 @@ export default class EnvelopeControl extends Component {
         <Envelope
           title="Frequency envelope"
           type="freq"
-          icon="music"
           firstInstrumentAddress={this.props.firstInstrumentAddress}
           instrumentAddress={this.props.instrumentAddress}
           envAddress={this.props.freqAddress}

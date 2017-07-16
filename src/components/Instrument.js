@@ -68,8 +68,11 @@ export default class Instrument extends Component {
       this.props.client.getFixWave(waveAddress).then((data) => {
         instrumentActions.update(waveAddress, 'wave', toImmutable(data));
       });
-      this.props.client.getAmpl(amplAddress).then((data) => {
+      this.props.client.getEnvelope('ampl', amplAddress).then((data) => {
         instrumentActions.update(amplAddress, 'ampl', toImmutable(data));
+      });
+      this.props.client.getEnvelope('freq', freqAddress).then((data) => {
+        instrumentActions.update(amplAddress, 'freq', toImmutable(data));
       });
     });
   }

@@ -83,7 +83,7 @@ class Envelope extends Component {
     this._moduleEls = [];
     
     // Use global modules variable to allow simple communication between modules
-    window.envelopeModules = [];
+    window.envelopeModules[this.props.type] = [];
   }
     
   shouldComponentUpdate(nextProps, nextState) {
@@ -103,23 +103,44 @@ class Envelope extends Component {
     // Convert to Uint8Array
     const data = new Uint8Array(dataNormal);
     
-    // Dissect attack and release data
-    let releasePhaseStart = (data[1] - 2) / 6;
-    if (releasePhaseStart > 6) {
-      // Release disabled, just enable it for now and fix it on the last module
-      releasePhaseStart = 6;
-    }
+    if (this.props.type === 'ampl') {
+      // Dissect attack and release data
+      let releasePhaseStart = (data[1] - 2) / 6;
+      if (releasePhaseStart > 6) {
+        // Release disabled, just enable it for now and fix it on the last module
+        releasePhaseStart = 6;
+      }
     
-    // Dissect module data (6 bytes each, 7 modules)
-    let modules = [];
-    for(let i = 0; i < 7; ++i) {
-      modules.push(this._handleLoadModule(i, data));
+      // Dissect module data (6 bytes each, 7 modules)
+      let modules = [];
+      for(let i = 0; i < 7; ++i) {
+        modules.push(this._handleLoadModule(i, data));
+      }
+      this.setState({
+        modules: modules,
+        data: data,
+        releasePhaseStart: releasePhaseStart
+      });
     }
-    this.setState({
-      modules: modules,
-      data: data,
-      releasePhaseStart: releasePhaseStart
-    });
+    else if (this.props.type === 'freq') {
+      // Dissect attack and release data
+      let releasePhaseStart = (data[1] - 2) / 5;
+      if (releasePhaseStart > 4) {
+        // Release disabled, just enable it for now and fix it on the last module
+        releasePhaseStart = 4;
+      }
+    
+      // Dissect module data (6 bytes each, 5 modules)
+      let modules = [];
+      for(let i = 0; i < 5; ++i) {
+        modules.push(this._handleLoadModule(i, data));
+      }
+      this.setState({
+        modules: modules,
+        data: data,
+        releasePhaseStart: releasePhaseStart
+      });
+    }
   }
   
   _watch(envAddress, type) {
@@ -291,7 +312,7 @@ class Envelope extends Component {
 
   _findFirstEmptyModule() {
     const { modules } = this.state;
-    for(let i = 0; i < 6; ++i) {
+    for(let i = 0; i < this.props.moduleSlots; ++i) {
       if(modules[i].type == 'empty') {
         return i;
       }
@@ -300,21 +321,21 @@ class Envelope extends Component {
   }
 
   _deleteAllModules() {
-    for(let index = 0; index < 7; ++index) {
+    for(let index = 0; index < this.props.moduleSlots; ++index) {
       this._handleSaveModule(index);
     }
   }
   
   _deleteModule(id) {
     // Move and resave modules
-    for(let index = 0; index < 7; ++index) {
+    for(let index = 0; index < this.props.moduleSlots; ++index) {
       if (index != id) {
-        window.envelopeModules[index].ref.saveModule(index < id ? index : (index - 1));
+        window.envelopeModules[this.props.type][index].ref.saveModule(index < id ? index : (index - 1));
       }
     }
     
     // Add empty module at the end
-    this._handleSaveModule(6);
+    this._handleSaveModule(this.props.moduleSlots - 1);
     
     // Move release slider if necessary
     if (this.state.releasePhaseStart > id) {
@@ -365,7 +386,8 @@ class Envelope extends Component {
         color: release ? 'thistle' : 'lightsteelblue',
         release: release,
         showValues: this.state.showValues,
-        showError: (message) => { this.setState({ error: 'Error for module ' + wersiPhase + ': ' + message }) }
+        showError: (message) => { this.setState({ error: 'Error for module ' + wersiPhase + ': ' + message }) },
+        envType: this.props.type
       };
   
       // Create element
@@ -408,7 +430,7 @@ class Envelope extends Component {
           style={{ width: width - moduleWidth }}
           value={ releasePhaseStart }
           min={0}
-          max={6}
+          max={this.props.moduleSlots - 1}
           onChange={(event) => {
             this.setState({ releasePhaseStart: Number(event.target.value) }, () => {
               this._handleSaveRelease();

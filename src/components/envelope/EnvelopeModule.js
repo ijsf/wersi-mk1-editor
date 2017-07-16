@@ -345,7 +345,7 @@ export default class EnvelopeModule extends Component {
     
     // Move values into hacky global (time is typically a and amplitude is typically b)
     // If we don't have a graph, just set the previous amplitude to the middle to get a nice visual.
-    window.envelopeModules[index] = this.props.type === 'graph' ? { a: a, b: b, c: c, ref: this } : { a: 0, b: 2048, c: 0, ref: this };
+    window.envelopeModules[this.props.envType][index] = this.props.type === 'graph' ? { a: a, b: b, c: c, ref: this } : { a: 0, b: 2048, c: 0, ref: this };
     
     // Attempt to get timeBefore (a) and amplBefore (b) from hacky global
     //
@@ -353,9 +353,9 @@ export default class EnvelopeModule extends Component {
     // This does not hold in certain cases though, e.g. when we're dragging.
     //
     if (index > 0) {
-      if (window.envelopeModules[index - 1]) {
-        const aBefore = window.envelopeModules[index - 1].a;
-        const bBefore = window.envelopeModules[index - 1].b;
+      if (window.envelopeModules[this.props.envType][index - 1]) {
+        const aBefore = window.envelopeModules[this.props.envType][index - 1].a;
+        const bBefore = window.envelopeModules[this.props.envType][index - 1].b;
         
         // Check if we are placed behind an empty element, which shouldn't be allowed
         if (this._isNumeric(aBefore) && this._isNumeric(bBefore)) {

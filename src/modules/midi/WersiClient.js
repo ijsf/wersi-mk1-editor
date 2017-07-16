@@ -529,7 +529,36 @@ export default class WersiClient extends Client {
         return status;
       });
   }
-    
+
+  getFreq(address) {
+    return this._requestBlock(WersiClient.BLOCK_TYPE.FREQ, address)
+    .then((message) => {
+      console.log('SysEx FREQ receive: ' + this._utohex(message.data));
+
+      // Verify AMPL length
+      const blockLength = this._getBlockLength(WersiClient.BLOCK_TYPE.FREQ);
+      if (message.length != blockLength) {
+        throw 'Invalid message length for FREQ (got ' + message.length + ', expected ' + blockLength + ')';
+      }
+      
+      return message.data;
+    });
+  }
+  
+  setFreq(address, data) {
+    console.log('SysEx FREQ send (' + address +')');
+    return this.send(
+      this._toSysEx({
+        type: WersiClient.BLOCK_TYPE.FREQ.charCodeAt(0),
+        address: address,
+        length: data.length,
+        data: data
+      }), true)
+      .then((status) => {
+        return status;
+      });
+  }
+
   getFixWave(address) {
     return this._requestBlock(WersiClient.BLOCK_TYPE.FIXWAVE, address)
     .then((message) => {

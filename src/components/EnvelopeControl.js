@@ -10,6 +10,9 @@ export default class EnvelopeControl extends Component {
     // References
     this._envelopeAmpl = null;
     this._envelopeFreq = null;
+
+    // Use global modules variable to allow simple communication between modules
+    window.envelopeModules = {};
   }
   
   componentWillMount() {
@@ -37,6 +40,7 @@ export default class EnvelopeControl extends Component {
         <Envelope
           title="Amplitude envelope"
           type="ampl"
+          moduleSlots={7}
           firstInstrumentAddress={this.props.firstInstrumentAddress}
           instrumentAddress={this.props.instrumentAddress}
           envAddress={this.props.amplAddress}
@@ -47,6 +51,7 @@ export default class EnvelopeControl extends Component {
         <Envelope
           title="Frequency envelope"
           type="freq"
+          moduleSlots={5}
           firstInstrumentAddress={this.props.firstInstrumentAddress}
           instrumentAddress={this.props.instrumentAddress}
           envAddress={this.props.freqAddress}

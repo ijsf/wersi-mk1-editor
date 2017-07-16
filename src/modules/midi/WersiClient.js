@@ -477,6 +477,30 @@ export default class WersiClient extends Client {
       });
   }
 
+  setEnvelope(type, address, data) {
+    if (type === 'ampl') {
+      return this.setAmpl(address, data);
+    }
+    else if (type === 'freq') {
+      return this.setFreq(address, data);
+    }
+    else {
+      throw new Error(`Unknown envelope type ${type}`);
+    }
+  }
+
+  getEnvelope(type, address) {
+    if (type === 'ampl') {
+      return this.getAmpl(address);
+    }
+    else if (type === 'freq') {
+      return this.getFreq(address);
+    }
+    else {
+      throw new Error(`Unknown envelope type ${type}`);
+    }
+  }
+
   getAmpl(address) {
     return this._requestBlock(WersiClient.BLOCK_TYPE.AMPL, address)
     .then((message) => {

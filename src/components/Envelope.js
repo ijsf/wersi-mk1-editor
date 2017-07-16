@@ -180,14 +180,14 @@ class Envelope extends Component {
     
     // Send to SysEx
     this.setState({ loading: true }, () => {
-      this.props.client.setAmpl(this.props.envAddress, this.state.data)
+      this.props.client.setEnvelope(this.props.type, this.props.envAddress, this.state.data)
       .then(() => {
         // Refresh data in case the Wersi has made any changes
-        return this.props.client.getAmpl(this.props.envAddress);
+        return this.props.client.getEnvelope(this.props.type, this.props.envAddress);
       })
       .then((data) => {
         // Update store
-        instrumentActions.update(this.props.envAddress, 'ampl', toImmutable(data));
+        instrumentActions.update(this.props.envAddress, this.props.type, toImmutable(data));
         this.setState({ loading: false });
       
         // Reload instrument
@@ -204,7 +204,7 @@ class Envelope extends Component {
     this.state.data[1] = releaseOffset;
     
     // Update store
-    instrumentActions.update(this.props.envAddress, 'ampl', this.state.data);
+    instrumentActions.update(this.props.envAddress, this.props.type, this.state.data);
   }
 
   _handleLoadModule(id, data) {

@@ -6,7 +6,7 @@ export default class App extends Component {
     return (
       <WersiApp
         // Defines the version
-        version="0.7.1"
+        version="0.8.0"
       />
     );
   }

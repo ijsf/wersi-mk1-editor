@@ -1,41 +1,32 @@
-import MidiConnector from './MidiConnector';
+import WebMidi from 'webmidi';
 
 /**
  * Client
  *
- * Implements a Websocket client for sysexd.
+ * Implements a Web MIDI API client.
  * Only handles a single Promise-based request at a time; new requests are queued up and handled accordingly.
  */
-export default class Client extends MidiConnector {
+export default class Client {
   constructor() {
-    super();
-    
-    // Set variables
-    this.portOut = null;
-    
     // Deferred promise resolve and reject callbacks
     this.deferred = null;
     
     // List of queued requests
     this.queue = [];
+
+    // Connected state
+    this.connected = false;
+
+    // WebMIDI API instances
+    this.portIn = null;
+    this.portOut = null;
   }
   
   _processQueue() {
     let request = this.queue.shift();
     this.deferred = request;
     if (request) {
-      super.send(request.send);
-    }
-  }
-  
-  _process(request) {
-    // Check if we are currently processing another message, in which case the request will be queued
-    if (this.deferred) {
-      this.queue.push(request);
-    }
-    else {
-      this.deferred = request;
-      super.send(request.send);
+      this._sysexSend(request.send);
     }
   }
   
@@ -75,117 +66,97 @@ export default class Client extends MidiConnector {
     this._processQueue();
   }
 
-  _onMessage(object) {
-    // Handle error types
-    if (object.type == 'midierrorin') {
-      console.error('Midi in error: ' + object.data);
-      this._reject(object);
-    }
-    else if (object.type == 'midierrorout') {
-      console.error('Midi out error: ' + object.data);
-      this._reject(object);
-    }
-    else if (object.type == 'send') {
-      if (this._shouldIgnoreAck()) {
-        // Ignore acknowledgement unless failure, in which case we will reject our send promise
-        // We assume that the actual data will come in later through midimessage.
-        if (!object.data) {
-          this._reject({ type: 'send' });
-        }
-      }
-      else {
-        // Use acknowledgement
-        this._resolve(object.data);
-      }
-    }
-    else if (object.type == 'midimessage') {
-      let u8 = new Uint8Array(atob(object.data).split('').map((c) => { return c.charCodeAt(0); }));
-      if (this.isValid(u8)) {
-        this._resolve(u8);
-      }
-    }
-    else {
-      this._resolve(object.data);
-    }
-  }
-  
   // Returns whether the received SysEx message is valid and should be further processed
   isValid(message) {
     return true;
   }
   
-  _onError() {
-    console.error('Websocket error');
-    this._reject({ type: 'websocket' });
-  }
-  
-  setPorts(portIn, portOut) {
-    // Set output port immediately
-    this.portOut = portOut;
-    
-    // Communicate input port
-    return new Promise((resolve, reject) => {
-      this._process({
-        ignoreAck: false,
-        resolve: resolve,
-        reject: reject,
-        send: {
-          token: this.token,
-          type: 'inport',
-          port: portIn
-        }
-      });
-    });
-  }
-  
-  query() {
-    return new Promise((resolve, reject) => {
-      this._process({
-        ignoreAck: false,
-        resolve: resolve,
-        reject: reject,
-        send: {
-          token: this.token,
-          type: 'query'
-        }
-      });
-    });
-  }
-  
   send(u8, ack, resend) {
     return new Promise((resolve, reject) => {
       if (this.portOut !== null) {
-        this._process({
+        const request = {
           ignoreAck: ack ? false : true,
           resolve: resolve,
           reject: reject,
-          send: {
-            token: this.token,
-            type: 'send',
-            port: this.portOut,
-            resend: resend ? true : false,
-            data: btoa(String.fromCharCode.apply(null, u8))
-          }
-        });
+          send: u8
+        };
+        // Check if we are currently processing another message, in which case the request will be queued
+        if (this.deferred) {
+          this.queue.push(request);
+        }
+        else {
+          this.deferred = request;
+          this._sysexSend(request.send);
+        }
       }
       else {
         reject('Invalid port.');
       }
     });
   }
-  
-  open(url, token) {
+
+  _sysexSend(u8) {
+    // Send raw SysEx
+    this.portOut.send(0xF0, Array.from(u8.slice(1)));
+
+    // ACK logic (no longer necessary with WebMIDI, so emulate here)
+    if (!this._shouldIgnoreAck()) {
+      // Use acknowledgement
+      this._resolve((u8));
+    }
+  }
+
+  setPorts(portIn, portOut) {
+    // Communicate input port
     return new Promise((resolve, reject) => {
-      this.token = token;
-      if (!this.deferred && !this.isConnected()) {
-        this.deferred = { resolve: resolve, reject: reject };
-        resolve(super.open(url).then(() => {
-          this.deferred = null;
-        }));
+      if (!this.portIn && !this.portOut) {
+        // Set API instances
+        this.portIn = WebMidi.inputs[portIn];
+        this.portOut = WebMidi.outputs[portOut];
+
+        // Input: listen on all channels for sysex messages
+        this.portIn.addListener('sysex', 'all', (event) => {
+          let data = (event.data);
+          if (this.isValid(data)) {
+            this._resolve(data);
+          }
+        });
+        resolve();
       }
       else {
-        reject('Already connected');
+        reject('Invalid ports');
       }
     });
+  }
+
+  isConnected() {
+    return this.connected;
+  }
+  
+  open() {
+    return new Promise((resolve, reject) => {
+      this.connected = false;
+
+      // Enable WebMIDI with sysex support
+      WebMidi.enable((error) => {
+        if (error) {
+          // Could not enable WebMIDI
+          reject(error);
+        }
+        else {
+          // WebMIDI enabled, resolve and pass inputs and outputs
+          this.connected = true;
+          resolve({ inports: WebMidi.inputs, outports: WebMidi.outputs });
+        }
+      }, true);
+    });
+  }
+
+  close() {
+    if (this.input && this.output) {
+      // Remove input listener
+      this.input.removeListener('sysex', 'all');
+      this.connected = false;
+    }
   }
 }

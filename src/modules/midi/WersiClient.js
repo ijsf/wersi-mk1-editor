@@ -3,7 +3,7 @@ import Client from './Client';
 /**
  * WersiClient
  *
- * Implements a Wersi MK1 compatible Websocket client for sysexd.
+ * Implements a Wersi MK1 compatible client.
  */
 export default class WersiClient extends Client {
   /**

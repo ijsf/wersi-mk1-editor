@@ -23,30 +23,13 @@ export default class MidiConfig extends Component {
   
   componentWillMount() {
     if (!this.props.client.isConnected()) {
-      this.props.client.open(this.props.url, this.props.token)
-      .then(() => {
-        this.setState({ status: 'sysexConnected' });
+      this.props.client.open()
+      .then((portsQueried) => {
+        this.setState({ status: 'sysexConnected', portsQueried });
       })
       .catch(() => {
-        this.setState({ status: 'error', error: 'Could not connect to sysexd at ' + this.props.url });
+        this.setState({ status: 'error', error: 'Could not connect to WebMIDI API.' });
       });
-    }
-  }
-  
-  componentDidUpdate() {
-    if (this.state.status == 'sysexConnected') {
-      if (!this.state.portsQueried) {
-        // Query ports
-        this.props.client.query()
-        .then((data) => {
-          this.setState({
-            portsQueried: data
-          });
-        })
-        .catch(() => {
-          this.setState({ status: 'error', error: 'Could not query MIDI ports' });
-        });
-      }
     }
   }
   
@@ -68,7 +51,7 @@ export default class MidiConfig extends Component {
     this.setState({ wersiConnecting: true });
     
     // Try to send a SysEx message to see if the synthesizer is responsive
-    this.props.client.getICB(this.props.instrumentAddress)
+    this.props.client.getICB(WersiClient.ADDRESS.CV(0))
     .then(() => {
       // Everything checks out, so hide this dialog
       this.setState({ showConfig: false });
@@ -92,7 +75,7 @@ export default class MidiConfig extends Component {
     if (this.state.status == 'connecting') {
       modalContents = (
         <Modal.Body>
-          Connecting to sysexd at {this.props.url}.
+          Connecting to WebMIDI API.
         </Modal.Body>
       );
     }
@@ -101,7 +84,7 @@ export default class MidiConfig extends Component {
         // Still querying ports
         modalContents = (
           <Modal.Body>
-            Connected to sysexd at {this.props.url}.
+            Connected to WebMIDI API.
           </Modal.Body>
         );
       }

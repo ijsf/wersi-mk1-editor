@@ -12,20 +12,21 @@ For browser compatibility, we recommend the latest version of Chrome or Chromium
 
 ## TL;DR
 
-Make sure [sysexd](https://github.com/ijsf/sysexd) is running on your computer, then head over to [edit.wer.si](http://edit.wer.si) to use the latest version of the editor!
+The editor fully works in a modern standalone browser and doesn't require any other software to function by using the new Web MIDI API. Go to [https://ijsf.github.io/wersi-mk1-editor/](https://ijsf.github.io/wersi-mk1-editor/) for the latest version.
 
-## Prerequisites
+If the editor doesn't work, make sure you use a browser that supports the latest Web MIDI API: [http://caniuse.com/#feat=midi](http://caniuse.com/#feat=midi).
 
-In order to use the editor, the following prerequisites are required on the host on which the editor is to be run:
+## Local development
 
-* [sysexd](https://github.com/ijsf/sysexd), the SysEx daemon to communicate with the Wersi hardware - follow the instructions at https://github.com/ijsf/sysexd.
+If you want to run the editor locally, e.g. for developing purposes, make sure the following is installed:
+
 * [NodeJS](https://nodejs.org/en/) v8 or higher.
 * [yarn](https://yarnpkg.com/lang/en/docs/install/) or similar NodeJS package manager.
 * Chrome (or Chromium based) browser.
 
 To install on OSX:
 
-Make sure [sysexd](https://github.com/ijsf/sysexd) and [Homebrew](https://brew.sh/) are installed. Then execute the following commands:
+Make sure [Homebrew](https://brew.sh/) is installed. Then execute the following commands:
 
 ```
 brew install nodejs
@@ -87,13 +88,9 @@ Pressing 1 twice is likely necessary, as it explicitly stops and restarts the MI
 
 ## Launch the editor
 
-First, make sure sysexd is started. Open a new terminal. Go to the `sysexd` directory and type:
-
-    ./bin/sysexd
-
 To start the editor, open a new terminal, go to this directory and type:
 
-    node server.js
+    yarn start
 
 Make sure you click Allow for any firewall questions on OSX. You should be able to access the editor at http://localhost:3000.
 

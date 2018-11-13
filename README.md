@@ -1,8 +1,6 @@
 # wersi-mk1-editor
 
-Welcome to the long - since 1988 - awaited editor for the Wersi MK1 / EX-20 synthesizers!
-
-This repository is currently under active development, and its current state is considered to be *alpha*. This means that setting up the editor will likely require some technical skill, and bugs will be present.
+This repository is currently considered to be *alpha*. This means that setting up the editor will likely require some technical skill, and bugs will be present. Any help is greatly appreciated!
 
 The goal behind this editor is to unlock the Wersi MK1's full sound synthesis potential, by creating a modern and user friendly interface to manipulate its sound synthesis. As such, a large effort has gone into reverse engineering the internal hardware, as well as its MIDI SysEx interface.
 
@@ -94,8 +92,3 @@ To start the editor, open a new terminal, go to this directory and type:
 
 Make sure you click Allow for any firewall questions on OSX. You should be able to access the editor at http://localhost:3000.
 
-## Showcase
-
-An example of what the editor currently looks like:
-
-<img src="https://pbs.twimg.com/media/CvZI_mvWEAAGYRq.jpg:large">

@@ -1,5 +1,7 @@
 # wersi-mk1-editor
 
+_Jan 7th, 2025_: This editor is currently unmaintained and has been for several years. Its dependencies and frameworks are outdated, but you should still be able to get it to run, and you may have some luck in getting it to work with your hardware. Still, this editor is currently unsupported by its author, but code contributions are very welcome.
+
 This repository is currently considered to be *alpha*. This means that setting up the editor will likely require some technical skill, and bugs will be present. Any help is greatly appreciated!
 
 The goal behind this editor is to unlock the Wersi MK1's full sound synthesis potential, by creating a modern and user friendly interface to manipulate its sound synthesis. As such, a large effort has gone into reverse engineering the internal hardware, as well as its MIDI SysEx interface.
@@ -22,7 +24,14 @@ If you want to run the editor locally, e.g. for developing purposes, make sure t
 * [yarn](https://yarnpkg.com/lang/en/docs/install/) or similar NodeJS package manager.
 * Chrome (or Chromium based) browser.
 
-To install on OSX:
+### To install on Windows (WSL2) or Linux
+
+```
+npm install --global yarn
+yarn install
+```
+
+### To install on OSX
 
 Make sure [Homebrew](https://brew.sh/) is installed. Then execute the following commands:
 
